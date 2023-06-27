@@ -7,7 +7,7 @@
     "build": "rimraf dist && swc ./src -d dist",
     "start": "node dist/index.js",
     "build:dev": "npm run build && npm run start",
-    "start:dev": "docker compose -f docker-compose.dev.yml up -d",
+    "start:dev": "docker compose -f docker-compose.dev.yml up -d && nodemon",
     "stop:dev": "docker compose -f docker-compose.dev.yml down"
   },
   "keywords": [],
@@ -28,6 +28,7 @@
     "@typescript-eslint/eslint-plugin": "^5.60.1",
     "@typescript-eslint/parser": "^5.60.1",
     "eslint": "^8.43.0",
+    "nodemon": "^2.0.22",
     "rimraf": "^5.0.0"
   }
 }
