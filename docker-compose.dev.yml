@@ -11,4 +11,5 @@ services:
       - /usr/src/app/node_modules
     environment:
       PORT: "${PORT}"
+      MONGO_URI: "${MONGO_URI}"
     command: npm run build:dev

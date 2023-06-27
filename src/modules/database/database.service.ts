@@ -8,7 +8,7 @@ export class DatabaseService implements IDatabaseService {
 
     public async initialize() {
         try {
-            const connection = await mongoose.connect(process.env.MONGO_URI)
+            const connection = await mongoose.connect(process.env.MONGO_URI as string)
             console.log(`MongoDB Connected: ${connection.connection?.host}`)
         } catch (err) {
             console.error(err)

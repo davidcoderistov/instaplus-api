@@ -8,8 +8,9 @@
     "build": "rimraf dist && npm run compile",
     "start": "node dist/main.js",
     "build:dev": "npm run build && npm run start",
-    "start:dev": "docker compose -f docker-compose.dev.yml up -d && nodemon",
-    "stop:dev": "docker compose -f docker-compose.dev.yml down"
+    "start:dev": "concurrently \"docker-compose -f docker-compose.dev.yml up\" \"nodemon\"",
+    "stop:dev": "docker compose -f docker-compose.dev.yml down",
+    "build:backend-dev": "docker compose -f docker-compose.dev.yml build backend"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +33,7 @@
     "@types/node": "^20.1.2",
     "@typescript-eslint/eslint-plugin": "^5.60.1",
     "@typescript-eslint/parser": "^5.60.1",
+    "concurrently": "^8.2.0",
     "eslint": "^8.43.0",
     "nodemon": "^2.0.22",
     "rimraf": "^5.0.0"
