@@ -14,4 +14,5 @@ services:
       MONGO_URI: "${MONGO_URI}"
       NODE_ENV: "${NODE_ENV}"
       SECRET_KEY: "${SECRET_KEY}"
+      CORS_ORIGIN: "${CORS_ORIGIN}"
     command: npm run build:dev

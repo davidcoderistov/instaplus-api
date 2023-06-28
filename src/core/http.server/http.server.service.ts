@@ -23,7 +23,7 @@ export class HttpServerService implements IHttpServerService {
         this.httpServer = http.createServer(server.setConfig(app => {
             app.use('/api',
                 morgan('dev'),
-                cors({ origin: 'http://localhost:3000', credentials: true }),
+                cors({ origin: process.env.CORS_ORIGIN as string, credentials: true }),
                 json(),
                 graphQLUploadMiddleware,
             )
