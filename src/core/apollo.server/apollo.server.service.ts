@@ -8,6 +8,7 @@ import { IGraphQLSchemaService } from '../graphql.schema/IGraphQLSchema.service'
 import { IApolloServerService } from './IApolloServer.service'
 import { Context } from '../../shared/types'
 import { InvalidSessionException } from '../../shared/exceptions/invalid.session.exception'
+import { expressMiddleware } from '@apollo/server/express4'
 
 
 @injectable()
@@ -58,6 +59,11 @@ export class ApolloServerService implements IApolloServerService {
                 },
             ],
         })
+
         await server.start()
+
+        const app = this._httpServerService.getExpressApp()
+
+        app.use('/api', expressMiddleware(server as any))
     }
 }
