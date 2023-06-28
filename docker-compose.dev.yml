@@ -12,4 +12,6 @@ services:
     environment:
       PORT: "${PORT}"
       MONGO_URI: "${MONGO_URI}"
+      NODE_ENV: "${NODE_ENV}"
+      SECRET_KEY: "${SECRET_KEY}"
     command: npm run build:dev
