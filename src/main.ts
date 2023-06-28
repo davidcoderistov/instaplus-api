@@ -1,27 +1,28 @@
 import 'reflect-metadata'
-import { InversifyExpressServer } from 'inversify-express-utils'
 import container from './container/container'
 import { TYPES } from './container/types'
+import { IHttpServerService } from './core/http.server/IHttpServer.service'
+import { IWsServerService } from './core/ws.server/IWsServer.service'
+import { IApolloServerService } from './core/apollo.server/IApolloServer.service'
+import { IGraphQLSchemaService } from './core/graphql.schema/IGraphQLSchema.service'
 import { IDatabaseService } from './modules/database/IDatabase.service'
-import { json, urlencoded } from 'express'
-import cors from 'cors'
-import morgan from 'morgan'
 
 
 (async () => {
-    const server = new InversifyExpressServer(container)
+    const httpServerService = container.get<IHttpServerService>(TYPES.IHttpServerService)
+    httpServerService.initialize()
+
     await container.get<IDatabaseService>(TYPES.IDatabaseService).initialize()
+    await container.get<IGraphQLSchemaService>(TYPES.IGraphQLSchemaService).initialize()
+
+    container.get<IWsServerService>(TYPES.IWsServerService).initialize()
+
+    const apolloServerService = container.get<IApolloServerService>(TYPES.IApolloServerService)
+
+    await apolloServerService.initialize()
 
     const port = Number(process.env.PORT || 8080)
-    server
-        .setConfig(app => {
-            app.use(morgan('dev'))
-            app.use(cors())
-            app.use(json())
-            app.use(urlencoded({ extended: true }))
-        })
-        .build()
-        .listen(port, () => {
-            console.log(`Server listening on port ${port}`)
-        })
+    httpServerService.getHttpServer().listen(port, () => {
+        console.log(`Server listening on port ${port}`)
+    })
 })()
