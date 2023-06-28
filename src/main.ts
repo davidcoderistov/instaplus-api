@@ -5,7 +5,7 @@ import { IHttpServerService } from './core/http.server/IHttpServer.service'
 import { IWsServerService } from './core/ws.server/IWsServer.service'
 import { IApolloServerService } from './core/apollo.server/IApolloServer.service'
 import { IGraphQLSchemaService } from './core/graphql.schema/IGraphQLSchema.service'
-import { IDatabaseService } from './modules/database/IDatabase.service'
+import { IDatabaseService } from './core/database/IDatabase.service'
 
 
 (async () => {
