@@ -7,6 +7,7 @@ import { IHttpServerService } from './IHttpServer.service'
 import morgan from 'morgan'
 import cors from 'cors'
 import { json } from 'body-parser'
+import { graphQLUploadMiddleware } from '../../middleware'
 
 
 @injectable()
@@ -24,6 +25,7 @@ export class HttpServerService implements IHttpServerService {
                 morgan('dev'),
                 cors({ origin: 'http://localhost:3000', credentials: true }),
                 json(),
+                graphQLUploadMiddleware,
             )
             this.expressApp = app
         }).build())
