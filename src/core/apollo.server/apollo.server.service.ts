@@ -9,6 +9,7 @@ import { IApolloServerService } from './IApolloServer.service'
 import { Context } from '../../shared/types'
 import { InvalidSessionException } from '../../shared/exceptions/invalid.session.exception'
 import { expressMiddleware } from '@apollo/server/express4'
+import { serializeRefreshToken, deserializeRefreshToken, getUserIdFromAuthHeader } from '../../shared/utils/token'
 
 
 @injectable()
@@ -64,6 +65,22 @@ export class ApolloServerService implements IApolloServerService {
 
         const app = this._httpServerService.getExpressApp()
 
-        app.use('/api', expressMiddleware(server as any))
+        app.use('/api', expressMiddleware(server as any, {
+            context: async ({ req, res }) => {
+                return {
+                    setRefreshTokenCookie(refreshToken: string, immediate: boolean = false) {
+                        res.setHeader('Set-Cookie', serializeRefreshToken(refreshToken, immediate))
+                    },
+                    getRefreshTokenCookie() {
+                        let headerCookie = req.headers.cookie
+                        if (typeof headerCookie !== 'string') {
+                            headerCookie = ''
+                        }
+                        return deserializeRefreshToken(headerCookie)
+                    },
+                    userId: await getUserIdFromAuthHeader(req.headers),
+                }
+            },
+        }))
     }
 }
