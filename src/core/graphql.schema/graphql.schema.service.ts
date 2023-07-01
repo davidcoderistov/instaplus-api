@@ -4,6 +4,8 @@ import { IGraphQLSchemaService } from './IGraphQLSchema.service'
 import { buildSchema, NonEmptyArray } from 'type-graphql'
 import graphqlResolver from '../../modules/graphql.resolver'
 import container from '../../container/container'
+import { validate } from '../../shared/utils/validation'
+import { InvalidArgsException } from '../../shared/exceptions/invalid.args.exception'
 
 
 @injectable()
@@ -15,6 +17,12 @@ export class GraphQLSchemaService implements IGraphQLSchemaService {
         this.graphQLSchema = await buildSchema({
             resolvers: graphqlResolver as unknown as NonEmptyArray<Function>,
             container,
+            validateFn: async (dtoClass) => {
+                const error = await validate(dtoClass)
+                if (error) {
+                    throw new InvalidArgsException(error)
+                }
+            },
         })
     }
 
