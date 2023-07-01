@@ -3,5 +3,5 @@
     "src"
   ],
   "ext": "*",
-  "exec": "docker-compose -f docker-compose.dev.yml restart backend"
+  "exec": "docker-compose -f docker-compose.dev.yml down && docker-compose -f docker-compose.dev.yml up"
 }
