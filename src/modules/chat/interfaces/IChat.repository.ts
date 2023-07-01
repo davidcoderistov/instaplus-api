@@ -1,11 +1,7 @@
-import { IChat } from '../models/chat.model'
-import { IMessage } from '../models/message.model'
+import { FindChatsDto } from '../dtos/find-chats.dto'
+import { ChatsModel } from '../graphql.models/chats.model'
 
-
-export interface IChatWithLatestMessage extends IChat {
-    message: Pick<IMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'videoUrl' | 'createdAt'>
-}
 
 export interface IChatRepository {
-    findChatsWithLatestMessagesForUser(userId: string, offset: number, limit: number): Promise<IChatWithLatestMessage[]>
+    findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsModel>
 }
