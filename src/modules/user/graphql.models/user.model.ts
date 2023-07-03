@@ -1,11 +1,12 @@
 import { ObjectType, Field } from 'type-graphql'
+import { Types } from 'mongoose'
 
 
 @ObjectType()
 export class UserModel {
 
-    @Field()
-    _id!: string
+    @Field(() => String)
+    _id!: Types.ObjectId
 
     @Field()
     firstName!: string
