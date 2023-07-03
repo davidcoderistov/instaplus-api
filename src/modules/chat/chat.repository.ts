@@ -5,7 +5,7 @@ import { ChatsModel } from './graphql.models/chats.model'
 import mongoose from 'mongoose'
 import ChatModel from './db.models/chat.model'
 import MessageModel from './db.models/message.model'
-import { getPaginatedResponse } from '../../shared/utils/misc'
+import { getPaginatedData } from '../../shared/utils/misc'
 
 
 @injectable()
@@ -81,6 +81,6 @@ export class ChatRepository implements IChatRepository {
                 },
             },
         ])
-        return getPaginatedResponse(chats) as unknown as ChatsModel
+        return getPaginatedData(chats) as unknown as ChatsModel
     }
 }
