@@ -16,6 +16,6 @@ export class UserResolver {
 
     @Mutation(() => AuthUserModel)
     public async signUp(@Args() signUpDto: SignUpDto): Promise<AuthUserModel> {
-        return this._userService.createUser(signUpDto)
+        return this._userService.signUp(signUpDto)
     }
 }

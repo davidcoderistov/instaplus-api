@@ -19,7 +19,7 @@ export class UserService implements IUserService {
         @inject(TYPES.IUserRepository) private readonly _userRepository: IUserRepository) {
     }
 
-    public async createUser(signUpDto: SignUpDto): Promise<AuthUserModel> {
+    public async signUp(signUpDto: SignUpDto): Promise<AuthUserModel> {
         try {
             const passwordHash = await bcrypt.hash(signUpDto.password, 10)
             const user = await this._userRepository.createUser({

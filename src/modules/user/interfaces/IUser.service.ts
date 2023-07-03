@@ -3,5 +3,5 @@ import { AuthUserModel } from '../graphql.models/auth-user.model'
 
 
 export interface IUserService {
-    createUser(signUpDto: SignUpDto): Promise<AuthUserModel>
+    signUp(signUpDto: SignUpDto): Promise<AuthUserModel>
 }
