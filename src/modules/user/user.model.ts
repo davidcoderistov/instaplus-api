@@ -15,14 +15,11 @@ const UserSchema = new Schema({
         type: Schema.Types.String,
         required: [true, 'Last name is required'],
     },
-    photoUrl: {
-        type: Schema.Types.String,
-        required: [true, 'Photo url is required'],
-    },
     password: {
         type: Schema.Types.String,
         required: [true, 'Password is required'],
     },
+    photoUrl: Schema.Types.String,
     accessToken: Schema.Types.String,
     refreshToken: Schema.Types.String,
 })
