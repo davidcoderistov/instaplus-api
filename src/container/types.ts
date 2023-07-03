@@ -1,5 +1,3 @@
-import { IChatService } from '../modules/chat/interfaces/IChat.service'
-
 export const TYPES = {
     IHttpServerService: Symbol.for('IHttpServerService'),
     IWsServerService: Symbol.for('IWsServerService'),
@@ -9,4 +7,7 @@ export const TYPES = {
     IChatRepository: Symbol.for('IChatRepository'),
     IChatService: Symbol.for('IChatService'),
     ChatResolver: Symbol.for('ChatResolver'),
+    IUserRepository: Symbol.for('IUserRepository'),
+    IUserService: Symbol.for('IUserService'),
+    UserResolver: Symbol.for('UserResolver'),
 }

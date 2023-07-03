@@ -15,6 +15,11 @@ import { ChatRepository } from '../modules/chat/chat.repository'
 import { IChatService } from '../modules/chat/interfaces/IChat.service'
 import { ChatService } from '../modules/chat/chat.service'
 import { ChatResolver } from '../modules/chat/chat.resolver'
+import { IUserRepository } from '../modules/user/interfaces/IUser.repository'
+import { UserRepository } from '../modules/user/user.repository'
+import { IUserService } from '../modules/user/interfaces/IUser.service'
+import { UserService } from '../modules/user/user.service'
+import { UserResolver } from '../modules/user/user.resolver'
 
 
 export const bindings = new ContainerModule(bind => {
@@ -28,4 +33,8 @@ export const bindings = new ContainerModule(bind => {
     bind<IChatRepository>(TYPES.IChatRepository).to(ChatRepository)
     bind<IChatService>(TYPES.IChatService).to(ChatService)
     bind<ChatResolver>(ChatResolver).toSelf()
+
+    bind<IUserRepository>(TYPES.IUserRepository).to(UserRepository)
+    bind<IUserService>(TYPES.IUserService).to(UserService)
+    bind<UserResolver>(UserResolver).toSelf()
 })
