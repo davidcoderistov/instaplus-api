@@ -1,13 +1,13 @@
 import { inject, injectable } from 'inversify'
-import { Resolver, Mutation, Args } from 'type-graphql'
+import { Resolver, Mutation, Args, Ctx } from 'type-graphql'
 import { TYPES } from '../../container/types'
 import { IUserService } from './interfaces/IUser.service'
 import {
     SignUpDto,
     SignInDto,
-    RefreshDto,
 } from './dtos'
 import { AuthUserModel } from './graphql.models/auth-user.model'
+import { Context } from '../../shared/types'
 
 
 @injectable()
@@ -24,17 +24,25 @@ export class UserResolver {
     }
 
     @Mutation(() => AuthUserModel)
-    public async signIn(@Args() signInDto: SignInDto): Promise<AuthUserModel> {
-        return this._userService.signIn(signInDto)
+    public async signIn(@Args() signInDto: SignInDto, @Ctx() { setRefreshTokenCookie }: Context): Promise<AuthUserModel> {
+        const user = await this._userService.signIn(signInDto)
+        setRefreshTokenCookie(user.refreshToken as string)
+        return user
     }
 
     @Mutation(() => AuthUserModel)
-    public async refresh(@Args() refreshDto: RefreshDto): Promise<AuthUserModel> {
-        return this._userService.refresh(refreshDto)
+    public async refresh(@Ctx() { getRefreshTokenCookie, setRefreshTokenCookie }: Context): Promise<AuthUserModel> {
+        const refreshToken = getRefreshTokenCookie()
+        const user = await this._userService.refresh({ refreshToken })
+        setRefreshTokenCookie(user.refreshToken as string)
+        return user
     }
 
     @Mutation(() => AuthUserModel)
-    public async logout(@Args() refreshDto: RefreshDto): Promise<AuthUserModel> {
-        return this._userService.logout(refreshDto)
+    public async logout(@Ctx() { getRefreshTokenCookie, setRefreshTokenCookie }: Context): Promise<AuthUserModel> {
+        const refreshToken = getRefreshTokenCookie()
+        const user = await this._userService.logout({ refreshToken })
+        setRefreshTokenCookie('', true)
+        return user
     }
 }

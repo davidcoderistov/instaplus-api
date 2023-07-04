@@ -4,6 +4,6 @@ import { ArgsType, Field } from 'type-graphql'
 @ArgsType()
 export class RefreshDto {
 
-    @Field()
-    refreshToken!: string
+    @Field(() => String)
+    refreshToken?: string | null
 }
