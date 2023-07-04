@@ -1,4 +1,4 @@
-import { SignUpDto } from '../dtos/sign-up.dto'
+import { SignUpDto } from '../dtos'
 import { IUser } from '../user.model'
 
 

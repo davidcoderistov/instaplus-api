@@ -1,9 +1,11 @@
 import { inject, injectable } from 'inversify'
 import { IUserRepository } from './interfaces/IUser.repository'
 import { IUserService } from './interfaces/IUser.service'
-import { SignUpDto } from './dtos/sign-up.dto'
-import { SignInDto } from './dtos/sign-in.dto'
-import { RefreshDto } from './dtos/refresh.dto'
+import {
+    SignUpDto,
+    SignInDto,
+    RefreshDto,
+} from './dtos'
 import { AuthUserModel } from './graphql.models/auth-user.model'
 import { TYPES } from '../../container/types'
 import bcrypt from 'bcrypt'
