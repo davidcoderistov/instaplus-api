@@ -3,15 +3,21 @@ import { IUserRepository } from './interfaces/IUser.repository'
 import { IUserService } from './interfaces/IUser.service'
 import { SignUpDto } from './dtos/sign-up.dto'
 import { SignInDto } from './dtos/sign-in.dto'
+import { RefreshDto } from './dtos/refresh.dto'
 import { AuthUserModel } from './graphql.models/auth-user.model'
 import { TYPES } from '../../container/types'
 import bcrypt from 'bcrypt'
-import { generateAccessToken, generateRefreshToken } from '../../shared/utils/token'
+import {
+    generateAccessToken,
+    generateRefreshToken,
+    verifyToken,
+} from '../../shared/utils/token'
 import { MongoError } from 'mongodb'
 import { Error } from 'mongoose'
 import { CustomValidationException } from '../../shared/exceptions/custom.validation.exception'
 import { ValidationException } from '../../shared/exceptions/validation.exception'
 import { MongodbServerException } from '../../shared/exceptions/mongodb.server.exception'
+import { InvalidSessionException } from '../../shared/exceptions/invalid.session.exception'
 
 
 @injectable()
@@ -70,6 +76,41 @@ export class UserService implements IUserService {
             }
         } catch (err) {
             throw new MongodbServerException('Could not sign in. Please try again later')
+        }
+    }
+
+    public async refresh(refreshDto: RefreshDto): Promise<AuthUserModel> {
+        try {
+            if (!refreshDto.refreshToken) {
+                return Promise.reject(new InvalidSessionException())
+            }
+
+            const decoded = await verifyToken(refreshDto.refreshToken)
+            const { id, refresh } = decoded
+            if (!id || !refresh) {
+                return Promise.reject(new InvalidSessionException())
+            }
+
+            const user = await this._userRepository.findUserById(id)
+            if (!user || user.refreshToken !== refreshDto.refreshToken) {
+                return Promise.reject(new InvalidSessionException())
+            }
+
+            const userId = user._id.toString()
+            const refreshToken = generateRefreshToken(id)
+            const updatedUser = await this._userRepository.updateUserById(userId, { refreshToken })
+
+            if (updatedUser) {
+                return {
+                    user: updatedUser,
+                    accessToken: generateAccessToken(userId),
+                    refreshToken: updatedUser.refreshToken,
+                }
+            } else {
+                return Promise.reject(new InvalidSessionException())
+            }
+        } catch (err) {
+            throw new InvalidSessionException()
         }
     }
 }
