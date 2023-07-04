@@ -10,4 +10,7 @@ export class AuthUserModel {
 
     @Field(() => String, { nullable: true })
     accessToken?: string | null
+
+    @Field(() => String, { nullable: true })
+    refreshToken?: string | null
 }
