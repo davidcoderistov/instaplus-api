@@ -5,6 +5,8 @@ import { IUser } from '../user.model'
 export interface IUserRepository {
     createUser(signUpDto: SignUpDto): Promise<Omit<IUser, 'password' | 'refreshToken'>>
 
+    findUserById(id: string): Promise<IUser | null>
+
     findUserByUsername(username: string): Promise<IUser | null>
 
     updateUserById(id: string, user: Partial<IUser>): Promise<IUser | null>

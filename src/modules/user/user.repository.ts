@@ -18,6 +18,11 @@ export class UserRepository implements IUserRepository {
         return await user.save() as unknown as Omit<IUser, 'password' | 'refreshToken'>
     }
 
+    public async findUserById(id: string): Promise<IUser | null> {
+        const user = await UserModel.findById(id)
+        return user ? user.toObject() : null
+    }
+
     public async findUserByUsername(username: string): Promise<IUser | null> {
         const user = await UserModel.findOne({ username })
         return user ? user.toObject() : null
