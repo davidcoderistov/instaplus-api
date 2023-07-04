@@ -117,4 +117,38 @@ export class UserService implements IUserService {
             throw new InvalidSessionException()
         }
     }
+
+    public async logout(refreshDto: RefreshDto): Promise<AuthUserModel> {
+        try {
+            if (!refreshDto.refreshToken) {
+                return Promise.reject(new InvalidSessionException())
+            }
+
+            const decoded = await verifyToken(refreshDto.refreshToken)
+            const { id, refresh } = decoded
+            if (!id || !refresh) {
+                return Promise.reject(new InvalidSessionException())
+            }
+
+            const user = await this._userRepository.findUserById(id)
+            if (!user || user.refreshToken !== refreshDto.refreshToken) {
+                return Promise.reject(new InvalidSessionException())
+            }
+
+            const userId = user._id.toString()
+            const updatedUser = await this._userRepository.updateUserById(userId, { refreshToken: null })
+
+            if (updatedUser) {
+                return {
+                    user: updatedUser,
+                    accessToken: null,
+                    refreshToken: null,
+                }
+            } else {
+                return Promise.reject(new InvalidSessionException())
+            }
+        } catch (err) {
+            throw new InvalidSessionException()
+        }
+    }
 }

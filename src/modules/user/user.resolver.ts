@@ -32,4 +32,9 @@ export class UserResolver {
     public async refresh(@Args() refreshDto: RefreshDto): Promise<AuthUserModel> {
         return this._userService.refresh(refreshDto)
     }
+
+    @Mutation(() => AuthUserModel)
+    public async logout(@Args() refreshDto: RefreshDto): Promise<AuthUserModel> {
+        return this._userService.logout(refreshDto)
+    }
 }

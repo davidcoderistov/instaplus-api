@@ -12,4 +12,6 @@ export interface IUserService {
     signIn(signInDto: SignInDto): Promise<AuthUserModel>
 
     refresh(refreshDto: RefreshDto): Promise<AuthUserModel>
+
+    logout(refreshDto: RefreshDto): Promise<AuthUserModel>
 }
