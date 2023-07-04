@@ -5,7 +5,7 @@ import { buildSchema, NonEmptyArray } from 'type-graphql'
 import graphqlResolver from '../../modules/graphql.resolver'
 import container from '../../container/container'
 import { validate } from '../../shared/utils/validation'
-import { InvalidArgsException } from '../../shared/exceptions/invalid.args.exception'
+import { InvalidArgsException } from '../../shared/exceptions'
 
 
 @injectable()
