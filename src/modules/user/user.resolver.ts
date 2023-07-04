@@ -4,6 +4,7 @@ import { TYPES } from '../../container/types'
 import { IUserService } from './interfaces/IUser.service'
 import { SignUpDto } from './dtos/sign-up.dto'
 import { SignInDto } from './dtos/sign-in.dto'
+import { RefreshDto } from './dtos/refresh.dto'
 import { AuthUserModel } from './graphql.models/auth-user.model'
 
 
@@ -23,5 +24,10 @@ export class UserResolver {
     @Mutation(() => AuthUserModel)
     public async signIn(@Args() signInDto: SignInDto): Promise<AuthUserModel> {
         return this._userService.signIn(signInDto)
+    }
+
+    @Mutation(() => AuthUserModel)
+    public async refresh(@Args() refreshDto: RefreshDto): Promise<AuthUserModel> {
+        return this._userService.refresh(refreshDto)
     }
 }
