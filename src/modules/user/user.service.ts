@@ -14,10 +14,12 @@ import {
 } from '../../shared/utils/token'
 import { MongoError } from 'mongodb'
 import { Error } from 'mongoose'
-import { CustomValidationException } from '../../shared/exceptions/custom.validation.exception'
-import { ValidationException } from '../../shared/exceptions/validation.exception'
-import { MongodbServerException } from '../../shared/exceptions/mongodb.server.exception'
-import { InvalidSessionException } from '../../shared/exceptions/invalid.session.exception'
+import {
+    CustomValidationException,
+    ValidationException,
+    MongodbServerException,
+    InvalidSessionException,
+} from '../../shared/exceptions'
 
 
 @injectable()
