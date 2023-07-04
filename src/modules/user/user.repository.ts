@@ -17,4 +17,14 @@ export class UserRepository implements IUserRepository {
         })
         return await user.save() as unknown as Omit<IUser, 'password' | 'refreshToken'>
     }
+
+    public async findUserByUsername(username: string): Promise<IUser | null> {
+        const user = await UserModel.findOne({ username })
+        return user ? user.toObject() : null
+    }
+
+    public async updateUserById(id: string, user: Partial<IUser>): Promise<IUser | null> {
+        const updateUser = await UserModel.findOneAndUpdate({ _id: id }, user, { new: true })
+        return updateUser ? updateUser.toObject() : null
+    }
 }
