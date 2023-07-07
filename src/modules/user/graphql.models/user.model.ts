@@ -17,6 +17,6 @@ export class UserModel {
     @Field()
     username!: string
 
-    @Field()
-    photoUrl!: string
+    @Field({ nullable: true })
+    photoUrl?: string
 }
