@@ -21,7 +21,7 @@ class Message {
     videoUrl?: string
 
     @Field()
-    createdAt!: string
+    createdAt!: Date
 }
 
 @ObjectType()

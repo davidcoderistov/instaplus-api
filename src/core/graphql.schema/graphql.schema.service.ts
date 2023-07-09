@@ -17,6 +17,7 @@ export class GraphQLSchemaService implements IGraphQLSchemaService {
         this.graphQLSchema = await buildSchema({
             resolvers: graphqlResolver as unknown as NonEmptyArray<Function>,
             container,
+            dateScalarMode: 'timestamp',
             validateFn: async (dtoClass) => {
                 const error = await validate(dtoClass)
                 if (error) {
