@@ -7,14 +7,9 @@ export class FindChatsDto {
 
     @Field(() => Int)
     @Min(0)
-    offset: number
+    offset!: number
 
     @Field(() => Int)
     @Min(0)
-    limit: number
-
-    constructor(offset: number, limit: number) {
-        this.offset = offset
-        this.limit = limit
-    }
+    limit!: number
 }
