@@ -1,7 +1,7 @@
 import { injectable } from 'inversify'
 import { IUserRepository } from './interfaces/IUser.repository'
 import UserModel from './user.model'
-import { SignUpDto } from './dtos'
+import { SignUpDto, FindUsersBySearchQueryDto } from './dtos'
 import { IUser } from './user.model'
 
 
@@ -26,6 +26,21 @@ export class UserRepository implements IUserRepository {
     public async findUserByUsername(username: string): Promise<IUser | null> {
         const user = await UserModel.findOne({ username })
         return user ? user.toObject() : null
+    }
+
+    public async findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto): Promise<IUser[]> {
+        const regex = new RegExp(findUsersBySearchQueryDto.searchQuery, 'i')
+        return UserModel
+            .find({
+                $or: [
+                    { firstName: { $regex: regex } },
+                    { lastName: { $regex: regex } },
+                    { username: { $regex: regex } },
+                ],
+            })
+            .sort('username')
+            .limit(findUsersBySearchQueryDto.limit)
+            .lean()
     }
 
     public async updateUserById(id: string, user: Partial<IUser>): Promise<IUser | null> {

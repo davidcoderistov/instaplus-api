@@ -1,4 +1,4 @@
-import { SignUpDto } from '../dtos'
+import { SignUpDto, FindUsersBySearchQueryDto } from '../dtos'
 import { IUser } from '../user.model'
 
 
@@ -8,6 +8,8 @@ export interface IUserRepository {
     findUserById(id: string): Promise<IUser | null>
 
     findUserByUsername(username: string): Promise<IUser | null>
+
+    findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto): Promise<IUser[]>
 
     updateUserById(id: string, user: Partial<IUser>): Promise<IUser | null>
 }
