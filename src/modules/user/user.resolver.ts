@@ -1,12 +1,14 @@
 import { inject, injectable } from 'inversify'
-import { Resolver, Mutation, Args, Ctx } from 'type-graphql'
+import { Resolver, Query, Mutation, Args, Ctx } from 'type-graphql'
 import { TYPES } from '../../container/types'
 import { IUserService } from './interfaces/IUser.service'
 import {
     SignUpDto,
     SignInDto,
+    FindUsersBySearchQueryDto,
 } from './dtos'
 import { AuthUserModel } from './graphql.models/auth-user.model'
+import { UserModel } from './graphql.models/user.model'
 import { Context } from '../../shared/types'
 
 
@@ -44,5 +46,10 @@ export class UserResolver {
         const user = await this._userService.logout({ refreshToken })
         setRefreshTokenCookie('', true)
         return user
+    }
+
+    @Query(() => UserModel)
+    public async findUsersBySearchQuery(@Args() findUsersBySearchQuery: FindUsersBySearchQueryDto, @Ctx() { userId }: Context): Promise<UserModel[]> {
+        return this._userService.findUsersBySearchQuery(findUsersBySearchQuery, userId)
     }
 }
