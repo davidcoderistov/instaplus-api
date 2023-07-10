@@ -7,6 +7,8 @@ export interface IUserRepository {
 
     findUserById(id: string): Promise<IUser | null>
 
+    findUsersByIds(ids: string[]): Promise<IUser[]>
+
     findUserByUsername(username: string): Promise<IUser | null>
 
     findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto): Promise<IUser[]>

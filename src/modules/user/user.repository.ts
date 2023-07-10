@@ -3,6 +3,7 @@ import { IUserRepository } from './interfaces/IUser.repository'
 import UserModel from './user.model'
 import { SignUpDto, FindUsersBySearchQueryDto } from './dtos'
 import { IUser } from './user.model'
+import { Types } from 'mongoose'
 
 
 @injectable()
@@ -21,6 +22,10 @@ export class UserRepository implements IUserRepository {
     public async findUserById(id: string): Promise<IUser | null> {
         const user = await UserModel.findById(id)
         return user ? user.toObject() : null
+    }
+
+    public async findUsersByIds(ids: string[]): Promise<IUser[]> {
+        return UserModel.find({ _id: { $in: ids.map(id => new Types.ObjectId(id)) } }).lean()
     }
 
     public async findUserByUsername(username: string): Promise<IUser | null> {
