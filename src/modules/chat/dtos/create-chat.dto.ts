@@ -1,11 +1,12 @@
 import { ArgsType, Field } from 'type-graphql'
-import { MinLength } from 'class-validator'
+import { ArrayMinSize, ArrayUnique } from 'class-validator'
 
 
 @ArgsType()
 export class CreateChatDto {
 
     @Field(() => [String])
-    @MinLength(2)
+    @ArrayUnique()
+    @ArrayMinSize(2)
     chatMemberIds!: string[]
 }
