@@ -1,28 +1,7 @@
 import { ObjectType, Field } from 'type-graphql'
 import { UserModel } from '../../user/graphql.models/user.model'
+import { MessageModel } from './message.model'
 
-
-@ObjectType()
-class Message {
-
-    @Field()
-    _id!: string
-
-    @Field(() => UserModel)
-    creator!: UserModel
-
-    @Field({ nullable: true })
-    text?: string
-
-    @Field({ nullable: true })
-    photoUrl?: string
-
-    @Field({ nullable: true })
-    videoUrl?: string
-
-    @Field()
-    createdAt!: Date
-}
 
 @ObjectType()
 export class ChatModel {
@@ -36,6 +15,6 @@ export class ChatModel {
     @Field(() => [UserModel])
     chatMembers!: UserModel[]
 
-    @Field(() => Message)
-    message!: Message
+    @Field(() => MessageModel)
+    message!: MessageModel
 }
