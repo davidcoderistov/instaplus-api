@@ -1,6 +1,5 @@
 import { FindChatsDto, FindMessagesByChatIdDto } from '../dtos'
-import { ChatsModel } from '../graphql.models/chats.model'
-import { MessagesModel } from '../graphql.models/messages.model'
+import { ChatsModel, MessagesModel } from '../graphql.models'
 
 
 export interface IChatRepository {

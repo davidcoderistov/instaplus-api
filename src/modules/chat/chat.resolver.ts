@@ -4,8 +4,7 @@ import { TYPES } from '../../container/types'
 import { IChatService } from './interfaces/IChat.service'
 import { Context } from '../../shared/types'
 import { FindChatsDto, FindMessagesByChatIdDto } from './dtos'
-import { ChatsModel } from './graphql.models/chats.model'
-import { MessagesModel } from './graphql.models/messages.model'
+import { ChatsModel, MessagesModel } from './graphql.models'
 
 
 @injectable()

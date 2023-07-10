@@ -1,8 +1,7 @@
 import { inject, injectable } from 'inversify'
 import { IChatService } from './interfaces/IChat.service'
 import { FindChatsDto, FindMessagesByChatIdDto } from './dtos'
-import { ChatsModel } from './graphql.models/chats.model'
-import { MessagesModel } from './graphql.models/messages.model'
+import { ChatsModel, MessagesModel } from './graphql.models'
 import { TYPES } from '../../container/types'
 import { IChatRepository } from './interfaces/IChat.repository'
 
