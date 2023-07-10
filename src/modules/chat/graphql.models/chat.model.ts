@@ -1,6 +1,5 @@
 import { ObjectType, Field } from 'type-graphql'
 import { UserModel } from '../../user/graphql.models'
-import { MessageModel } from './message.model'
 
 
 @ObjectType()
@@ -15,6 +14,6 @@ export class ChatModel {
     @Field(() => [UserModel])
     chatMembers!: UserModel[]
 
-    @Field(() => MessageModel)
-    message!: MessageModel
+    @Field()
+    createdAt!: Date
 }

@@ -1,4 +1,5 @@
 export * from './chat.model'
-export * from './chats.model'
+export * from './chat-with-latest-message.model'
+export * from './chats-with-latest-message.model'
 export * from './message.model'
 export * from './messages.model'

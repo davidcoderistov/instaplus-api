@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify'
 import { IChatService } from './interfaces/IChat.service'
 import { FindChatsDto, FindMessagesByChatIdDto, CreateChatDto } from './dtos'
-import { ChatsModel, MessagesModel } from './graphql.models'
+import { ChatsWithLatestMessageModel, MessagesModel } from './graphql.models'
 import { IChat } from './db.models/chat.model'
 import { TYPES } from '../../container/types'
 import { IChatRepository } from './interfaces/IChat.repository'
@@ -17,7 +17,7 @@ export class ChatService implements IChatService {
         @inject(TYPES.IUserRepository) private readonly _userRepository: IUserRepository) {
     }
 
-    public async findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsModel> {
+    public async findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsWithLatestMessageModel> {
         return this._chatRepository.findChatsForUser(userId, findChatsDto)
     }
 
@@ -32,7 +32,7 @@ export class ChatService implements IChatService {
             if (chat) {
                 return chat
             }
-            
+
             const creator = await this._userRepository.findUserById(creatorId)
             if (!creator) {
                 return Promise.reject(new CustomValidationException('creatorId', `User ${creatorId} does not exist`))

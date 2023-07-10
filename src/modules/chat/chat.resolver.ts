@@ -4,7 +4,7 @@ import { TYPES } from '../../container/types'
 import { IChatService } from './interfaces/IChat.service'
 import { Context } from '../../shared/types'
 import { FindChatsDto, FindMessagesByChatIdDto } from './dtos'
-import { ChatsModel, MessagesModel } from './graphql.models'
+import { ChatsWithLatestMessageModel, MessagesModel } from './graphql.models'
 
 
 @injectable()
@@ -15,8 +15,8 @@ export class ChatResolver {
         @inject(TYPES.IChatService) private readonly _chatService: IChatService) {
     }
 
-    @Query(() => ChatsModel)
-    public async findChatsForUser(@Args() findChatsDto: FindChatsDto, @Ctx() { userId }: Context): Promise<ChatsModel> {
+    @Query(() => ChatsWithLatestMessageModel)
+    public async findChatsForUser(@Args() findChatsDto: FindChatsDto, @Ctx() { userId }: Context): Promise<ChatsWithLatestMessageModel> {
         return this._chatService.findChatsForUser(userId, findChatsDto)
     }
 
