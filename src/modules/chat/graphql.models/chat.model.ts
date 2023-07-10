@@ -1,5 +1,5 @@
 import { ObjectType, Field } from 'type-graphql'
-import { UserModel } from '../../user/graphql.models/user.model'
+import { UserModel } from '../../user/graphql.models'
 import { MessageModel } from './message.model'
 
 
