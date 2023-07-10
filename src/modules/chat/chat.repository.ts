@@ -116,9 +116,20 @@ export class ChatRepository implements IChatRepository {
     }
 
     public async findChatByChatMemberIds(chatMemberIds: string[]): Promise<IChat | null> {
-        const chats: IChat[] = await ChatModel
-            .find({ 'chatMembers._id': { $all: chatMemberIds.map(id => new Types.ObjectId(id)) } })
-            .lean()
+        const chats: IChat[] = await ChatModel.find({
+            $and: [
+                {
+                    'chatMembers._id': {
+                        $all: chatMemberIds.map(id => new Types.ObjectId(id)),
+                    },
+                },
+                {
+                    chatMembers: {
+                        $size: chatMemberIds.length,
+                    },
+                },
+            ],
+        }).lean()
         return chats.length > 0 ? chats[0] : null
     }
 
