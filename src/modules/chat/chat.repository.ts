@@ -1,8 +1,9 @@
 import { injectable } from 'inversify'
 import { IChatRepository } from './interfaces/IChat.repository'
 import { FindChatsDto, FindMessagesByChatIdDto } from './dtos'
+import { IChat } from './db.models/chat.model'
 import { ChatsModel, MessagesModel } from './graphql.models'
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import ChatModel from './db.models/chat.model'
 import MessageModel from './db.models/message.model'
 import { getPaginatedData } from '../../shared/utils/misc'
@@ -109,5 +110,12 @@ export class ChatRepository implements IChatRepository {
             },
         ])
         return getPaginatedData(messages) as unknown as MessagesModel
+    }
+
+    public async findChatByChatMemberIds(chatMemberIds: string[]): Promise<IChat | null> {
+        const chats: IChat[] = await ChatModel
+            .find({ 'chatMembers._id': { $in: chatMemberIds.map(id => new Types.ObjectId(id)) } })
+            .lean()
+        return chats.length > 0 ? chats[0] : null
     }
 }
