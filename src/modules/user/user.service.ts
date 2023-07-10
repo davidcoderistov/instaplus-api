@@ -7,7 +7,7 @@ import {
     RefreshDto,
     FindUsersBySearchQueryDto,
 } from './dtos'
-import { AuthUserModel, UserModel } from './graphql.models'
+import { AuthUser, User } from './graphql.models'
 import { TYPES } from '../../container/types'
 import bcrypt from 'bcrypt'
 import {
@@ -32,7 +32,7 @@ export class UserService implements IUserService {
         @inject(TYPES.IUserRepository) private readonly _userRepository: IUserRepository) {
     }
 
-    public async signUp(signUpDto: SignUpDto): Promise<AuthUserModel> {
+    public async signUp(signUpDto: SignUpDto): Promise<AuthUser> {
         try {
             const passwordHash = await bcrypt.hash(signUpDto.password, 10)
             const user = await this._userRepository.createUser({
@@ -55,7 +55,7 @@ export class UserService implements IUserService {
         }
     }
 
-    public async signIn(signInDto: SignInDto): Promise<AuthUserModel> {
+    public async signIn(signInDto: SignInDto): Promise<AuthUser> {
         try {
             const user = await this._userRepository.findUserByUsername(signInDto.username)
             if (!user) {
@@ -84,7 +84,7 @@ export class UserService implements IUserService {
         }
     }
 
-    public async refresh(refreshDto: RefreshDto): Promise<AuthUserModel> {
+    public async refresh(refreshDto: RefreshDto): Promise<AuthUser> {
         try {
             if (!refreshDto.refreshToken) {
                 return Promise.reject(new InvalidSessionException())
@@ -119,7 +119,7 @@ export class UserService implements IUserService {
         }
     }
 
-    public async logout(refreshDto: RefreshDto): Promise<AuthUserModel> {
+    public async logout(refreshDto: RefreshDto): Promise<AuthUser> {
         try {
             if (!refreshDto.refreshToken) {
                 return Promise.reject(new InvalidSessionException())
@@ -153,7 +153,7 @@ export class UserService implements IUserService {
         }
     }
 
-    public async findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto, authUserId: string): Promise<UserModel[]> {
+    public async findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto, authUserId: string): Promise<User[]> {
         try {
             const user = await this._userRepository.findUserById(authUserId)
             if (!user) {

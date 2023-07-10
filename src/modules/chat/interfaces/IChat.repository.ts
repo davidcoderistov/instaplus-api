@@ -1,13 +1,13 @@
 import { FindChatsDto, FindMessagesByChatIdDto } from '../dtos'
 import { IChat } from '../db.models/chat.model'
 import { IUser } from '../../user/user.model'
-import { ChatsWithLatestMessageModel, MessagesModel } from '../graphql.models'
+import { ChatsWithLatestMessage, Messages } from '../graphql.models'
 
 
 export interface IChatRepository {
-    findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsWithLatestMessageModel>
+    findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsWithLatestMessage>
 
-    findMessagesByChatId(findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<MessagesModel>
+    findMessagesByChatId(findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<Messages>
 
     findChatByChatMemberIds(chatMemberIds: string[]): Promise<IChat | null>
 

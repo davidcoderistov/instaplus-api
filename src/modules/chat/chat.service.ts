@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify'
 import { IChatService } from './interfaces/IChat.service'
 import { FindChatsDto, FindMessagesByChatIdDto, CreateChatDto } from './dtos'
-import { ChatsWithLatestMessageModel, MessagesModel } from './graphql.models'
+import { ChatsWithLatestMessage, Messages } from './graphql.models'
 import { IChat } from './db.models/chat.model'
 import { TYPES } from '../../container/types'
 import { IChatRepository } from './interfaces/IChat.repository'
@@ -17,11 +17,11 @@ export class ChatService implements IChatService {
         @inject(TYPES.IUserRepository) private readonly _userRepository: IUserRepository) {
     }
 
-    public async findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsWithLatestMessageModel> {
+    public async findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsWithLatestMessage> {
         return this._chatRepository.findChatsForUser(userId, findChatsDto)
     }
 
-    public async findMessagesByChatId(findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<MessagesModel> {
+    public async findMessagesByChatId(findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<Messages> {
         return this._chatRepository.findMessagesByChatId(findMessagesByChatIdDto)
     }
 

@@ -1,8 +1,8 @@
 import { ObjectType } from 'type-graphql'
 import { PaginatedResponseFactory } from '../../../shared/graphql/paginated-response-factory'
-import { ChatWithLatestMessageModel } from './chat-with-latest-message.model'
+import { ChatWithLatestMessage } from './chat-with-latest-message.model'
 
 
 @ObjectType()
-export class ChatsWithLatestMessageModel extends PaginatedResponseFactory<ChatWithLatestMessageModel>(ChatWithLatestMessageModel) {
+export class ChatsWithLatestMessage extends PaginatedResponseFactory<ChatWithLatestMessage>(ChatWithLatestMessage) {
 }

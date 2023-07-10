@@ -7,7 +7,7 @@ import {
     SignInDto,
     FindUsersBySearchQueryDto,
 } from './dtos'
-import { AuthUserModel, UserModel } from './graphql.models'
+import { AuthUser, User } from './graphql.models'
 import { Context } from '../../shared/types'
 
 
@@ -19,36 +19,36 @@ export class UserResolver {
         @inject(TYPES.IUserService) private readonly _userService: IUserService) {
     }
 
-    @Mutation(() => AuthUserModel)
-    public async signUp(@Args() signUpDto: SignUpDto): Promise<AuthUserModel> {
+    @Mutation(() => AuthUser)
+    public async signUp(@Args() signUpDto: SignUpDto): Promise<AuthUser> {
         return this._userService.signUp(signUpDto)
     }
 
-    @Mutation(() => AuthUserModel)
-    public async signIn(@Args() signInDto: SignInDto, @Ctx() { setRefreshTokenCookie }: Context): Promise<AuthUserModel> {
+    @Mutation(() => AuthUser)
+    public async signIn(@Args() signInDto: SignInDto, @Ctx() { setRefreshTokenCookie }: Context): Promise<AuthUser> {
         const user = await this._userService.signIn(signInDto)
         setRefreshTokenCookie(user.refreshToken as string)
         return user
     }
 
-    @Mutation(() => AuthUserModel)
-    public async refresh(@Ctx() { getRefreshTokenCookie, setRefreshTokenCookie }: Context): Promise<AuthUserModel> {
+    @Mutation(() => AuthUser)
+    public async refresh(@Ctx() { getRefreshTokenCookie, setRefreshTokenCookie }: Context): Promise<AuthUser> {
         const refreshToken = getRefreshTokenCookie()
         const user = await this._userService.refresh({ refreshToken })
         setRefreshTokenCookie(user.refreshToken as string)
         return user
     }
 
-    @Mutation(() => AuthUserModel)
-    public async logout(@Ctx() { getRefreshTokenCookie, setRefreshTokenCookie }: Context): Promise<AuthUserModel> {
+    @Mutation(() => AuthUser)
+    public async logout(@Ctx() { getRefreshTokenCookie, setRefreshTokenCookie }: Context): Promise<AuthUser> {
         const refreshToken = getRefreshTokenCookie()
         const user = await this._userService.logout({ refreshToken })
         setRefreshTokenCookie('', true)
         return user
     }
 
-    @Query(() => UserModel)
-    public async findUsersBySearchQuery(@Args() findUsersBySearchQuery: FindUsersBySearchQueryDto, @Ctx() { userId }: Context): Promise<UserModel[]> {
+    @Query(() => User)
+    public async findUsersBySearchQuery(@Args() findUsersBySearchQuery: FindUsersBySearchQueryDto, @Ctx() { userId }: Context): Promise<User[]> {
         return this._userService.findUsersBySearchQuery(findUsersBySearchQuery, userId)
     }
 }

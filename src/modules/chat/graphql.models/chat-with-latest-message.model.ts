@@ -1,14 +1,14 @@
 import { ObjectType, Field } from 'type-graphql'
-import { ChatModel } from './chat.model'
-import { MessageModel } from './message.model'
+import { Chat } from './chat.model'
+import { Message } from './message.model'
 
 
 @ObjectType()
-export class ChatWithLatestMessageModel {
+export class ChatWithLatestMessage {
 
-    @Field(() => ChatModel)
-    chat!: ChatModel
+    @Field(() => Chat)
+    chat!: Chat
 
-    @Field(() => MessageModel)
-    message!: MessageModel
+    @Field(() => Message)
+    message!: Message
 }

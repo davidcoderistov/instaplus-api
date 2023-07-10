@@ -3,7 +3,7 @@ import { IChatRepository } from './interfaces/IChat.repository'
 import { FindChatsDto, FindMessagesByChatIdDto } from './dtos'
 import { IChat } from './db.models/chat.model'
 import { IUser } from '../user/user.model'
-import { ChatsWithLatestMessageModel, MessagesModel } from './graphql.models'
+import { ChatsWithLatestMessage, Messages } from './graphql.models'
 import mongoose, { Types } from 'mongoose'
 import ChatModel from './db.models/chat.model'
 import MessageModel from './db.models/message.model'
@@ -13,7 +13,7 @@ import { getPaginatedData } from '../../shared/utils/misc'
 @injectable()
 export class ChatRepository implements IChatRepository {
 
-    public async findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsWithLatestMessageModel> {
+    public async findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsWithLatestMessage> {
         const chats = await ChatModel.aggregate([
             {
                 $match: {
@@ -85,10 +85,10 @@ export class ChatRepository implements IChatRepository {
                 },
             },
         ])
-        return getPaginatedData(chats) as unknown as ChatsWithLatestMessageModel
+        return getPaginatedData(chats) as unknown as ChatsWithLatestMessage
     }
 
-    public async findMessagesByChatId({ chatId, offset, limit }: FindMessagesByChatIdDto): Promise<MessagesModel> {
+    public async findMessagesByChatId({ chatId, offset, limit }: FindMessagesByChatIdDto): Promise<Messages> {
         const messages = await MessageModel.aggregate([
             {
                 $match: { chatId },
@@ -112,7 +112,7 @@ export class ChatRepository implements IChatRepository {
                 },
             },
         ])
-        return getPaginatedData(messages) as unknown as MessagesModel
+        return getPaginatedData(messages) as unknown as Messages
     }
 
     public async findChatByChatMemberIds(chatMemberIds: string[]): Promise<IChat | null> {

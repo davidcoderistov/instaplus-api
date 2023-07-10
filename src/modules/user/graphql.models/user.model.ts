@@ -3,7 +3,7 @@ import { Types } from 'mongoose'
 
 
 @ObjectType()
-export class UserModel {
+export class User {
 
     @Field(() => String)
     _id!: Types.ObjectId

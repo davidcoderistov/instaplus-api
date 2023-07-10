@@ -1,8 +1,8 @@
 import { ObjectType } from 'type-graphql'
 import { PaginatedResponseFactory } from '../../../shared/graphql/paginated-response-factory'
-import { MessageModel } from './message.model'
+import { Message } from './message.model'
 
 
 @ObjectType()
-export class MessagesModel extends PaginatedResponseFactory<MessageModel>(MessageModel) {
+export class Messages extends PaginatedResponseFactory<Message>(Message) {
 }

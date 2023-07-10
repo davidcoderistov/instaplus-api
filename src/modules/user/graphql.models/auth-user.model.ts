@@ -1,12 +1,12 @@
 import { ObjectType, Field } from 'type-graphql'
-import { UserModel } from './user.model'
+import { User } from './user.model'
 
 
 @ObjectType()
-export class AuthUserModel {
+export class AuthUser {
 
-    @Field(() => UserModel)
-    user!: UserModel
+    @Field(() => User)
+    user!: User
 
     @Field(() => String, { nullable: true })
     accessToken?: string | null

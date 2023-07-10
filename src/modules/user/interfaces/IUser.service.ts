@@ -4,17 +4,17 @@ import {
     RefreshDto,
     FindUsersBySearchQueryDto,
 } from '../dtos'
-import { AuthUserModel, UserModel } from '../graphql.models'
+import { AuthUser, User } from '../graphql.models'
 
 
 export interface IUserService {
-    signUp(signUpDto: SignUpDto): Promise<AuthUserModel>
+    signUp(signUpDto: SignUpDto): Promise<AuthUser>
 
-    signIn(signInDto: SignInDto): Promise<AuthUserModel>
+    signIn(signInDto: SignInDto): Promise<AuthUser>
 
-    refresh(refreshDto: RefreshDto): Promise<AuthUserModel>
+    refresh(refreshDto: RefreshDto): Promise<AuthUser>
 
-    logout(refreshDto: RefreshDto): Promise<AuthUserModel>
+    logout(refreshDto: RefreshDto): Promise<AuthUser>
 
-    findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto, authUserId: string): Promise<UserModel[]>
+    findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto, authUserId: string): Promise<User[]>
 }
