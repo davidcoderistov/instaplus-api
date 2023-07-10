@@ -4,8 +4,7 @@ import {
     RefreshDto,
     FindUsersBySearchQueryDto,
 } from '../dtos'
-import { AuthUserModel } from '../graphql.models/auth-user.model'
-import { UserModel } from '../graphql.models/user.model'
+import { AuthUserModel, UserModel } from '../graphql.models'
 
 
 export interface IUserService {
