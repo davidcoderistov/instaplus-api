@@ -2,6 +2,7 @@ import { injectable } from 'inversify'
 import { IChatRepository } from './interfaces/IChat.repository'
 import { FindChatsDto, FindMessagesByChatIdDto } from './dtos'
 import { IChat } from './db.models/chat.model'
+import { IUser } from '../user/user.model'
 import { ChatsModel, MessagesModel } from './graphql.models'
 import mongoose, { Types } from 'mongoose'
 import ChatModel from './db.models/chat.model'
@@ -114,8 +115,16 @@ export class ChatRepository implements IChatRepository {
 
     public async findChatByChatMemberIds(chatMemberIds: string[]): Promise<IChat | null> {
         const chats: IChat[] = await ChatModel
-            .find({ 'chatMembers._id': { $in: chatMemberIds.map(id => new Types.ObjectId(id)) } })
+            .find({ 'chatMembers._id': { $all: chatMemberIds.map(id => new Types.ObjectId(id)) } })
             .lean()
         return chats.length > 0 ? chats[0] : null
+    }
+
+    public async createChat(creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>, chatMembers: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>[]): Promise<IChat> {
+        const chat = new ChatModel({
+            creator,
+            chatMembers,
+        })
+        return await chat.save() as unknown as IChat
     }
 }
