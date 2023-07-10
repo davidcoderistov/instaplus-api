@@ -36,7 +36,7 @@ export class ChatRepository implements IChatRepository {
             {
                 $unwind: {
                     path: '$messages',
-                    preserveNullAndEmptyArrays: true,
+                    preserveNullAndEmptyArrays: false,
                 },
             },
             {
@@ -54,10 +54,10 @@ export class ChatRepository implements IChatRepository {
             {
                 $project: {
                     chat: {
-                        _id: 1,
-                        creator: 1,
-                        chatMembers: 1,
-                        createdAt: 1,
+                        _id: '$_id',
+                        creator: '$creator',
+                        chatMembers: '$chatMembers',
+                        createdAt: '$createdAt',
                     },
                     message: {
                         _id: '$message._id',
