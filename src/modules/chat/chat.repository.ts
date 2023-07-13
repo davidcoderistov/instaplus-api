@@ -38,6 +38,34 @@ export class ChatRepository implements IChatRepository {
             },
             {
                 $lookup: {
+                    from: UserDeletedChatModel.collection.name,
+                    let: {
+                        chatId: '$chatId',
+                        userId: userId,
+                    },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$userId', '$$userId'] },
+                                        { $eq: ['$chatId', '$$chatId'] },
+                                    ],
+                                },
+                            },
+                        },
+                    ],
+                    as: 'userDeletedChat',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$userDeletedChat',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
                     from: MessageModel.collection.name,
                     localField: 'chatId',
                     foreignField: 'chatId',
@@ -48,6 +76,21 @@ export class ChatRepository implements IChatRepository {
                 $unwind: {
                     path: '$messages',
                     preserveNullAndEmptyArrays: false,
+                },
+            },
+            {
+                $match: {
+                    $expr: {
+                        $cond: [
+                            {
+                                $eq: ['$userDeletedChat', null],
+                            },
+                            true,
+                            {
+                                $gt: ['$messages.createdAt', '$userDeletedChat.updatedAt'],
+                            },
+                        ],
+                    },
                 },
             },
             {
