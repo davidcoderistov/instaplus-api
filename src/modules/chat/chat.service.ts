@@ -21,7 +21,7 @@ export class ChatService implements IChatService {
         return this._chatRepository.findChatsForUser(userId, findChatsDto)
     }
 
-    public async findMessagesByChatId(findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<Messages> {
+    public async findMessagesByChatId(userId: string, findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<Messages> {
         return this._chatRepository.findMessagesByChatId(findMessagesByChatIdDto)
     }
 

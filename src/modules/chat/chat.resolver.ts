@@ -21,8 +21,8 @@ export class ChatResolver {
     }
 
     @Query(() => Messages)
-    public async findMessagesByChatId(@Args() findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<Messages> {
-        return this._chatService.findMessagesByChatId(findMessagesByChatIdDto)
+    public async findMessagesByChatId(@Args() findMessagesByChatIdDto: FindMessagesByChatIdDto, @Ctx() { userId }: Context): Promise<Messages> {
+        return this._chatService.findMessagesByChatId(userId, findMessagesByChatIdDto)
     }
 
     @Mutation(() => Chat)

@@ -10,7 +10,7 @@ export interface IChatRepository {
 
     findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsWithLatestMessage>
 
-    findMessagesByChatId(findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<Messages>
+    findMessagesByChatId(userId: string, findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<Messages>
 
     findChatByChatMemberIds(chatMemberIds: string[]): Promise<IChat | null>
 

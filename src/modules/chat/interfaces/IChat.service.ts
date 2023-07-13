@@ -6,7 +6,7 @@ import { ChatsWithLatestMessage, Messages } from '../graphql.models'
 export interface IChatService {
     findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsWithLatestMessage>
 
-    findMessagesByChatId(findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<Messages>
+    findMessagesByChatId(userId: string, findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<Messages>
 
     createChat(createChatDto: CreateChatDto, creatorId: string): Promise<IChat>
 

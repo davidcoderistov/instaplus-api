@@ -142,7 +142,11 @@ export class ChatRepository implements IChatRepository {
         return getPaginatedData(chats) as unknown as ChatsWithLatestMessage
     }
 
-    public async findMessagesByChatId({ chatId, offset, limit }: FindMessagesByChatIdDto): Promise<Messages> {
+    public async findMessagesByChatId(userId: string, {
+        chatId,
+        offset,
+        limit,
+    }: FindMessagesByChatIdDto): Promise<Messages> {
         const messages = await MessageModel.aggregate([
             {
                 $match: { chatId },
