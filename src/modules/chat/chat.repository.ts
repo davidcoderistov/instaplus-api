@@ -3,6 +3,7 @@ import { IChatRepository } from './interfaces/IChat.repository'
 import { FindChatsDto, FindMessagesByChatIdDto, DeleteChatDto } from './dtos'
 import { IChat } from './db.models/chat.model'
 import { IUser } from '../user/user.model'
+import { IUserDeletedChat } from './db.models/user-deleted-chat.model'
 import { ChatsWithLatestMessage, Messages } from './graphql.models'
 import mongoose, { Types } from 'mongoose'
 import ChatModel from './db.models/chat.model'
@@ -141,6 +142,11 @@ export class ChatRepository implements IChatRepository {
             ],
         }).lean()
         return chats.length > 0 ? chats[0] : null
+    }
+
+    public async findUserDeletedChat(userId: string, chatId: string): Promise<IUserDeletedChat | null> {
+        const userDeletedChat = await UserDeletedChatModel.findOne({ userId, chatId })
+        return userDeletedChat ? userDeletedChat.toObject() : null
     }
 
     public async createChat(creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>, chatMembers: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>[]): Promise<IChat> {

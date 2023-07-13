@@ -1,6 +1,7 @@
 import { FindChatsDto, FindMessagesByChatIdDto, DeleteChatDto } from '../dtos'
 import { IChat } from '../db.models/chat.model'
 import { IUser } from '../../user/user.model'
+import { IUserDeletedChat } from '../db.models/user-deleted-chat.model'
 import { ChatsWithLatestMessage, Messages } from '../graphql.models'
 
 
@@ -12,6 +13,8 @@ export interface IChatRepository {
     findMessagesByChatId(findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<Messages>
 
     findChatByChatMemberIds(chatMemberIds: string[]): Promise<IChat | null>
+
+    findUserDeletedChat(userId: string, chatId: string): Promise<IUserDeletedChat | null>
 
     createChat(creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>, chatMembers: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>[]): Promise<IChat>
 
