@@ -14,6 +14,15 @@ import { getPaginatedData } from '../../shared/utils/misc'
 @injectable()
 export class ChatRepository implements IChatRepository {
 
+    public async findChatById(chatId: string): Promise<IChat | null> {
+        try {
+            const chat = await ChatModel.findById(chatId)
+            return chat ? chat.toObject() : null
+        } catch (err) {
+            throw err
+        }
+    }
+
     public async findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsWithLatestMessage> {
         const chats = await ChatModel.aggregate([
             {
