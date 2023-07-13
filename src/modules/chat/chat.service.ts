@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify'
 import { IChatService } from './interfaces/IChat.service'
-import { FindChatsDto, FindMessagesByChatIdDto, CreateChatDto } from './dtos'
+import { FindChatsDto, FindMessagesByChatIdDto, CreateChatDto, DeleteChatDto } from './dtos'
 import { ChatsWithLatestMessage, Messages } from './graphql.models'
 import { IChat } from './db.models/chat.model'
 import { TYPES } from '../../container/types'
@@ -59,6 +59,24 @@ export class ChatService implements IChatService {
                     photoUrl: chatMember.photoUrl,
                 })),
             )
+        } catch (err) {
+            throw err
+        }
+    }
+
+    public async deleteChat(deleteChatDto: DeleteChatDto): Promise<void> {
+        try {
+            const user = await this._userRepository.findUserById(deleteChatDto.userId)
+            if (!user) {
+                return Promise.reject(new CustomValidationException('userId', `User ${deleteChatDto.userId} does not exist`))
+            }
+
+            const chat = await this._chatRepository.findChatById(deleteChatDto.chatId)
+            if (!chat) {
+                return Promise.reject(new CustomValidationException('chatId', `Chat ${deleteChatDto.chatId} does not exist`))
+            }
+
+            await this._chatRepository.upsertUserDeletedChat(deleteChatDto)
         } catch (err) {
             throw err
         }
