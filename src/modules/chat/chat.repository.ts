@@ -257,4 +257,12 @@ export class ChatRepository implements IChatRepository {
             throw err
         }
     }
+
+    public async addChatMembers(chatId: string, chatMembers: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>[]): Promise<IChat | null> {
+        return ChatModel.findOneAndUpdate(
+            { _id: chatId },
+            { $push: { chatMembers: { $each: chatMembers } } },
+            { new: true, lean: true },
+        )
+    }
 }
