@@ -1,4 +1,4 @@
-import { FindChatsDto, FindMessagesByChatIdDto, CreateChatDto, DeleteChatDto } from '../dtos'
+import { FindChatsDto, FindMessagesByChatIdDto, CreateChatDto, DeleteChatDto, AddChatMembersDto } from '../dtos'
 import { IChat } from '../db.models/chat.model'
 import { ChatsWithLatestMessage, Messages } from '../graphql.models'
 
@@ -11,4 +11,6 @@ export interface IChatService {
     createChat(createChatDto: CreateChatDto, creatorId: string): Promise<IChat>
 
     deleteChat(deleteChatDto: DeleteChatDto): Promise<void>
+
+    addChatMembers(addChatMembersDto: AddChatMembersDto): Promise<IChat>
 }

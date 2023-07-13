@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify'
 import { IChatService } from './interfaces/IChat.service'
-import { FindChatsDto, FindMessagesByChatIdDto, CreateChatDto, DeleteChatDto } from './dtos'
+import { FindChatsDto, FindMessagesByChatIdDto, CreateChatDto, DeleteChatDto, AddChatMembersDto } from './dtos'
 import { ChatsWithLatestMessage, Messages } from './graphql.models'
 import { IChat } from './db.models/chat.model'
 import { TYPES } from '../../container/types'
@@ -77,6 +77,34 @@ export class ChatService implements IChatService {
             }
 
             await this._chatRepository.upsertUserDeletedChat(deleteChatDto)
+        } catch (err) {
+            throw err
+        }
+    }
+
+    public async addChatMembers(addChatMembersDto: AddChatMembersDto): Promise<IChat> {
+        try {
+            const chatMembers = await this._userRepository.findUsersByIds(addChatMembersDto.chatMemberIds)
+            if (chatMembers.length !== addChatMembersDto.chatMemberIds.length) {
+                return Promise.reject(new CustomValidationException('chatMembers', `Chat members should all exist`))
+            }
+
+            const chat = await this._chatRepository.addChatMembers(
+                addChatMembersDto.chatId,
+                chatMembers.map(chatMember => ({
+                    _id: chatMember._id,
+                    firstName: chatMember.firstName,
+                    lastName: chatMember.lastName,
+                    username: chatMember.username,
+                    photoUrl: chatMember.photoUrl,
+                })),
+            )
+
+            if (chat) {
+                return chat
+            } else {
+                return Promise.reject(new CustomValidationException('chatId', `Chat ${addChatMembersDto.chatId} does not exist`))
+            }
         } catch (err) {
             throw err
         }
