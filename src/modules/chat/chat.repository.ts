@@ -1,6 +1,6 @@
 import { injectable } from 'inversify'
 import { IChatRepository } from './interfaces/IChat.repository'
-import { FindChatsDto, FindMessagesByChatIdDto, DeleteChatDto } from './dtos'
+import { FindChatsDto, FindMessagesByChatIdDto, DeleteChatDto, LeaveChatDto } from './dtos'
 import { IChat } from './db.models/chat.model'
 import { IUser } from '../user/user.model'
 import { IUserDeletedChat } from './db.models/user-deleted-chat.model'
@@ -262,6 +262,14 @@ export class ChatRepository implements IChatRepository {
         return ChatModel.findOneAndUpdate(
             { _id: chatId },
             { $push: { chatMembers: { $each: chatMembers } } },
+            { new: true, lean: true },
+        )
+    }
+
+    public async leaveChat({ chatId, userId }: LeaveChatDto): Promise<IChat | null> {
+        return ChatModel.findOneAndUpdate(
+            { _id: chatId },
+            { $pull: { chatMembers: { _id: new mongoose.Types.ObjectId(userId) } } },
             { new: true, lean: true },
         )
     }

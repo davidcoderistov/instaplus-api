@@ -1,4 +1,4 @@
-import { FindChatsDto, FindMessagesByChatIdDto, DeleteChatDto } from '../dtos'
+import { FindChatsDto, FindMessagesByChatIdDto, DeleteChatDto, LeaveChatDto } from '../dtos'
 import { IChat } from '../db.models/chat.model'
 import { IUser } from '../../user/user.model'
 import { IUserDeletedChat } from '../db.models/user-deleted-chat.model'
@@ -21,4 +21,6 @@ export interface IChatRepository {
     upsertUserDeletedChat(deleteChatDto: DeleteChatDto): Promise<void>
 
     addChatMembers(chatId: string, chatMembers: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>[]): Promise<IChat | null>
+
+    leaveChat(leaveChatDto: LeaveChatDto): Promise<IChat | null>
 }
