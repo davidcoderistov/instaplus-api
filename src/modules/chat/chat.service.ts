@@ -22,7 +22,7 @@ export class ChatService implements IChatService {
     }
 
     public async findMessagesByChatId(userId: string, findMessagesByChatIdDto: FindMessagesByChatIdDto): Promise<Messages> {
-        return this._chatRepository.findMessagesByChatId(findMessagesByChatIdDto)
+        return this._chatRepository.findMessagesByChatId(userId, findMessagesByChatIdDto)
     }
 
     public async createChat(createChatDto: CreateChatDto, creatorId: string): Promise<IChat> {

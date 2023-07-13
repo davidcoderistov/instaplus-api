@@ -152,6 +152,49 @@ export class ChatRepository implements IChatRepository {
                 $match: { chatId },
             },
             {
+                $lookup: {
+                    from: UserDeletedChatModel.collection.name,
+                    let: {
+                        chatId: chatId,
+                        userId: userId,
+                    },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$userId', '$$userId'] },
+                                        { $eq: ['$chatId', '$$chatId'] },
+                                    ],
+                                },
+                            },
+                        },
+                    ],
+                    as: 'userDeletedChat',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$userDeletedChat',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $match: {
+                    $expr: {
+                        $cond: [
+                            {
+                                $eq: ['$userDeletedChat', null],
+                            },
+                            true,
+                            {
+                                $gt: ['$createdAt', '$userDeletedChat.updatedAt'],
+                            },
+                        ],
+                    },
+                },
+            },
+            {
                 $sort: { createdAt: -1 },
             },
             {
