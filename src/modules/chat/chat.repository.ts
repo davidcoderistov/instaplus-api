@@ -1,12 +1,13 @@
 import { injectable } from 'inversify'
 import { IChatRepository } from './interfaces/IChat.repository'
-import { FindChatsDto, FindMessagesByChatIdDto } from './dtos'
+import { FindChatsDto, FindMessagesByChatIdDto, DeleteChatDto } from './dtos'
 import { IChat } from './db.models/chat.model'
 import { IUser } from '../user/user.model'
 import { ChatsWithLatestMessage, Messages } from './graphql.models'
 import mongoose, { Types } from 'mongoose'
 import ChatModel from './db.models/chat.model'
 import MessageModel from './db.models/message.model'
+import UserDeletedChatModel from './db.models/user-deleted-chat.model'
 import { getPaginatedData } from '../../shared/utils/misc'
 
 
@@ -139,5 +140,16 @@ export class ChatRepository implements IChatRepository {
             chatMembers,
         })
         return await chat.save() as unknown as IChat
+    }
+
+    public async upsertUserDeletedChat(deleteChatDto: DeleteChatDto): Promise<void> {
+        try {
+            await UserDeletedChatModel.updateOne({
+                userId: deleteChatDto.userId,
+                chatId: deleteChatDto.chatId,
+            }, { $currentDate: { updatedAt: true } }, { upsert: true })
+        } catch (err) {
+            throw err
+        }
     }
 }
