@@ -19,9 +19,11 @@ export class GraphQLSchemaService implements IGraphQLSchemaService {
             container,
             dateScalarMode: 'timestamp',
             validateFn: async (dtoClass) => {
-                const error = await validate(dtoClass)
-                if (error) {
-                    throw new InvalidArgsException(error)
+                if (typeof dtoClass === 'object') {
+                    const error = await validate(dtoClass)
+                    if (error) {
+                        throw new InvalidArgsException(error)
+                    }
                 }
             },
         })
