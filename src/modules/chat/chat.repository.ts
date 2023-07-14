@@ -1,6 +1,6 @@
 import { injectable } from 'inversify'
 import { IChatRepository } from './interfaces/IChat.repository'
-import { FindChatsDto, FindMessagesByChatIdDto, DeleteChatDto, LeaveChatDto } from './dtos'
+import { FindChatsDto, FindMessagesByChatIdDto } from './dtos'
 import { IChat } from './db.models/chat.model'
 import { IUser } from '../user/user.model'
 import { IUserDeletedChat } from './db.models/user-deleted-chat.model'
@@ -247,15 +247,11 @@ export class ChatRepository implements IChatRepository {
         return await chat.save() as unknown as IChat
     }
 
-    public async upsertUserDeletedChat(deleteChatDto: DeleteChatDto): Promise<void> {
-        try {
-            await UserDeletedChatModel.updateOne({
-                userId: deleteChatDto.userId,
-                chatId: deleteChatDto.chatId,
-            }, { $currentDate: { updatedAt: true } }, { upsert: true })
-        } catch (err) {
-            throw err
-        }
+    public async upsertUserDeletedChat(chatId: string, userId: string): Promise<IChat> {
+        return UserDeletedChatModel.findOneAndUpdate({
+            userId: userId,
+            chatId: chatId,
+        }, { $currentDate: { updatedAt: true } }, { upsert: true, new: true, lean: true })
     }
 
     public async addChatMembers(chatId: string, chatMembers: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>[]): Promise<IChat | null> {
@@ -266,7 +262,7 @@ export class ChatRepository implements IChatRepository {
         )
     }
 
-    public async leaveChat({ chatId, userId }: LeaveChatDto): Promise<IChat | null> {
+    public async leaveChat(chatId: string, userId: string): Promise<IChat | null> {
         return ChatModel.findOneAndUpdate(
             { _id: chatId },
             { $pull: { chatMembers: { _id: new mongoose.Types.ObjectId(userId) } } },

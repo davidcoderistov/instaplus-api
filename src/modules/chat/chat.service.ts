@@ -4,9 +4,7 @@ import {
     FindChatsDto,
     FindMessagesByChatIdDto,
     CreateChatDto,
-    DeleteChatDto,
     AddChatMembersDto,
-    LeaveChatDto,
 } from './dtos'
 import { ChatsWithLatestMessage, Messages } from './graphql.models'
 import { IChat } from './db.models/chat.model'
@@ -71,19 +69,19 @@ export class ChatService implements IChatService {
         }
     }
 
-    public async deleteChat(deleteChatDto: DeleteChatDto): Promise<void> {
+    public async deleteChat(chatId: string, userId: string): Promise<IChat> {
         try {
-            const user = await this._userRepository.findUserById(deleteChatDto.userId)
+            const user = await this._userRepository.findUserById(userId)
             if (!user) {
-                return Promise.reject(new CustomValidationException('userId', `User ${deleteChatDto.userId} does not exist`))
+                return Promise.reject(new CustomValidationException('userId', `User ${userId} does not exist`))
             }
 
-            const chat = await this._chatRepository.findChatById(deleteChatDto.chatId)
+            const chat = await this._chatRepository.findChatById(chatId)
             if (!chat) {
-                return Promise.reject(new CustomValidationException('chatId', `Chat ${deleteChatDto.chatId} does not exist`))
+                return Promise.reject(new CustomValidationException('chatId', `Chat ${chatId} does not exist`))
             }
 
-            await this._chatRepository.upsertUserDeletedChat(deleteChatDto)
+            return this._chatRepository.upsertUserDeletedChat(chatId, userId)
         } catch (err) {
             throw err
         }
@@ -117,13 +115,13 @@ export class ChatService implements IChatService {
         }
     }
 
-    public async leaveChat(leaveChatDto: LeaveChatDto): Promise<IChat | null> {
+    public async leaveChat(chatId: string, userId: string): Promise<IChat | null> {
         try {
-            const chat = await this._chatRepository.leaveChat(leaveChatDto)
+            const chat = await this._chatRepository.leaveChat(chatId, userId)
             if (chat) {
                 return chat
             } else {
-                return Promise.reject(new CustomValidationException('chatId', `Chat ${leaveChatDto.chatId} does not exist`))
+                return Promise.reject(new CustomValidationException('chatId', `Chat ${chatId} does not exist`))
             }
         } catch (err) {
             throw err
