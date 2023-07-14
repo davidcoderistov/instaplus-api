@@ -82,7 +82,7 @@ export class ChatService implements IChatService {
             }
 
             await this._chatRepository.upsertUserDeletedChat(chatId, userId)
-            return this._chatRepository.findChatById(chatId)
+            return await this._chatRepository.findChatById(chatId) as IChat
         } catch (err) {
             throw err
         }
