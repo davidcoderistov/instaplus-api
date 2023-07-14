@@ -81,7 +81,8 @@ export class ChatService implements IChatService {
                 return Promise.reject(new CustomValidationException('chatId', `Chat ${chatId} does not exist`))
             }
 
-            return this._chatRepository.upsertUserDeletedChat(chatId, userId)
+            await this._chatRepository.upsertUserDeletedChat(chatId, userId)
+            return this._chatRepository.findChatById(chatId)
         } catch (err) {
             throw err
         }

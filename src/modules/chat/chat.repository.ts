@@ -247,7 +247,7 @@ export class ChatRepository implements IChatRepository {
         return await chat.save() as unknown as IChat
     }
 
-    public async upsertUserDeletedChat(chatId: string, userId: string): Promise<IChat> {
+    public async upsertUserDeletedChat(chatId: string, userId: string): Promise<IUserDeletedChat> {
         return UserDeletedChatModel.findOneAndUpdate({
             userId: userId,
             chatId: chatId,
