@@ -47,7 +47,7 @@ export class UserResolver {
         return user
     }
 
-    @Query(() => User)
+    @Query(() => [User])
     public async findUsersBySearchQuery(@Args() findUsersBySearchQuery: FindUsersBySearchQueryDto, @Ctx() { userId }: Context): Promise<User[]> {
         return this._userService.findUsersBySearchQuery(findUsersBySearchQuery, userId)
     }
