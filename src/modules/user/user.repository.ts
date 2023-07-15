@@ -1,8 +1,7 @@
 import { injectable } from 'inversify'
 import { IUserRepository } from './interfaces/IUser.repository'
-import UserModel from './user.model'
-import { SignUpDto, FindUsersBySearchQueryDto } from './dtos'
-import { IUser } from './user.model'
+import UserModel, { IUser } from './user.model'
+import { FindUsersBySearchQueryDto, SignUpDto } from './dtos'
 import { Types } from 'mongoose'
 
 
@@ -25,7 +24,17 @@ export class UserRepository implements IUserRepository {
     }
 
     public async findUsersByIds(ids: string[]): Promise<IUser[]> {
-        return UserModel.find({ _id: { $in: ids.map(id => new Types.ObjectId(id)) } }).lean()
+        try {
+            const userIds = ids.map(id => new Types.ObjectId(id))
+            const users: IUser[] = await UserModel.find({ _id: { $in: userIds } }).lean()
+            const usersMap: { [key: string]: IUser } = users.reduce((usersMap, user) => ({
+                ...usersMap,
+                [user._id.toString()]: user,
+            }), {})
+            return ids.filter(id => usersMap[id]).map(id => usersMap[id])
+        } catch (err) {
+            throw err
+        }
     }
 
     public async findUserByUsername(username: string): Promise<IUser | null> {
