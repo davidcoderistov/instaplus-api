@@ -3,7 +3,7 @@ import { Args, Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 import { TYPES } from '../../container/types'
 import { IChatService } from './interfaces/IChat.service'
 import { Context } from '../../shared/types'
-import { CreateChatDto, FindChatsDto, FindMessagesByChatIdDto } from './dtos'
+import { CreateChatDto, FindChatsDto, FindMessagesByChatIdDto, AddChatMembersDto } from './dtos'
 import { Chat, ChatsWithLatestMessage, Messages } from './graphql.models'
 
 
@@ -28,6 +28,11 @@ export class ChatResolver {
     @Mutation(() => Chat)
     public async createChat(@Args() createChatDto: CreateChatDto, @Ctx() { userId }: Context): Promise<Chat> {
         return await this._chatService.createChat(createChatDto, userId) as unknown as Chat
+    }
+
+    @Mutation(() => Chat)
+    public async addChatMembers(@Args() addChatMembersDto: AddChatMembersDto): Promise<Chat> {
+        return await this._chatService.addChatMembers(addChatMembersDto) as unknown as Chat
     }
 
     @Mutation(() => Chat)
