@@ -223,7 +223,7 @@ export class ChatRepository implements IChatRepository {
                 $limit: limit + 1,
             },
         ])
-        return getCursorPaginatedData(messages) as unknown as Messages
+        return getCursorPaginatedData(messages, limit) as unknown as Messages
     }
 
     public async findChatByChatMemberIds(chatMemberIds: string[]): Promise<IChat | null> {
