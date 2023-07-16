@@ -18,3 +18,15 @@ export function getPaginatedData(aggregateData: AggregateData[]): PaginatedRespo
         data: aggregateData[0].data,
     }
 }
+
+interface CursorPaginatedResponse {
+    hasNext: boolean
+    data: any[]
+}
+
+export function getCursorPaginatedData(data: any[], limit: number): CursorPaginatedResponse {
+    return {
+        hasNext: data.length > limit,
+        data: data.slice(0, limit),
+    }
+}
