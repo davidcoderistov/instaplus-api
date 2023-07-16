@@ -9,7 +9,7 @@ import mongoose, { Types } from 'mongoose'
 import ChatModel from './db.models/chat.model'
 import MessageModel from './db.models/message.model'
 import UserDeletedChatModel from './db.models/user-deleted-chat.model'
-import { getPaginatedData, getCursorPaginatedData } from '../../shared/utils/misc'
+import { getCursorPaginatedData } from '../../shared/utils/misc'
 
 
 @injectable()
@@ -150,7 +150,8 @@ export class ChatRepository implements IChatRepository {
 
     public async findMessagesByChatId(userId: string, {
         chatId,
-        offset,
+        lastCreatedAt,
+        lastId,
         limit,
     }: FindMessagesByChatIdDto): Promise<Messages> {
         const messages = await MessageModel.aggregate([
@@ -201,25 +202,28 @@ export class ChatRepository implements IChatRepository {
                 },
             },
             {
-                $sort: { createdAt: -1 },
+                $sort: { createdAt: -1, _id: -1 },
             },
-            {
-                $facet: {
-                    metadata: [{
-                        $count: 'count',
-                    }],
-                    data: [
-                        {
-                            $skip: offset,
-                        },
-                        {
-                            $limit: limit,
-                        },
-                    ],
+            ...(lastId && lastCreatedAt ? [
+                {
+                    $match: {
+                        $or: [
+                            { createdAt: { $lt: lastCreatedAt } },
+                            {
+                                $and: [
+                                    { createdAt: lastCreatedAt },
+                                    { _id: { $lt: new mongoose.Types.ObjectId(lastId) } },
+                                ],
+                            },
+                        ],
+                    },
                 },
+            ] : []),
+            {
+                $limit: limit + 1,
             },
         ])
-        return getPaginatedData(messages) as unknown as Messages
+        return getCursorPaginatedData(messages) as unknown as Messages
     }
 
     public async findChatByChatMemberIds(chatMemberIds: string[]): Promise<IChat | null> {
