@@ -18,10 +18,7 @@ const MessageSchema = new Schema({
                 type: Schema.Types.String,
                 required: true,
             },
-            photoUrl: {
-                type: Schema.Types.String,
-                required: true,
-            },
+            photoUrl: Schema.Types.String,
         },
         required: true,
     },
@@ -69,10 +66,7 @@ const MessageSchema = new Schema({
                         type: Schema.Types.String,
                         required: true,
                     },
-                    photoUrl: {
-                        type: Schema.Types.String,
-                        required: true,
-                    },
+                    photoUrl: Schema.Types.String,
                 },
                 required: true,
             },

@@ -21,10 +21,7 @@ const ChatSchema = new Schema({
                 type: Schema.Types.String,
                 required: true,
             },
-            photoUrl: {
-                type: Schema.Types.String,
-                required: true,
-            },
+            photoUrl: Schema.Types.String,
         },
         required: true,
     },
@@ -47,10 +44,7 @@ const ChatSchema = new Schema({
                     type: Schema.Types.String,
                     required: true,
                 },
-                photoUrl: {
-                    type: Schema.Types.String,
-                    required: true,
-                },
+                photoUrl: Schema.Types.String,
             },
         ],
         required: true,
