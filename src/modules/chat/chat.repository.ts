@@ -9,7 +9,7 @@ import mongoose, { Types } from 'mongoose'
 import ChatModel from './db.models/chat.model'
 import MessageModel from './db.models/message.model'
 import UserDeletedChatModel from './db.models/user-deleted-chat.model'
-import { getPaginatedData } from '../../shared/utils/misc'
+import { getPaginatedData, getCursorPaginatedData } from '../../shared/utils/misc'
 
 
 @injectable()
@@ -94,7 +94,7 @@ export class ChatRepository implements IChatRepository {
                 },
             },
             {
-                $sort: { 'messages.createdAt': -1 },
+                $sort: { 'messages.createdAt': -1, 'messages._id': -1 },
             },
             {
                 $group: {
@@ -124,22 +124,28 @@ export class ChatRepository implements IChatRepository {
                 },
             },
             {
-                $sort: { 'message.createdAt': -1 },
+                $sort: { 'message.createdAt': -1, 'message._id': -1 },
             },
-            {
-                $facet: {
-                    metadata: [{
-                        $count: 'count',
-                    }],
-                    data: [{
-                        $skip: findChatsDto.offset,
-                    }, {
-                        $limit: findChatsDto.limit,
-                    }],
+            ...(findChatsDto.lastId && findChatsDto.lastCreatedAt ? [
+                {
+                    $match: {
+                        $or: [
+                            { 'message.createdAt': { $lt: findChatsDto.lastCreatedAt } },
+                            {
+                                $and: [
+                                    { 'message.createdAt': findChatsDto.lastCreatedAt },
+                                    { 'message._id': { $lt: new mongoose.Types.ObjectId(findChatsDto.lastId) } },
+                                ],
+                            },
+                        ],
+                    },
                 },
+            ] : []),
+            {
+                $limit: findChatsDto.limit + 1,
             },
         ])
-        return getPaginatedData(chats) as unknown as ChatsWithLatestMessage
+        return getCursorPaginatedData(chats, findChatsDto.limit) as unknown as ChatsWithLatestMessage
     }
 
     public async findMessagesByChatId(userId: string, {

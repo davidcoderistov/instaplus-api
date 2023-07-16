@@ -1,7 +1,7 @@
 import { ArgsType } from 'type-graphql'
-import { PaginationArgs } from '../../../shared/graphql/pagination-args'
+import { CursorPaginationArgs } from '../../../shared/graphql/cursor-pagination-args'
 
 
 @ArgsType()
-export class FindChatsDto extends PaginationArgs {
+export class FindChatsDto extends CursorPaginationArgs {
 }
