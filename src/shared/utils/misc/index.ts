@@ -7,12 +7,12 @@ interface AggregateData {
     data: any[]
 }
 
-interface PaginatedResponse {
+interface OffsetPaginatedResponse {
     count: number
     data: any[]
 }
 
-export function getPaginatedData(aggregateData: AggregateData[]): PaginatedResponse {
+export function getOffsetPaginatedData(aggregateData: AggregateData[]): OffsetPaginatedResponse {
     return {
         count: aggregateData[0].metadata.length > 0 ? aggregateData[0].metadata[0].count : 0,
         data: aggregateData[0].data,

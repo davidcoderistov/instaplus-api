@@ -3,7 +3,7 @@ import { Min } from 'class-validator'
 
 
 @ArgsType()
-export class PaginationArgs {
+export class OffsetPaginationArgs {
 
     @Field(() => Int)
     @Min(0)

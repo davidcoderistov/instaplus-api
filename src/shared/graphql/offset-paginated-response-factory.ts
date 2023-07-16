@@ -1,7 +1,7 @@
 import { ObjectType, Field, Int, ClassType } from 'type-graphql'
 
 
-export function PaginatedResponseFactory<T>(TClass: ClassType<T>) {
+export function OffsetPaginatedResponseFactory<T>(TClass: ClassType<T>) {
 
     @ObjectType()
     class PaginatedResponse {
