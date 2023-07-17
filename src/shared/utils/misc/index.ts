@@ -19,14 +19,19 @@ export function getOffsetPaginatedData(aggregateData: AggregateData[]): OffsetPa
     }
 }
 
+interface NextCursor {
+    _id: string
+    createdAt: Date
+}
+
 interface CursorPaginatedResponse {
-    hasNext: boolean
+    nextCursor: NextCursor | null
     data: any[]
 }
 
-export function getCursorPaginatedData(data: any[], limit: number): CursorPaginatedResponse {
+export function getCursorPaginatedData(aggregateData: { data: any[], nextCursor: NextCursor[] }[]): CursorPaginatedResponse {
     return {
-        hasNext: data.length > limit,
-        data: data.slice(0, limit),
+        nextCursor: aggregateData[0].nextCursor.length > 0 ? aggregateData[0].nextCursor[0] : null,
+        data: aggregateData[0].data,
     }
 }
