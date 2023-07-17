@@ -9,6 +9,6 @@ export class ChatWithLatestMessage {
     @Field(() => Chat)
     chat!: Chat
 
-    @Field(() => Message)
-    message!: Message
+    @Field(() => Message, { nullable: true })
+    message?: Message
 }
