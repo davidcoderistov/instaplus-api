@@ -32,10 +32,12 @@ export class ChatService implements IChatService {
 
     public async createChat(createChatDto: CreateChatDto, creatorId: string): Promise<IChat> {
         try {
-            const chat = await this._chatRepository.findChatByChatMemberIds(createChatDto.chatMemberIds)
+            if (createChatDto.chatMemberIds.length <= 2) {
+                const chat = await this._chatRepository.findChatByChatMemberIds(createChatDto.chatMemberIds)
 
-            if (chat) {
-                return chat
+                if (chat) {
+                    return chat
+                }
             }
 
             const creator = await this._userRepository.findUserById(creatorId)
