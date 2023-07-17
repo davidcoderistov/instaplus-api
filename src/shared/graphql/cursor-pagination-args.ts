@@ -1,15 +1,22 @@
-import { ArgsType, Field, Int } from 'type-graphql'
+import { ArgsType, InputType, Field, Int } from 'type-graphql'
 import { Min } from 'class-validator'
 
+
+@InputType()
+class Cursor {
+
+    @Field()
+    _id!: string
+
+    @Field()
+    createdAt!: Date
+}
 
 @ArgsType()
 export class CursorPaginationArgs {
 
-    @Field(() => Date, { nullable: true })
-    lastCreatedAt?: Date
-
-    @Field({ nullable: true })
-    lastId?: string
+    @Field(() => Cursor, { nullable: true })
+    cursor?: Cursor
 
     @Field(() => Int)
     @Min(0)
