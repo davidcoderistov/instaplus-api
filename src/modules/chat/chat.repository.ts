@@ -24,7 +24,10 @@ export class ChatRepository implements IChatRepository {
         }
     }
 
-    public async findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsWithLatestMessage> {
+    public async findChatsForUser(userId: string, {
+        cursor,
+        limit,
+    }: FindChatsDto): Promise<ChatsWithLatestMessage> {
         const chats = await ChatModel.aggregate([
             {
                 $match: {
@@ -126,15 +129,20 @@ export class ChatRepository implements IChatRepository {
             {
                 $sort: { 'message.createdAt': -1, 'message._id': -1 },
             },
-            ...(findChatsDto.lastId && findChatsDto.lastCreatedAt ? [
+            ...(cursor ? [
                 {
                     $match: {
                         $or: [
-                            { 'message.createdAt': { $lt: findChatsDto.lastCreatedAt } },
+                            { 'message.createdAt': { $lt: cursor.createdAt } },
                             {
                                 $and: [
-                                    { 'message.createdAt': findChatsDto.lastCreatedAt },
-                                    { 'message._id': { $lt: new mongoose.Types.ObjectId(findChatsDto.lastId) } },
+                                    { 'message.createdAt': cursor.createdAt },
+                                    {
+                                        $or: [
+                                            { 'message._id': { $lt: new mongoose.Types.ObjectId(cursor._id) } },
+                                            { 'message._id': new mongoose.Types.ObjectId(cursor._id) },
+                                        ],
+                                    },
                                 ],
                             },
                         ],
@@ -142,16 +150,31 @@ export class ChatRepository implements IChatRepository {
                 },
             ] : []),
             {
-                $limit: findChatsDto.limit + 1,
+                $facet: {
+                    data: [
+                        { $limit: limit },
+                    ],
+                    nextCursor: [
+                        { $skip: limit },
+                        {
+                            $limit: 1,
+                        },
+                        {
+                            $project: {
+                                _id: '$message._id',
+                                createdAt: '$message.createdAt',
+                            },
+                        },
+                    ],
+                },
             },
         ])
-        return getCursorPaginatedData(chats, findChatsDto.limit) as unknown as ChatsWithLatestMessage
+        return getCursorPaginatedData(chats) as unknown as ChatsWithLatestMessage
     }
 
     public async findMessagesByChatId(userId: string, {
         chatId,
-        lastCreatedAt,
-        lastId,
+        cursor,
         limit,
     }: FindMessagesByChatIdDto): Promise<Messages> {
         const messages = await MessageModel.aggregate([
@@ -204,15 +227,20 @@ export class ChatRepository implements IChatRepository {
             {
                 $sort: { createdAt: -1, _id: -1 },
             },
-            ...(lastId && lastCreatedAt ? [
+            ...(cursor ? [
                 {
                     $match: {
                         $or: [
-                            { createdAt: { $lt: lastCreatedAt } },
+                            { createdAt: { $lt: cursor.createdAt } },
                             {
                                 $and: [
-                                    { createdAt: lastCreatedAt },
-                                    { _id: { $lt: new mongoose.Types.ObjectId(lastId) } },
+                                    { createdAt: cursor.createdAt },
+                                    {
+                                        $or: [
+                                            { _id: { $lt: new mongoose.Types.ObjectId(cursor._id) } },
+                                            { _id: new mongoose.Types.ObjectId(cursor._id) },
+                                        ],
+                                    },
                                 ],
                             },
                         ],
@@ -220,10 +248,26 @@ export class ChatRepository implements IChatRepository {
                 },
             ] : []),
             {
-                $limit: limit + 1,
+                $facet: {
+                    data: [
+                        { $limit: limit },
+                    ],
+                    nextCursor: [
+                        { $skip: limit },
+                        {
+                            $limit: 1,
+                        },
+                        {
+                            $project: {
+                                _id: 1,
+                                createdAt: 1,
+                            },
+                        },
+                    ],
+                },
             },
         ])
-        return getCursorPaginatedData(messages, limit) as unknown as Messages
+        return getCursorPaginatedData(messages) as unknown as Messages
     }
 
     public async findChatByChatMemberIds(chatMemberIds: string[]): Promise<IChat | null> {
