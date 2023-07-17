@@ -4,7 +4,7 @@ import { FindChatsDto, FindMessagesByChatIdDto } from './dtos'
 import { IChat } from './db.models/chat.model'
 import { IUser } from '../user/user.model'
 import { IUserDeletedChat } from './db.models/user-deleted-chat.model'
-import { ChatsWithLatestMessage, Messages } from './graphql.models'
+import { ChatsWithLatestMessage, ChatWithLatestMessage, Chat, Messages, Message } from './graphql.models'
 import mongoose, { Types } from 'mongoose'
 import ChatModel from './db.models/chat.model'
 import MessageModel from './db.models/message.model'
@@ -270,8 +270,8 @@ export class ChatRepository implements IChatRepository {
         return getCursorPaginatedData(messages) as unknown as Messages
     }
 
-    public async findChatByChatMemberIds(chatMemberIds: string[]): Promise<IChat | null> {
-        const chats: IChat[] = await ChatModel.find({
+    public async findChatByChatMemberIds(chatMemberIds: string[]): Promise<Chat | null> {
+        const chats: Chat[] = await ChatModel.find({
             $and: [
                 {
                     'chatMembers._id': {
@@ -288,17 +288,53 @@ export class ChatRepository implements IChatRepository {
         return chats.length > 0 ? chats[0] : null
     }
 
+    public async findChatForUser(userId: string, chatMemberIds: string[]): Promise<ChatWithLatestMessage | null> {
+        const chat = await this.findChatByChatMemberIds(chatMemberIds)
+        if (chat) {
+            const chatId = chat._id.toString()
+            const userDeletedChat = await this.findUserDeletedChat(userId, chatId)
+            const messages = await MessageModel.aggregate([
+                {
+                    $match: {
+                        chatId: chatId,
+                    },
+                },
+                ...(userDeletedChat ? [
+                    {
+                        $match: {
+                            createdAt: { $gt: userDeletedChat.updatedAt },
+                        },
+                    },
+                ] : []),
+                {
+                    $sort: {
+                        createdAt: -1,
+                    },
+                },
+                {
+                    $limit: 1,
+                },
+            ])
+            const message = messages[0] ? messages[0] as unknown as Message : null
+            return {
+                chat,
+                ...message && { message },
+            }
+        }
+        return null
+    }
+
     public async findUserDeletedChat(userId: string, chatId: string): Promise<IUserDeletedChat | null> {
         const userDeletedChat = await UserDeletedChatModel.findOne({ userId, chatId })
         return userDeletedChat ? userDeletedChat.toObject() : null
     }
 
-    public async createChat(creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>, chatMembers: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>[]): Promise<IChat> {
+    public async createChat(creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>, chatMembers: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>[]): Promise<Chat> {
         const chat = new ChatModel({
             creator,
             chatMembers,
         })
-        return await chat.save() as unknown as IChat
+        return await chat.save() as unknown as Chat
     }
 
     public async upsertUserDeletedChat(chatId: string, userId: string): Promise<IUserDeletedChat> {
