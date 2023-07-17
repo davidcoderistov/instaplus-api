@@ -4,7 +4,7 @@ import { TYPES } from '../../container/types'
 import { IChatService } from './interfaces/IChat.service'
 import { Context } from '../../shared/types'
 import { CreateChatDto, FindChatsDto, FindMessagesByChatIdDto, AddChatMembersDto } from './dtos'
-import { Chat, ChatsWithLatestMessage, Messages } from './graphql.models'
+import { Chat, ChatsWithLatestMessage, ChatWithLatestMessage, Messages } from './graphql.models'
 
 
 @injectable()
@@ -25,9 +25,9 @@ export class ChatResolver {
         return this._chatService.findMessagesByChatId(userId, findMessagesByChatIdDto)
     }
 
-    @Mutation(() => Chat)
-    public async createChat(@Args() createChatDto: CreateChatDto, @Ctx() { userId }: Context): Promise<Chat> {
-        return await this._chatService.createChat(createChatDto, userId) as unknown as Chat
+    @Mutation(() => ChatWithLatestMessage)
+    public async createChat(@Args() createChatDto: CreateChatDto, @Ctx() { userId }: Context): Promise<ChatWithLatestMessage> {
+        return await this._chatService.createChat(createChatDto, userId) as unknown as ChatWithLatestMessage
     }
 
     @Mutation(() => Chat)
