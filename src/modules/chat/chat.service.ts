@@ -6,7 +6,7 @@ import {
     CreateChatDto,
     AddChatMembersDto,
 } from './dtos'
-import { ChatsWithLatestMessage, Messages } from './graphql.models'
+import { ChatsWithLatestMessage, ChatWithLatestMessage, Messages } from './graphql.models'
 import { IChat } from './db.models/chat.model'
 import { TYPES } from '../../container/types'
 import { IChatRepository } from './interfaces/IChat.repository'
@@ -30,10 +30,10 @@ export class ChatService implements IChatService {
         return this._chatRepository.findMessagesByChatId(userId, findMessagesByChatIdDto)
     }
 
-    public async createChat(createChatDto: CreateChatDto, creatorId: string): Promise<IChat> {
+    public async createChat(createChatDto: CreateChatDto, creatorId: string): Promise<ChatWithLatestMessage> {
         try {
             if (createChatDto.chatMemberIds.length <= 2) {
-                const chat = await this._chatRepository.findChatByChatMemberIds(createChatDto.chatMemberIds)
+                const chat = await this._chatRepository.findChatForUser(creatorId, createChatDto.chatMemberIds)
 
                 if (chat) {
                     return chat
@@ -50,7 +50,7 @@ export class ChatService implements IChatService {
                 return Promise.reject(new CustomValidationException('chatMembers', `Chat members should all exist`))
             }
 
-            return this._chatRepository.createChat(
+            const chat = await this._chatRepository.createChat(
                 {
                     _id: creator._id,
                     firstName: creator.firstName,
@@ -66,6 +66,9 @@ export class ChatService implements IChatService {
                     photoUrl: chatMember.photoUrl,
                 })),
             )
+            return {
+                chat,
+            }
         } catch (err) {
             throw err
         }
