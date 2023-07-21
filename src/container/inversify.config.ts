@@ -10,6 +10,10 @@ import { IGraphQLSchemaService } from '../core/graphql.schema/IGraphQLSchema.ser
 import { GraphQLSchemaService } from '../core/graphql.schema/graphql.schema.service'
 import { IDatabaseService } from '../core/database/IDatabase.service'
 import { DatabaseService } from '../core/database/database.service'
+import { ICloudinaryService } from '../core/cloudinary/ICloudinary.service'
+import { CloudinaryService } from '../core/cloudinary/cloudinary.service'
+import { IFileRepository } from '../modules/file/IFile.repository'
+import { FileRepository } from '../modules/file/file.repository'
 import { IChatRepository } from '../modules/chat/interfaces/IChat.repository'
 import { ChatRepository } from '../modules/chat/chat.repository'
 import { IChatService } from '../modules/chat/interfaces/IChat.service'
@@ -29,6 +33,10 @@ export const bindings = new ContainerModule(bind => {
     bind<IGraphQLSchemaService>(TYPES.IGraphQLSchemaService).to(GraphQLSchemaService)
 
     bind<IDatabaseService>(TYPES.IDatabaseService).to(DatabaseService)
+
+    bind<ICloudinaryService>(TYPES.ICloudinaryService).to(CloudinaryService)
+
+    bind<IFileRepository>(TYPES.IFileRepository).to(FileRepository)
 
     bind<IChatRepository>(TYPES.IChatRepository).to(ChatRepository)
     bind<IChatService>(TYPES.IChatService).to(ChatService)

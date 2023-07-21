@@ -4,6 +4,8 @@ export const TYPES = {
     IApolloServerService: Symbol.for('IApolloServerService'),
     IGraphQLSchemaService: Symbol.for('IGraphQLSchemaService'),
     IDatabaseService: Symbol.for('IDatabaseService'),
+    ICloudinaryService: Symbol.for('ICloudinaryService'),
+    IFileRepository: Symbol.for('IFileRepository'),
     IChatRepository: Symbol.for('IChatRepository'),
     IChatService: Symbol.for('IChatService'),
     ChatResolver: Symbol.for('ChatResolver'),
