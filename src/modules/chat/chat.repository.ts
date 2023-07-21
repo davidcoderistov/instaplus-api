@@ -121,7 +121,6 @@ export class ChatRepository implements IChatRepository {
                         creator: '$message.creator',
                         text: '$message.text',
                         photoUrl: '$message.photoUrl',
-                        videoUrl: '$message.videoUrl',
                         createdAt: '$message.createdAt',
                     },
                 },

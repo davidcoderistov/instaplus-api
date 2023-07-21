@@ -18,9 +18,6 @@ export class Message {
     @Field({ nullable: true })
     photoUrl?: string
 
-    @Field({ nullable: true })
-    videoUrl?: string
-
     @Field()
     createdAt!: Date
 }
