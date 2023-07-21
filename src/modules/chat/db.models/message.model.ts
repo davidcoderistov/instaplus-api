@@ -22,23 +22,35 @@ const MessageSchema = new Schema({
         },
         required: true,
     },
-    text: Schema.Types.String,
-    photoUrl: Schema.Types.String,
-    photoOrientation: Schema.Types.String,
+    text: {
+        type: Schema.Types.String,
+        default: null,
+    },
+    photoUrl: {
+        type: Schema.Types.String,
+        default: null,
+    },
+    photoOrientation: {
+        type: Schema.Types.String,
+        default: null,
+    },
     seenByUserIds: [{
         type: Schema.Types.String,
         ref: 'User',
     }],
     reply: {
-        _id: Schema.Types.ObjectId,
-        creator: {
+        type: {
             _id: Schema.Types.ObjectId,
-            username: Schema.Types.String,
+            creator: {
+                _id: Schema.Types.ObjectId,
+                username: Schema.Types.String,
+                photoUrl: Schema.Types.String,
+            },
+            text: Schema.Types.String,
             photoUrl: Schema.Types.String,
+            photoOrientation: Schema.Types.String,
         },
-        text: Schema.Types.String,
-        photoUrl: Schema.Types.String,
-        photoOrientation: Schema.Types.String,
+        default: null,
     },
     reactions: [
         {
