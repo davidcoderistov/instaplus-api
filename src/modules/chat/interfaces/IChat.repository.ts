@@ -28,4 +28,12 @@ export interface IChatRepository {
     leaveChat(chatId: string, userId: string): Promise<IChat | null>
 
     findMessageById(messageId: string): Promise<IMessage | null>
+
+    createMessage(
+        chatId: string,
+        creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>,
+        text?: string | null,
+        photoUrl?: string | null,
+        photoOrientation?: 'landscape' | 'portrait' | null,
+        reply?: Pick<IMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation'> | null): Promise<IMessage>
 }

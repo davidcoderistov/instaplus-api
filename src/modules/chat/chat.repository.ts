@@ -367,4 +367,22 @@ export class ChatRepository implements IChatRepository {
             throw err
         }
     }
+
+    public async createMessage(
+        chatId: string,
+        creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>,
+        text?: string | null,
+        photoUrl?: string | null,
+        photoOrientation?: 'landscape' | 'portrait' | null,
+        reply?: Pick<IMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation'> | null): Promise<IMessage> {
+        const message = new MessageModel({
+            chatId,
+            creator,
+            text,
+            photoUrl,
+            photoOrientation,
+            reply,
+        })
+        return await message.save() as unknown as IMessage
+    }
 }
