@@ -3,8 +3,8 @@ import { Args, Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 import { TYPES } from '../../container/types'
 import { IChatService } from './interfaces/IChat.service'
 import { Context } from '../../shared/types'
-import { CreateChatDto, FindChatsDto, FindMessagesByChatIdDto, AddChatMembersDto } from './dtos'
-import { Chat, ChatsWithLatestMessage, ChatWithLatestMessage, Messages } from './graphql.models'
+import { CreateChatDto, FindChatsDto, FindMessagesByChatIdDto, AddChatMembersDto, CreateMessageDto } from './dtos'
+import { Chat, ChatsWithLatestMessage, ChatWithLatestMessage, Message, Messages } from './graphql.models'
 
 
 @injectable()
@@ -43,5 +43,10 @@ export class ChatResolver {
     @Mutation(() => Chat)
     public async leaveChat(@Arg('chatId') chatId: string, @Ctx() { userId }: Context): Promise<Chat> {
         return await this._chatService.leaveChat(chatId, userId) as unknown as Chat
+    }
+
+    @Mutation(() => Message)
+    public async sendMessage(@Args() createMessageDto: CreateMessageDto, @Ctx() { userId }: Context): Promise<Message> {
+        return await this._chatService.createMessage(createMessageDto, userId) as unknown as Message
     }
 }
