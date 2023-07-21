@@ -9,6 +9,9 @@ export class Message {
     @Field(() => String)
     _id!: Types.ObjectId
 
+    @Field()
+    chatId!: string
+
     @Field(() => User)
     creator!: User
 
@@ -17,6 +20,15 @@ export class Message {
 
     @Field({ nullable: true })
     photoUrl?: string
+
+    @Field({ nullable: true })
+    photoOrientation?: string
+
+    @Field(() => [String], { nullable: true })
+    seenByUserIds?: string[]
+
+    @Field(() => Message, { nullable: true })
+    reply?: Message
 
     @Field()
     createdAt!: Date
