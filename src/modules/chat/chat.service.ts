@@ -5,12 +5,15 @@ import {
     FindMessagesByChatIdDto,
     CreateChatDto,
     AddChatMembersDto,
+    CreateMessageDto,
 } from './dtos'
 import { ChatsWithLatestMessage, ChatWithLatestMessage, Messages } from './graphql.models'
 import { IChat } from './db.models/chat.model'
+import { IMessage } from './db.models/message.model'
 import { TYPES } from '../../container/types'
 import { IChatRepository } from './interfaces/IChat.repository'
 import { IUserRepository } from '../user/interfaces/IUser.repository'
+import { IFileRepository } from '../file/IFile.repository'
 import { CustomValidationException } from '../../shared/exceptions'
 
 
@@ -19,7 +22,8 @@ export class ChatService implements IChatService {
 
     constructor(
         @inject(TYPES.IChatRepository) private readonly _chatRepository: IChatRepository,
-        @inject(TYPES.IUserRepository) private readonly _userRepository: IUserRepository) {
+        @inject(TYPES.IUserRepository) private readonly _userRepository: IUserRepository,
+        @inject(TYPES.IFileRepository) private readonly _fileRepository: IFileRepository) {
     }
 
     public async findChatsForUser(userId: string, findChatsDto: FindChatsDto): Promise<ChatsWithLatestMessage> {
@@ -132,5 +136,55 @@ export class ChatService implements IChatService {
         } catch (err) {
             throw err
         }
+    }
+
+    public async createMessage(createMessageDto: CreateMessageDto, creatorId: string): Promise<IMessage> {
+        const {
+            chatId,
+            text,
+            photo,
+            replyId,
+        } = createMessageDto
+
+        const chat = await this._chatRepository.findChatById(chatId)
+        if (!chat) {
+            return Promise.reject(new CustomValidationException('chatId', `Chat ${chatId} does not exist`))
+        }
+
+        const user = await this._userRepository.findUserById(creatorId)
+        if (!user) {
+            return Promise.reject(new CustomValidationException('userId', `User ${creatorId} does not exist`))
+        }
+
+        let reply = null
+        if (replyId) {
+            const message = await this._chatRepository.findMessageById(replyId)
+            if (!message) {
+                return Promise.reject(new CustomValidationException('replyId', `Message ${replyId} does not exist`))
+            }
+            reply = {
+                _id: message._id,
+                creator: message.creator,
+                text: message.text,
+                photoUrl: message.photoUrl,
+                photoOrientation: message.photoOrientation,
+            }
+        }
+
+        let photoUrl, photoOrientation = null
+        if (photo) {
+            const upload = await this._fileRepository.storeUpload(photo, `/instaplus/storage/chat/${chatId}`)
+            photoUrl = upload.photoUrl
+            photoOrientation = upload.photoOrientation
+        }
+
+        return this._chatRepository.createMessage(
+            chatId,
+            { _id: user._id, username: user.username, photoUrl: user.photoUrl },
+            text,
+            photoUrl,
+            photoOrientation,
+            reply,
+        )
     }
 }
