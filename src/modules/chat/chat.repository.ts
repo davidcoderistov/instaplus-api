@@ -7,7 +7,7 @@ import { IUserDeletedChat } from './db.models/user-deleted-chat.model'
 import { ChatsWithLatestMessage, ChatWithLatestMessage, Chat, Messages, Message } from './graphql.models'
 import mongoose, { Types } from 'mongoose'
 import ChatModel from './db.models/chat.model'
-import MessageModel from './db.models/message.model'
+import MessageModel, { IMessage } from './db.models/message.model'
 import UserDeletedChatModel from './db.models/user-deleted-chat.model'
 import { getCursorPaginatedData } from '../../shared/utils/misc'
 
@@ -357,5 +357,14 @@ export class ChatRepository implements IChatRepository {
             { $pull: { chatMembers: { _id: new mongoose.Types.ObjectId(userId) } } },
             { new: true, lean: true },
         )
+    }
+
+    public async findMessageById(messageId: string): Promise<IMessage | null> {
+        try {
+            const message = await MessageModel.findById(messageId)
+            return message ? message.toObject() : null
+        } catch (err) {
+            throw err
+        }
     }
 }
