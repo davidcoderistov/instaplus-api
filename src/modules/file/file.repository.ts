@@ -15,8 +15,8 @@ export class FileRepository implements IFileRepository {
     public async storeUpload(
         upload: Promise<FileUpload>,
         url: string,
-        dimensions: { height: number; width: number },
-    ): Promise<string> {
+        dimensions?: { height: number; width: number },
+    ): Promise<{ photoUrl: string, photoOrientation: 'landscape' | 'portrait' }> {
         const { createReadStream, filename } = await upload
         const stream = createReadStream()
         const storedFileUrl = path.join(__dirname, '..', path.join('/', `${new Date().getTime()}-${filename}`))
@@ -31,9 +31,32 @@ export class FileRepository implements IFileRepository {
         // Concatenate the chunks into a single buffer
         const fileBuffer = Buffer.concat(chunks)
 
+        // Get image dimensions
+        let width, height
+        if (dimensions) {
+            width = dimensions.width
+            height = dimensions.height
+        } else {
+            const dimensions = await sharp(fileBuffer).metadata()
+            if (dimensions.width && dimensions.height) {
+                if (dimensions.width - 200 > dimensions.height) {
+                    width = 600
+                    height = 400
+                } else {
+                    width = 320
+                    height = 480
+                }
+            } else {
+                width = 320
+                height = 480
+            }
+        }
+        const photoOrientation = width > height ? 'landscape' : 'portrait'
+
+
         // Image processing using Sharp
         const resizedImageBuffer = await sharp(fileBuffer)
-            .resize(dimensions.width, dimensions.height)
+            .resize(width, height)
             .toBuffer()
 
         await new Promise((resolve, reject) => {
@@ -53,6 +76,9 @@ export class FileRepository implements IFileRepository {
         const result = await cloudinary.uploader.upload(storedFileUrl, { folder: url })
         await unlinkAsync(storedFileUrl)
 
-        return result.secure_url
+        return {
+            photoUrl: result.secure_url,
+            photoOrientation,
+        }
     }
 }
