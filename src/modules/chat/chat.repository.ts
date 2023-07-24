@@ -396,6 +396,7 @@ export class ChatRepository implements IChatRepository {
                 $set: { 'reactions.$.reaction': reaction },
             },
             {
+                new: true,
                 lean: true,
             },
         )
@@ -410,6 +411,7 @@ export class ChatRepository implements IChatRepository {
                 $push: { reactions: { reaction, creator } },
             },
             {
+                new: true,
                 lean: true,
             },
         )
