@@ -6,6 +6,7 @@ import {
     CreateChatDto,
     AddChatMembersDto,
     CreateMessageDto,
+    ReactToMessageDto,
 } from './dtos'
 import { ChatsWithLatestMessage, ChatWithLatestMessage, Messages } from './graphql.models'
 import { IChat } from './db.models/chat.model'
@@ -186,5 +187,40 @@ export class ChatService implements IChatService {
             photoOrientation,
             reply,
         )
+    }
+
+    public async reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<IMessage> {
+        try {
+            const creator = await this._userRepository.findUserById(creatorId)
+            if (!creator) {
+                return Promise.reject(new CustomValidationException('userId', `User ${creatorId} does not exist`))
+            }
+
+            let message = await this._chatRepository.findMessageByReactionAndUpdate(reactToMessageDto.messageId, creatorId, reactToMessageDto.reaction)
+
+            if (message) {
+                return message
+            }
+
+            message = await this._chatRepository.addMessageReaction(
+                reactToMessageDto.messageId,
+                {
+                    _id: creator._id,
+                    firstName: creator.firstName,
+                    lastName: creator.lastName,
+                    username: creator.username,
+                    photoUrl: creator.photoUrl,
+                },
+                reactToMessageDto.reaction,
+            )
+
+            if (message) {
+                return message
+            } else {
+                return Promise.reject(new CustomValidationException('messageId', `Message ${reactToMessageDto.messageId} does not exist`))
+            }
+        } catch (err) {
+            throw err
+        }
     }
 }

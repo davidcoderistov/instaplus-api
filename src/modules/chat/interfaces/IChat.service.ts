@@ -4,6 +4,7 @@ import {
     CreateChatDto,
     AddChatMembersDto,
     CreateMessageDto,
+    ReactToMessageDto,
 } from '../dtos'
 import { IChat } from '../db.models/chat.model'
 import { IMessage } from '../db.models/message.model'
@@ -24,4 +25,6 @@ export interface IChatService {
     leaveChat(chatId: string, userId: string): Promise<IChat | null>
 
     createMessage(createMessageDto: CreateMessageDto, creatorId: string): Promise<IMessage>
+
+    reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<IMessage>
 }
