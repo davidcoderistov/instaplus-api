@@ -1,5 +1,6 @@
 import { ObjectType, Field } from 'type-graphql'
 import { User } from '../../user/graphql.models'
+import { Reaction } from './reaction.model'
 import { Types } from 'mongoose'
 
 
@@ -29,6 +30,9 @@ export class Message {
 
     @Field(() => Message, { nullable: true })
     reply?: Message
+
+    @Field(() => [Reaction], { nullable: true })
+    reactions?: Reaction[]
 
     @Field()
     createdAt!: Date
