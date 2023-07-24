@@ -38,4 +38,6 @@ export interface IChatRepository {
         reply?: Pick<IMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation'> | null): Promise<IMessage>
 
     findMessageByReactionAndUpdate(messageId: string, userId: string, reaction: string): Promise<IMessage | null>
+
+    addMessageReaction(messageId: string, creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>, reaction: string): Promise<IMessage | null>
 }

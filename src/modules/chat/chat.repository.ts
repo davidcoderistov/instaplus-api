@@ -400,4 +400,18 @@ export class ChatRepository implements IChatRepository {
             },
         )
     }
+
+    public async addMessageReaction(messageId: string, creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>, reaction: string): Promise<IMessage | null> {
+        return MessageModel.findOneAndUpdate(
+            {
+                _id: new mongoose.Types.ObjectId(messageId),
+            },
+            {
+                $push: { reactions: { reaction, creator } },
+            },
+            {
+                lean: true,
+            },
+        )
+    }
 }
