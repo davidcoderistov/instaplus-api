@@ -385,4 +385,19 @@ export class ChatRepository implements IChatRepository {
         })
         return await message.save() as unknown as IMessage
     }
+
+    public async findMessageByReactionAndUpdate(messageId: string, userId: string, reaction: string): Promise<IMessage | null> {
+        return MessageModel.findOneAndUpdate(
+            {
+                _id: new mongoose.Types.ObjectId(messageId),
+                'reactions.creator._id': new mongoose.Types.ObjectId(userId),
+            },
+            {
+                $set: { 'reactions.$.reaction': reaction },
+            },
+            {
+                lean: true,
+            },
+        )
+    }
 }

@@ -36,4 +36,6 @@ export interface IChatRepository {
         photoUrl?: string | null,
         photoOrientation?: 'landscape' | 'portrait' | null,
         reply?: Pick<IMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation'> | null): Promise<IMessage>
+
+    findMessageByReactionAndUpdate(messageId: string, userId: string, reaction: string): Promise<IMessage | null>
 }
