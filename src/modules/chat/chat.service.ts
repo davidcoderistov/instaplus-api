@@ -10,7 +10,6 @@ import {
 } from './dtos'
 import { ChatsWithLatestMessage, ChatWithLatestMessage, Messages } from './graphql.models'
 import { IChat } from './db.models/chat.model'
-import { IMessage } from './db.models/message.model'
 import { TYPES } from '../../container/types'
 import { IChatRepository } from './interfaces/IChat.repository'
 import { IUserRepository } from '../user/interfaces/IUser.repository'
@@ -139,7 +138,7 @@ export class ChatService implements IChatService {
         }
     }
 
-    public async createMessage(createMessageDto: CreateMessageDto, creatorId: string): Promise<{ message: IMessage, chatMemberIds: string[] }> {
+    public async createMessage(createMessageDto: CreateMessageDto, creatorId: string): Promise<ChatWithLatestMessage> {
         const {
             chatId,
             text,
@@ -188,12 +187,12 @@ export class ChatService implements IChatService {
             reply,
         )
         return {
+            chat,
             message,
-            chatMemberIds: chat.chatMembers.map(chatMember => chatMember._id.toString()),
-        }
+        } as unknown as ChatWithLatestMessage
     }
 
-    public async reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<{ message: IMessage, chatMemberIds: string[] }> {
+    public async reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<ChatWithLatestMessage> {
         try {
             const creator = await this._userRepository.findUserById(creatorId)
             if (!creator) {
@@ -223,9 +222,9 @@ export class ChatService implements IChatService {
                 }
 
                 return {
+                    chat,
                     message,
-                    chatMemberIds: chat.chatMembers.map(chatMember => chatMember._id.toString()),
-                }
+                } as unknown as ChatWithLatestMessage
             } else {
                 return Promise.reject(new CustomValidationException('messageId', `Message ${reactToMessageDto.messageId} does not exist`))
             }
