@@ -89,7 +89,25 @@ export class ChatResolver {
     }
 
     @Mutation(() => Message)
-    public async reactToMessage(@Args() reactToMessageDto: ReactToMessageDto, @Ctx() { userId }: Context): Promise<Message> {
-        return await this._chatService.reactToMessage(reactToMessageDto, userId) as unknown as Message
+    public async reactToMessage(@Args() reactToMessageDto: ReactToMessageDto, @PubSub() pubSub: PubSubEngine, @Ctx() { userId }: Context): Promise<Message> {
+        const { message, chatMemberIds } = await this._chatService.reactToMessage(reactToMessageDto, userId)
+        pubSub.publish('NEW_MESSAGE_REACTION', {
+            message,
+            chatMemberIds: chatMemberIds.filter(chatMemberId => chatMemberId !== userId),
+        })
+        return message as unknown as Message
+    }
+
+    @Subscription(() => Message, {
+        topics: 'NEW_MESSAGE_REACTION',
+        filter({
+                   payload,
+                   context,
+               }: ResolverFilterData<any, { message: IMessage, chatMemberIds: string [] }, WsContext>) {
+            return payload.chatMemberIds.includes(context.userId)
+        },
+    })
+    public newMessageReaction(@Root() payload: { message: IMessage, chatMemberIds: string[] }) {
+        return payload.message as unknown as Message
     }
 }
