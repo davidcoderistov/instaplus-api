@@ -193,7 +193,7 @@ export class ChatService implements IChatService {
         }
     }
 
-    public async reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<IMessage> {
+    public async reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<{ message: IMessage, chatMemberIds: string[] }> {
         try {
             const creator = await this._userRepository.findUserById(creatorId)
             if (!creator) {
@@ -202,24 +202,30 @@ export class ChatService implements IChatService {
 
             let message = await this._chatRepository.findMessageByReactionAndUpdate(reactToMessageDto.messageId, creatorId, reactToMessageDto.reaction)
 
-            if (message) {
-                return message
+            if (!message) {
+                message = await this._chatRepository.addMessageReaction(
+                    reactToMessageDto.messageId,
+                    {
+                        _id: creator._id,
+                        firstName: creator.firstName,
+                        lastName: creator.lastName,
+                        username: creator.username,
+                        photoUrl: creator.photoUrl,
+                    },
+                    reactToMessageDto.reaction,
+                )
             }
 
-            message = await this._chatRepository.addMessageReaction(
-                reactToMessageDto.messageId,
-                {
-                    _id: creator._id,
-                    firstName: creator.firstName,
-                    lastName: creator.lastName,
-                    username: creator.username,
-                    photoUrl: creator.photoUrl,
-                },
-                reactToMessageDto.reaction,
-            )
-
             if (message) {
-                return message
+                const chat = await this._chatRepository.findChatById(message.chatId)
+                if (!chat) {
+                    return Promise.reject(new CustomValidationException('chatId', `Chat ${message.chatId} does not exist`))
+                }
+
+                return {
+                    message,
+                    chatMemberIds: chat.chatMembers.map(chatMember => chatMember._id.toString()),
+                }
             } else {
                 return Promise.reject(new CustomValidationException('messageId', `Message ${reactToMessageDto.messageId} does not exist`))
             }
