@@ -1,8 +1,20 @@
 import { inject, injectable } from 'inversify'
-import { Args, Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import {
+    Args,
+    Arg,
+    Ctx,
+    Root,
+    Mutation,
+    Query,
+    Subscription,
+    PubSub,
+    PubSubEngine,
+    Resolver,
+    ResolverFilterData,
+} from 'type-graphql'
 import { TYPES } from '../../container/types'
 import { IChatService } from './interfaces/IChat.service'
-import { Context } from '../../shared/types'
+import { Context, WsContext } from '../../shared/types'
 import {
     CreateChatDto,
     FindChatsDto,
@@ -12,6 +24,7 @@ import {
     ReactToMessageDto,
 } from './dtos'
 import { Chat, ChatsWithLatestMessage, ChatWithLatestMessage, Message, Messages } from './graphql.models'
+import { IMessage } from './db.models/message.model'
 
 
 @injectable()
@@ -53,8 +66,26 @@ export class ChatResolver {
     }
 
     @Mutation(() => Message)
-    public async sendMessage(@Args() createMessageDto: CreateMessageDto, @Ctx() { userId }: Context): Promise<Message> {
-        return await this._chatService.createMessage(createMessageDto, userId) as unknown as Message
+    public async sendMessage(@Args() createMessageDto: CreateMessageDto, @PubSub() pubSub: PubSubEngine, @Ctx() { userId }: Context): Promise<Message> {
+        const { message, chatMemberIds } = await this._chatService.createMessage(createMessageDto, userId)
+        pubSub.publish('NEW_MESSAGE', {
+            message,
+            chatMemberIds: chatMemberIds.filter(chatMemberId => chatMemberId !== userId),
+        })
+        return message as unknown as Message
+    }
+
+    @Subscription(() => Message, {
+        topics: 'NEW_MESSAGE',
+        filter({
+                   payload,
+                   context,
+               }: ResolverFilterData<any, { message: IMessage, chatMemberIds: string [] }, WsContext>) {
+            return payload.chatMemberIds.includes(context.userId)
+        },
+    })
+    public newMessage(@Root() payload: { message: IMessage, chatMemberIds: string[] }) {
+        return payload.message as unknown as Message
     }
 
     @Mutation(() => Message)
