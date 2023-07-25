@@ -24,7 +24,7 @@ export interface IChatService {
 
     leaveChat(chatId: string, userId: string): Promise<IChat | null>
 
-    createMessage(createMessageDto: CreateMessageDto, creatorId: string): Promise<IMessage>
+    createMessage(createMessageDto: CreateMessageDto, creatorId: string): Promise<{ message: IMessage, chatMemberIds: string[] }>
 
     reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<IMessage>
 }

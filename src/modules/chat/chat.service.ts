@@ -139,7 +139,7 @@ export class ChatService implements IChatService {
         }
     }
 
-    public async createMessage(createMessageDto: CreateMessageDto, creatorId: string): Promise<IMessage> {
+    public async createMessage(createMessageDto: CreateMessageDto, creatorId: string): Promise<{ message: IMessage, chatMemberIds: string[] }> {
         const {
             chatId,
             text,
@@ -179,7 +179,7 @@ export class ChatService implements IChatService {
             photoOrientation = upload.photoOrientation
         }
 
-        return this._chatRepository.createMessage(
+        const message = await this._chatRepository.createMessage(
             chatId,
             { _id: user._id, username: user.username, photoUrl: user.photoUrl },
             text,
@@ -187,6 +187,10 @@ export class ChatService implements IChatService {
             photoOrientation,
             reply,
         )
+        return {
+            message,
+            chatMemberIds: chat.chatMembers.map(chatMember => chatMember._id.toString()),
+        }
     }
 
     public async reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<IMessage> {
