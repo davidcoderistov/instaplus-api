@@ -340,7 +340,7 @@ export class ChatRepository implements IChatRepository {
         return UserDeletedChatModel.findOneAndUpdate({
             userId: userId,
             chatId: chatId,
-        }, { $currentDate: { updatedAt: true } }, { upsert: true, new: true, lean: true })
+        }, { $set: { updatedAt: new Date() } }, { upsert: true, new: true, lean: true })
     }
 
     public async addChatMembers(chatId: string, chatMembers: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>[]): Promise<IChat | null> {
