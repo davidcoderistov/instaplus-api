@@ -24,6 +24,7 @@ import {
     ReactToMessageDto,
 } from './dtos'
 import { Chat, ChatsWithLatestMessage, ChatWithLatestMessage, Message, Messages } from './graphql.models'
+import { IMessage } from './db.models/message.model'
 import { User } from '../user/graphql.models'
 
 
@@ -90,24 +91,24 @@ export class ChatResolver {
 
     @Mutation(() => Message)
     public async reactToMessage(@Args() reactToMessageDto: ReactToMessageDto, @PubSub() pubSub: PubSubEngine, @Ctx() { userId }: Context): Promise<Message> {
-        const chatWithLatestMessage = await this._chatService.reactToMessage(reactToMessageDto, userId)
-        pubSub.publish('NEW_MESSAGE_REACTION', { chatWithLatestMessage, userId })
-        return chatWithLatestMessage.message as unknown as Message
+        const { message, chatMemberIds } = await this._chatService.reactToMessage(reactToMessageDto, userId)
+        pubSub.publish('NEW_MESSAGE_REACTION', {
+            message,
+            chatMemberIds: chatMemberIds.filter(chatMemberId => chatMemberId !== userId),
+        })
+        return message as unknown as Message
     }
 
-    @Subscription(() => ChatWithLatestMessage, {
+    @Subscription(() => Message, {
         topics: 'NEW_MESSAGE_REACTION',
         filter({
                    payload,
                    context,
-               }: ResolverFilterData<any, { chatWithLatestMessage: ChatWithLatestMessage, userId: string }, WsContext>) {
-            return payload.chatWithLatestMessage.chat.chatMembers
-                .map((chatMember: User) => chatMember._id.toString())
-                .filter((chatMemberId: string) => chatMemberId !== payload.userId)
-                .includes(context.userId)
+               }: ResolverFilterData<any, { message: IMessage, chatMemberIds: string [] }, WsContext>) {
+            return payload.chatMemberIds.includes(context.userId)
         },
     })
-    public newMessageReaction(@Root() payload: { chatWithLatestMessage: ChatWithLatestMessage, userId: string }) {
-        return payload.chatWithLatestMessage
+    public newMessageReaction(@Root() payload: { message: IMessage, chatMemberIds: string[] }) {
+        return payload.message as unknown as Message
     }
 }

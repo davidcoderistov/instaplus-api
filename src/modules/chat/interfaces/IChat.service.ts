@@ -7,6 +7,7 @@ import {
     ReactToMessageDto,
 } from '../dtos'
 import { IChat } from '../db.models/chat.model'
+import { IMessage } from '../db.models/message.model'
 import { ChatsWithLatestMessage, ChatWithLatestMessage, Messages } from '../graphql.models'
 
 
@@ -25,5 +26,5 @@ export interface IChatService {
 
     createMessage(createMessageDto: CreateMessageDto, creatorId: string): Promise<ChatWithLatestMessage>
 
-    reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<ChatWithLatestMessage>
+    reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<{ message: IMessage, chatMemberIds: string[] }>
 }

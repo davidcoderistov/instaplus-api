@@ -10,6 +10,7 @@ import {
 } from './dtos'
 import { ChatsWithLatestMessage, ChatWithLatestMessage, Messages } from './graphql.models'
 import { IChat } from './db.models/chat.model'
+import { IMessage } from './db.models/message.model'
 import { TYPES } from '../../container/types'
 import { IChatRepository } from './interfaces/IChat.repository'
 import { IUserRepository } from '../user/interfaces/IUser.repository'
@@ -192,7 +193,7 @@ export class ChatService implements IChatService {
         } as unknown as ChatWithLatestMessage
     }
 
-    public async reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<ChatWithLatestMessage> {
+    public async reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<{ message: IMessage, chatMemberIds: string[] }> {
         try {
             const creator = await this._userRepository.findUserById(creatorId)
             if (!creator) {
@@ -222,9 +223,9 @@ export class ChatService implements IChatService {
                 }
 
                 return {
-                    chat,
                     message,
-                } as unknown as ChatWithLatestMessage
+                    chatMemberIds: chat.chatMembers.map(chatMember => chatMember._id.toString()),
+                }
             } else {
                 return Promise.reject(new CustomValidationException('messageId', `Message ${reactToMessageDto.messageId} does not exist`))
             }
