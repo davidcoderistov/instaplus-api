@@ -389,6 +389,7 @@ export class ChatRepository implements IChatRepository {
             creator,
             text,
             photoUrl,
+            seenByUserIds: [creator._id.toString()],
             photoOrientation,
             reply,
         })
