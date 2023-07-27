@@ -111,4 +111,10 @@ export class ChatResolver {
     public newMessageReaction(@Root() payload: { message: IMessage, chatMemberIds: string[] }) {
         return payload.message as unknown as Message
     }
+
+    @Mutation(() => Message)
+    public async markMessageAsRead(@Arg('messageId') messageId: string, @Ctx() { userId }: Context): Promise<Message> {
+        const message = await this._chatService.markMessageAsRead(messageId, userId)
+        return message as unknown as Message
+    }
 }
