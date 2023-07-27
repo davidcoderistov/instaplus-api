@@ -368,6 +368,14 @@ export class ChatRepository implements IChatRepository {
         }
     }
 
+    public async markMessageAsRead(messageId: string, userId: string): Promise<IMessage | null> {
+        return MessageModel.findByIdAndUpdate(
+            messageId,
+            { $addToSet: { seenByUserIds: userId } },
+            { new: true, lean: true },
+        )
+    }
+
     public async createMessage(
         chatId: string,
         creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>,

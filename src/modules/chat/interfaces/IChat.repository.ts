@@ -29,6 +29,8 @@ export interface IChatRepository {
 
     findMessageById(messageId: string): Promise<IMessage | null>
 
+    markMessageAsRead(messageId: string, userId: string): Promise<IMessage | null>
+
     createMessage(
         chatId: string,
         creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>,
