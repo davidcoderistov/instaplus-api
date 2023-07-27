@@ -233,4 +233,18 @@ export class ChatService implements IChatService {
             throw err
         }
     }
+
+    public async markMessageAsRead(messageId: string, userId: string): Promise<IMessage> {
+        try {
+            const message = await this._chatRepository.markMessageAsRead(messageId, userId)
+
+            if (!message) {
+                return Promise.reject(new CustomValidationException('messageId', `Message ${messageId} does not exist`))
+            }
+
+            return message
+        } catch (err) {
+            throw err
+        }
+    }
 }

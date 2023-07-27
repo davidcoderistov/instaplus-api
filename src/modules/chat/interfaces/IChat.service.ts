@@ -27,4 +27,6 @@ export interface IChatService {
     createMessage(createMessageDto: CreateMessageDto, creatorId: string): Promise<ChatWithLatestMessage>
 
     reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<{ message: IMessage, chatMemberIds: string[] }>
+
+    markMessageAsRead(messageId: string, userId: string): Promise<IMessage>
 }
