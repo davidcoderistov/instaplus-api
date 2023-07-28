@@ -169,6 +169,7 @@ export class ChatService implements IChatService {
                 text: message.text,
                 photoUrl: message.photoUrl,
                 photoOrientation: message.photoOrientation,
+                previewPhotoUrl: message.previewPhotoUrl,
             }
         }
 
