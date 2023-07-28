@@ -172,11 +172,12 @@ export class ChatService implements IChatService {
             }
         }
 
-        let photoUrl, photoOrientation = null
+        let photoUrl, photoOrientation, previewPhotoUrl = null
         if (photo) {
-            const upload = await this._fileRepository.storeUpload(photo, `/instaplus/storage/chat/${chatId}`)
+            const upload = await this._fileRepository.storePreviewUpload(photo, `/instaplus/storage/chat/${chatId}`)
             photoUrl = upload.photoUrl
             photoOrientation = upload.photoOrientation
+            previewPhotoUrl = upload.previewPhotoUrl
         }
 
         const message = await this._chatRepository.createMessage(
@@ -185,6 +186,7 @@ export class ChatService implements IChatService {
             text,
             photoUrl,
             photoOrientation,
+            previewPhotoUrl,
             reply,
         )
         return {

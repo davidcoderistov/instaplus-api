@@ -34,6 +34,10 @@ const MessageSchema = new Schema({
         type: Schema.Types.String,
         default: null,
     },
+    previewPhotoUrl: {
+        type: Schema.Types.String,
+        default: null,
+    },
     seenByUserIds: [{
         type: Schema.Types.String,
         ref: 'User',
@@ -49,6 +53,7 @@ const MessageSchema = new Schema({
             text: Schema.Types.String,
             photoUrl: Schema.Types.String,
             photoOrientation: Schema.Types.String,
+            previewPhotoUrl: Schema.Types.String,
         },
         default: null,
     },
@@ -103,12 +108,13 @@ interface IBaseMessage {
     text?: string
     photoUrl?: string
     photoOrientation?: string
+    previewPhotoUrl?: string
     seenByUserIds: string[]
     reactions: IReaction[]
 }
 
 export interface IMessage extends IBaseMessage, SchemaTimestampsConfig {
-    reply?: Pick<IBaseMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation'>
+    reply?: Pick<IBaseMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation' | 'previewPhotoUrl'>
 }
 
 export default model('Message', MessageSchema)

@@ -25,6 +25,9 @@ export class Message {
     @Field({ nullable: true })
     photoOrientation?: string
 
+    @Field({ nullable: true })
+    previewPhotoUrl?: string
+
     @Field(() => [String], { nullable: true })
     seenByUserIds?: string[]
 

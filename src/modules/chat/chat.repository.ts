@@ -383,12 +383,14 @@ export class ChatRepository implements IChatRepository {
         text?: string | null,
         photoUrl?: string | null,
         photoOrientation?: 'landscape' | 'portrait' | null,
-        reply?: Pick<IMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation'> | null): Promise<IMessage> {
+        previewPhotoUrl?: string | null,
+        reply?: Pick<IMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation' | 'previewPhotoUrl'> | null): Promise<IMessage> {
         const message = new MessageModel({
             chatId,
             creator,
             text,
             photoUrl,
+            previewPhotoUrl,
             seenByUserIds: [creator._id.toString()],
             photoOrientation,
             reply,
