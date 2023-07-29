@@ -12,4 +12,6 @@ export const TYPES = {
     IUserRepository: Symbol.for('IUserRepository'),
     IUserService: Symbol.for('IUserService'),
     UserResolver: Symbol.for('UserResolver'),
+    INotificationRepository: Symbol.for('INotificationRepository'),
+    INotificationService: Symbol.for('INotificationService'),
 }

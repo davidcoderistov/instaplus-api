@@ -24,6 +24,10 @@ import { UserRepository } from '../modules/user/user.repository'
 import { IUserService } from '../modules/user/interfaces/IUser.service'
 import { UserService } from '../modules/user/user.service'
 import { UserResolver } from '../modules/user/user.resolver'
+import { INotificationRepository } from '../modules/notification/interfaces/INotification.repository'
+import { NotificationRepository } from '../modules/notification/notification.repository'
+import { INotificationService } from '../modules/notification/interfaces/INotification.service'
+import { NotificationService } from '../modules/notification/notification.service'
 
 
 export const bindings = new ContainerModule(bind => {
@@ -45,4 +49,7 @@ export const bindings = new ContainerModule(bind => {
     bind<IUserRepository>(TYPES.IUserRepository).to(UserRepository)
     bind<IUserService>(TYPES.IUserService).to(UserService)
     bind<UserResolver>(UserResolver).toSelf()
+
+    bind<INotificationRepository>(TYPES.INotificationRepository).to(NotificationRepository)
+    bind<INotificationService>(TYPES.INotificationService).to(NotificationService)
 })
