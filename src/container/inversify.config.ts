@@ -28,6 +28,7 @@ import { INotificationRepository } from '../modules/notification/interfaces/INot
 import { NotificationRepository } from '../modules/notification/notification.repository'
 import { INotificationService } from '../modules/notification/interfaces/INotification.service'
 import { NotificationService } from '../modules/notification/notification.service'
+import { NotificationResolver } from '../modules/notification/notification.resolver'
 
 
 export const bindings = new ContainerModule(bind => {
@@ -52,4 +53,5 @@ export const bindings = new ContainerModule(bind => {
 
     bind<INotificationRepository>(TYPES.INotificationRepository).to(NotificationRepository)
     bind<INotificationService>(TYPES.INotificationService).to(NotificationService)
+    bind<NotificationResolver>(NotificationResolver).toSelf()
 })
