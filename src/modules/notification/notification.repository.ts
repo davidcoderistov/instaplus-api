@@ -133,6 +133,7 @@ export class NotificationRepository implements INotificationRepository {
                 {
                     $group: {
                         _id: '$_id',
+                        notificationId: { $first: '$notifications._id' },
                         post: { $first: '$post' },
                         createdAt: { $first: '$notifications.createdAt' },
                         latestUsers: {
@@ -169,9 +170,10 @@ export class NotificationRepository implements INotificationRepository {
                 {
                     $group: {
                         _id: '$_id',
+                        notificationId: { $first: '$notificationId' },
                         post: { $first: '$post' },
                         createdAt: { $first: '$createdAt' },
-                        latestUsers: { $addToSet: '$lastTwoLatestUsers' },
+                        latestUsers: { $first: '$lastTwoLatestUsers' },
                         usersCount: { $first: { $size: '$latestUsers' } },
                     },
                 },
@@ -180,7 +182,7 @@ export class NotificationRepository implements INotificationRepository {
                 },
                 {
                     $project: {
-                        _id: { $toObjectId: '$_id.postId' },
+                        _id: '$notificationId',
                         type: '$_id.type',
                         post: 1,
                         createdAt: 1,

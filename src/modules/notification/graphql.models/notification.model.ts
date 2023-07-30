@@ -1,4 +1,4 @@
-import { ObjectType, Field } from 'type-graphql'
+import { ObjectType, Field, Int } from 'type-graphql'
 import { Types } from 'mongoose'
 import { User } from '../../user/graphql.models'
 import { Post } from '../../post/graphql.models/post.model'
@@ -16,8 +16,11 @@ export class Notification {
     @Field(() => String)
     userId!: string
 
-    @Field(() => User)
-    user!: User
+    @Field(() => [User])
+    latestUsers!: User[]
+
+    @Field(() => Int)
+    usersCount!: number
 
     @Field(() => Post, { nullable: true })
     post?: Post | null
