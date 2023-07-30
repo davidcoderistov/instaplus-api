@@ -8,6 +8,8 @@ export interface INotificationService {
 
     findWeeklyNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications>
 
+    findMonthlyNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications>
+
     findEarlierNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications>
 
 }

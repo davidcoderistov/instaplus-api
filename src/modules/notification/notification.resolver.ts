@@ -31,6 +31,11 @@ export class NotificationResolver {
     }
 
     @Query(() => Notifications)
+    public async findMonthlyNotifications(@Args() findNotificationsDto: FindNotificationsDto, @Ctx() { userId }: Context): Promise<Notifications> {
+        return this._notificationService.findMonthlyNotifications(findNotificationsDto, userId)
+    }
+
+    @Query(() => Notifications)
     public async findEarlierNotifications(@Args() findNotificationsDto: FindNotificationsDto, @Ctx() { userId }: Context): Promise<Notifications> {
         return this._notificationService.findEarlierNotifications(findNotificationsDto, userId)
     }

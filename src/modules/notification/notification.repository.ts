@@ -35,9 +35,28 @@ export class NotificationRepository implements INotificationRepository {
 
         const now = moment()
 
-        const start = now.clone().startOf('day').subtract(7, 'days').toDate()
+        const start = now.clone().startOf('week').toDate()
 
         const end = now.clone().startOf('day').toDate()
+
+        return await NotificationRepository.findNotificationsForUser(
+            start,
+            end,
+            userId,
+            offset,
+            limit,
+            'day') as unknown as Notifications
+    }
+
+    public async findMonthlyNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications> {
+
+        const { limit, offset } = findNotificationsDto
+
+        const now = moment()
+
+        const start = now.clone().startOf('month').toDate()
+
+        const end = now.clone().startOf('week').toDate()
 
         return await NotificationRepository.findNotificationsForUser(
             start,
@@ -53,9 +72,9 @@ export class NotificationRepository implements INotificationRepository {
 
         const now = moment()
 
-        const start = now.clone().subtract(3, 'months').toDate()
+        const start = now.clone().subtract(4, 'months').toDate()
 
-        const end = now.clone().startOf('day').subtract(7, 'days').toDate()
+        const end = now.clone().startOf('month').toDate()
 
         return await NotificationRepository.findNotificationsForUser(
             start,

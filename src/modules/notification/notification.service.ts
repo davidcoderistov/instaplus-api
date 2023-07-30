@@ -21,6 +21,10 @@ export class NotificationService implements INotificationService {
         return this._notificationRepository.findWeeklyNotifications(findNotificationsDto, userId)
     }
 
+    public async findMonthlyNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications> {
+        return this._notificationRepository.findMonthlyNotifications(findNotificationsDto, userId)
+    }
+
     public async findEarlierNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications> {
         return this._notificationRepository.findEarlierNotifications(findNotificationsDto, userId)
     }
