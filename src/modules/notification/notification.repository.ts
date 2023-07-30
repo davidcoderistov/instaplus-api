@@ -3,6 +3,7 @@ import { INotificationRepository } from './interfaces/INotification.repository'
 import { INotification, Notification } from './notification.model'
 import { FindNotificationsDto } from './dtos'
 import { Notifications } from './graphql.models'
+import { getOffsetPaginatedData } from '../../shared/utils/misc'
 import moment from 'moment'
 
 
@@ -11,67 +12,67 @@ export class NotificationRepository implements INotificationRepository {
 
     public async findDailyNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications> {
 
-        const { limit, cursor } = findNotificationsDto
+        const { limit, offset } = findNotificationsDto
 
         const now = moment()
 
-        const startDay = now.clone().startOf('day').toDate()
+        const start = now.clone().startOf('day').toDate()
 
-        const nextDay = now.clone().add(1, 'days').startOf('day').toDate()
+        const end = now.clone().add(1, 'days').startOf('day').toDate()
 
-        return await this.findNotificationsForUser(
-            startDay,
-            nextDay,
+        return await NotificationRepository.findNotificationsForUser(
+            start,
+            end,
             userId,
+            offset,
             limit,
-            cursor ? cursor.createdAt : null,
             'hour') as unknown as Notifications
     }
 
     public async findWeeklyNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications> {
 
-        const { limit, cursor } = findNotificationsDto
+        const { limit, offset } = findNotificationsDto
 
         const now = moment()
 
-        const startWeek = now.clone().startOf('week').toDate()
+        const start = now.clone().startOf('day').subtract(7, 'days').toDate()
 
-        const nextWeek = now.clone().add(1, 'weeks').startOf('week').toDate()
+        const end = now.clone().startOf('day').toDate()
 
-        return await this.findNotificationsForUser(
-            startWeek,
-            nextWeek,
+        return await NotificationRepository.findNotificationsForUser(
+            start,
+            end,
             userId,
+            offset,
             limit,
-            cursor ? cursor.createdAt : null,
             'day') as unknown as Notifications
     }
 
     public async findEarlierNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications> {
-        const { limit, cursor } = findNotificationsDto
+        const { limit, offset } = findNotificationsDto
 
         const now = moment()
 
-        const threeMonthsBefore = now.clone().subtract(3, 'months').toDate()
+        const start = now.clone().subtract(3, 'months').toDate()
 
-        const startWeek = now.clone().startOf('week').toDate()
+        const end = now.clone().startOf('day').subtract(7, 'days').toDate()
 
-        return await this.findNotificationsForUser(
-            threeMonthsBefore,
-            startWeek,
+        return await NotificationRepository.findNotificationsForUser(
+            start,
+            end,
             userId,
+            offset,
             limit,
-            cursor ? cursor.createdAt : null,
             'week') as unknown as Notifications
     }
 
-    public async findNotificationsForUser(
+    private static async findNotificationsForUser(
         startDate: Date,
         endDate: Date,
         userId: string,
+        offset: number,
         limit: number,
-        createdAt: Date | null,
-        granularity: 'hour' | 'day' | 'week'): Promise<{ data: INotification[], nextCursor: { _id: string, createdAt: Date } | null }> {
+        granularity: 'hour' | 'day' | 'week'): Promise<{ data: INotification[], count: number }> {
 
         let format
         if (granularity === 'hour') {
@@ -82,7 +83,7 @@ export class NotificationRepository implements INotificationRepository {
             format = '%Y-%U'
         }
 
-        return await Notification.aggregate(
+        const aggregateNotifications = await Notification.aggregate(
             [
                 {
                     $match: {
@@ -163,38 +164,25 @@ export class NotificationRepository implements INotificationRepository {
                         _id: { $toObjectId: '$_id.postId' },
                         type: '$_id.type',
                         post: 1,
-                        createdAt: { $dateFromString: { dateString: '$_id.date' } },
+                        createdAt: 1,
                         latestUsers: 1,
                         usersCount: 1,
                     },
                 },
-                ...(createdAt ? [
-                    {
-                        $match: {
-                            createdAt: { $lte: createdAt },
-                        },
-                    },
-                ] : []),
                 {
                     $facet: {
-                        data: [
-                            { $limit: limit },
-                        ],
-                        nextCursor: [
-                            { $skip: limit },
-                            {
-                                $limit: 1,
-                            },
-                            {
-                                $project: {
-                                    _id: '$_id',
-                                    createdAt: '$createdAt',
-                                },
-                            },
-                        ],
+                        metadata: [{
+                            $count: 'count',
+                        }],
+                        data: [{
+                            $skip: offset,
+                        }, {
+                            $limit: limit,
+                        }],
                     },
                 },
             ],
-        ) as unknown as { data: INotification[], nextCursor: { _id: string, createdAt: Date } | null }
+        )
+        return getOffsetPaginatedData(aggregateNotifications)
     }
 }
