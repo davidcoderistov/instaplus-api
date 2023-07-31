@@ -19,4 +19,6 @@ export interface IUserRepository {
     findFollowByUserIds(followingUserId: string, followedUserId: string): Promise<IFollow | null>
 
     followUser(followingUserId: string, followedUserId: string): Promise<IFollow>
+
+    unfollowUser(followingUserId: string, followedUserId: string): Promise<IFollow | null>
 }

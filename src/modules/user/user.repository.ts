@@ -76,4 +76,8 @@ export class UserRepository implements IUserRepository {
         await follow.save()
         return follow.toObject() as unknown as IFollow
     }
+
+    public async unfollowUser(followingUserId: string, followedUserId: string): Promise<IFollow | null> {
+        return FollowModel.findOneAndDelete({ followingUserId, followedUserId })
+    }
 }
