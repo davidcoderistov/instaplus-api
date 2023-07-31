@@ -7,7 +7,7 @@ import {
     RefreshDto,
     FindUsersBySearchQueryDto,
 } from './dtos'
-import { AuthUser, User } from './graphql.models'
+import { AuthUser, User, FollowableUser } from './graphql.models'
 import { TYPES } from '../../container/types'
 import bcrypt from 'bcrypt'
 import {
@@ -162,6 +162,31 @@ export class UserService implements IUserService {
 
             const users = await this._userRepository.findUsersBySearchQuery(findUsersBySearchQueryDto)
             return users.filter(user => user._id.toString() !== authUserId)
+        } catch (err) {
+            throw err
+        }
+    }
+
+    public async followUser(followingUserId: string, followedUserId: string): Promise<FollowableUser> {
+        try {
+            if (!await this._userRepository.findUserById(followingUserId)) {
+                return Promise.reject(new CustomValidationException('followingUserId', `User with id ${followingUserId} does not exist`))
+            }
+
+            const followedUser = await this._userRepository.findUserById(followedUserId)
+            if (!followedUser) {
+                return Promise.reject(new CustomValidationException('followedUserId', `User with id ${followedUserId} does not exist`))
+            }
+
+            if (await this._userRepository.findFollowByUserIds(followingUserId, followedUserId)) {
+                return Promise.reject(new CustomValidationException('followedUserId', `User ${followingUserId} already follows ${followedUserId}`))
+            }
+
+            await this._userRepository.followUser(followingUserId, followedUserId)
+            return {
+                user: followedUser,
+                following: true,
+            }
         } catch (err) {
             throw err
         }
