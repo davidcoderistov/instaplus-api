@@ -56,4 +56,9 @@ export class UserResolver {
     public async followUser(@Arg('followedUserId') followedUserId: string, @Ctx() { userId }: Context): Promise<FollowableUser> {
         return this._userService.followUser(userId, followedUserId)
     }
+
+    @Mutation(() => FollowableUser)
+    public async unfollowUser(@Arg('followedUserId') followedUserId: string, @Ctx() { userId }: Context): Promise<FollowableUser> {
+        return this._userService.unfollowUser(userId, followedUserId)
+    }
 }
