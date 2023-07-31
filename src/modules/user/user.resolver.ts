@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify'
-import { Resolver, Query, Mutation, Args, Ctx } from 'type-graphql'
+import { Resolver, Query, Mutation, Args, Arg, Ctx } from 'type-graphql'
 import { TYPES } from '../../container/types'
 import { IUserService } from './interfaces/IUser.service'
 import {
@@ -7,7 +7,7 @@ import {
     SignInDto,
     FindUsersBySearchQueryDto,
 } from './dtos'
-import { AuthUser, User } from './graphql.models'
+import { AuthUser, User, FollowableUser } from './graphql.models'
 import { Context } from '../../shared/types'
 
 
@@ -50,5 +50,10 @@ export class UserResolver {
     @Query(() => [User])
     public async findUsersBySearchQuery(@Args() findUsersBySearchQuery: FindUsersBySearchQueryDto, @Ctx() { userId }: Context): Promise<User[]> {
         return this._userService.findUsersBySearchQuery(findUsersBySearchQuery, userId)
+    }
+
+    @Mutation(() => FollowableUser)
+    public async followUser(@Arg('followedUserId') followedUserId: string, @Ctx() { userId }: Context): Promise<FollowableUser> {
+        return this._userService.followUser(userId, followedUserId)
     }
 }
