@@ -63,6 +63,11 @@ export class UserRepository implements IUserRepository {
         return updateUser ? updateUser.toObject() : null
     }
 
+    public async findFollowByUserIds(followingUserId: string, followedUserId: string): Promise<IFollow | null> {
+        const follows: IFollow[] = await FollowModel.find({ followingUserId, followedUserId }).lean()
+        return follows.length > 0 ? follows[0] : null
+    }
+
     public async followUser(followingUserId: string, followedUserId: string): Promise<IFollow> {
         const follow = new FollowModel({
             followingUserId,

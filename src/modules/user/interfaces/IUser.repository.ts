@@ -16,5 +16,7 @@ export interface IUserRepository {
 
     updateUserById(id: string, user: Partial<IUser>): Promise<IUser | null>
 
+    findFollowByUserIds(followingUserId: string, followedUserId: string): Promise<IFollow | null>
+
     followUser(followingUserId: string, followedUserId: string): Promise<IFollow>
 }
