@@ -1,6 +1,7 @@
 import { SignUpDto, FindUsersBySearchQueryDto } from '../dtos'
 import { IUser } from '../db.models/user.model'
 import { IFollow } from '../db.models/follow.model'
+import { SearchUser } from '../graphql.models'
 
 
 export interface IUserRepository {
@@ -13,6 +14,8 @@ export interface IUserRepository {
     findUserByUsername(username: string): Promise<IUser | null>
 
     findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto): Promise<IUser[]>
+
+    findSearchUsersBySearchQuery(searchQuery: string, limit: number): Promise<SearchUser[]>
 
     updateUserById(id: string, user: Partial<IUser>): Promise<IUser | null>
 

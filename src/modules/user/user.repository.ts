@@ -3,6 +3,7 @@ import { IUserRepository } from './interfaces/IUser.repository'
 import UserModel, { IUser } from './db.models/user.model'
 import FollowModel, { IFollow } from './db.models/follow.model'
 import { FindUsersBySearchQueryDto, SignUpDto } from './dtos'
+import { SearchUser } from './graphql.models'
 import { Types } from 'mongoose'
 
 
@@ -56,6 +57,100 @@ export class UserRepository implements IUserRepository {
             .sort('username')
             .limit(findUsersBySearchQueryDto.limit)
             .lean()
+    }
+
+    public async findSearchUsersBySearchQuery(searchQuery: string, limit: number): Promise<SearchUser[]> {
+        const regex = new RegExp(searchQuery, 'i')
+
+        interface AggregateResult extends IUser {
+            followers: IUser[]
+            followedCount: number
+        }
+
+        const aggregateResult = await UserModel.aggregate(
+            [
+                {
+                    $match: {
+                        $or: [
+                            { firstName: { $regex: regex } },
+                            { lastName: { $regex: regex } },
+                            { username: { $regex: regex } },
+                        ],
+                    },
+                },
+                {
+                    $addFields: {
+                        userId: { $toString: '$_id' },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: FollowModel.collection.name,
+                        localField: 'userId',
+                        foreignField: 'followedUserId',
+                        as: 'follows',
+                    },
+                },
+                {
+                    $unwind: {
+                        path: '$follows',
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+                {
+                    $sort: {
+                        'follows.createdAt': -1,
+                    },
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        firstName: { $first: '$firstName' },
+                        lastName: { $first: '$lastName' },
+                        username: { $first: '$username' },
+                        photoUrl: { $first: '$photoUrl' },
+                        latestFollowerId: { $first: '$follows.followingUserId' },
+                        followedCount: { $count: {} },
+                    },
+                },
+                {
+                    $addFields: {
+                        latestFollowerObjectId: {
+                            $cond: {
+                                if: { $ne: ['$latestFollowerId', null] },
+                                then: { $toObjectId: '$latestFollowerId' },
+                                else: null,
+                            },
+                        },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: UserModel.collection.name,
+                        localField: 'latestFollowerObjectId',
+                        foreignField: '_id',
+                        as: 'followers',
+                    },
+                },
+                {
+                    $sort: { username: 1 },
+                },
+                {
+                    $limit: limit,
+                },
+            ],
+        ) as unknown as AggregateResult[]
+        return aggregateResult.map(aggregateResult => ({
+            user: {
+                _id: aggregateResult._id,
+                firstName: aggregateResult.firstName,
+                lastName: aggregateResult.lastName,
+                username: aggregateResult.username,
+                photoUrl: aggregateResult.photoUrl,
+            },
+            latestFollower: aggregateResult.followers.length > 0 ? aggregateResult.followers[0] : null,
+            followersCount: aggregateResult.followers.length > 0 ? aggregateResult.followedCount : 0,
+        }))
     }
 
     public async updateUserById(id: string, user: Partial<IUser>): Promise<IUser | null> {
