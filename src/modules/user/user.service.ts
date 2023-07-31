@@ -199,7 +199,7 @@ export class UserService implements IUserService {
             }
 
             const followedUser = await this._userRepository.findUserById(followedUserId)
-            if (!await this._userRepository.findUserById(followedUserId)) {
+            if (!followedUser) {
                 return Promise.reject(new CustomValidationException('followedUserId', `User with id ${followedUserId} does not exist`))
             }
 
