@@ -14,4 +14,5 @@ export const TYPES = {
     UserResolver: Symbol.for('UserResolver'),
     INotificationRepository: Symbol.for('INotificationRepository'),
     INotificationService: Symbol.for('INotificationService'),
+    IPostRepository: Symbol.for('IPostRepository'),
 }
