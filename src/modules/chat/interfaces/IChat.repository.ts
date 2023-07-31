@@ -1,7 +1,7 @@
 import { FindChatsDto, FindMessagesByChatIdDto } from '../dtos'
 import { IChat } from '../db.models/chat.model'
 import { IMessage } from '../db.models/message.model'
-import { IUser } from '../../user/user.model'
+import { IUser } from '../../user/db.models/user.model'
 import { IUserDeletedChat } from '../db.models/user-deleted-chat.model'
 import { ChatsWithLatestMessage, ChatWithLatestMessage, Chat, Messages } from '../graphql.models'
 

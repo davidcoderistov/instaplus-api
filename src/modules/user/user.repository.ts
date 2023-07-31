@@ -1,6 +1,6 @@
 import { injectable } from 'inversify'
 import { IUserRepository } from './interfaces/IUser.repository'
-import UserModel, { IUser } from './user.model'
+import UserModel, { IUser } from './db.models/user.model'
 import { FindUsersBySearchQueryDto, SignUpDto } from './dtos'
 import { Types } from 'mongoose'
 

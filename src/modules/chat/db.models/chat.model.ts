@@ -1,5 +1,5 @@
 import { Schema, Types, model, SchemaTimestampsConfig } from 'mongoose'
-import { IUser } from '../../user/user.model'
+import { IUser } from '../../user/db.models/user.model'
 
 
 const ChatSchema = new Schema({

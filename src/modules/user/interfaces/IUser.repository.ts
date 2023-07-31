@@ -1,5 +1,5 @@
 import { SignUpDto, FindUsersBySearchQueryDto } from '../dtos'
-import { IUser } from '../user.model'
+import { IUser } from '../db.models/user.model'
 
 
 export interface IUserRepository {

@@ -1,5 +1,5 @@
 import { Schema, model, SchemaTimestampsConfig, Error, Types } from 'mongoose'
-import { IUser } from '../../user/user.model'
+import { IUser } from '../../user/db.models/user.model'
 
 
 const MessageSchema = new Schema({
