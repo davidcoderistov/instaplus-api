@@ -191,4 +191,27 @@ export class UserService implements IUserService {
             throw err
         }
     }
+
+    public async unfollowUser(followingUserId: string, followedUserId: string): Promise<FollowableUser> {
+        try {
+            if (!await this._userRepository.findUserById(followingUserId)) {
+                return Promise.reject(new CustomValidationException('followingUserId', `User with id ${followingUserId} does not exist`))
+            }
+
+            const followedUser = await this._userRepository.findUserById(followedUserId)
+            if (!await this._userRepository.findUserById(followedUserId)) {
+                return Promise.reject(new CustomValidationException('followedUserId', `User with id ${followedUserId} does not exist`))
+            }
+
+            if (!await this._userRepository.unfollowUser(followingUserId, followedUserId)) {
+                return Promise.reject(new CustomValidationException('followedUserId', `User ${followingUserId} does not follow ${followedUserId}`))
+            }
+            return {
+                user: followedUser,
+                following: false,
+            }
+        } catch (err) {
+            throw err
+        }
+    }
 }

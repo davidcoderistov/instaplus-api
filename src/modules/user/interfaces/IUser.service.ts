@@ -19,4 +19,6 @@ export interface IUserService {
     findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto, authUserId: string): Promise<User[]>
 
     followUser(followingUserId: string, followedUserId: string): Promise<FollowableUser>
+
+    unfollowUser(followingUserId: string, followedUserId: string): Promise<FollowableUser>
 }
