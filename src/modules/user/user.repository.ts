@@ -1,6 +1,7 @@
 import { injectable } from 'inversify'
 import { IUserRepository } from './interfaces/IUser.repository'
 import UserModel, { IUser } from './db.models/user.model'
+import FollowModel, { IFollow } from './db.models/follow.model'
 import { FindUsersBySearchQueryDto, SignUpDto } from './dtos'
 import { Types } from 'mongoose'
 
@@ -60,5 +61,14 @@ export class UserRepository implements IUserRepository {
     public async updateUserById(id: string, user: Partial<IUser>): Promise<IUser | null> {
         const updateUser = await UserModel.findOneAndUpdate({ _id: id }, user, { new: true })
         return updateUser ? updateUser.toObject() : null
+    }
+
+    public async followUser(followingUserId: string, followedUserId: string): Promise<IFollow> {
+        const follow = new FollowModel({
+            followingUserId,
+            followedUserId,
+        })
+        await follow.save()
+        return follow.toObject() as unknown as IFollow
     }
 }

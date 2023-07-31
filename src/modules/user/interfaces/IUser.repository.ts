@@ -1,5 +1,6 @@
 import { SignUpDto, FindUsersBySearchQueryDto } from '../dtos'
 import { IUser } from '../db.models/user.model'
+import { IFollow } from '../db.models/follow.model'
 
 
 export interface IUserRepository {
@@ -14,4 +15,6 @@ export interface IUserRepository {
     findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto): Promise<IUser[]>
 
     updateUserById(id: string, user: Partial<IUser>): Promise<IUser | null>
+
+    followUser(followingUserId: string, followedUserId: string): Promise<IFollow>
 }
