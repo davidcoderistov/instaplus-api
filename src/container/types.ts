@@ -15,4 +15,6 @@ export const TYPES = {
     INotificationRepository: Symbol.for('INotificationRepository'),
     INotificationService: Symbol.for('INotificationService'),
     IPostRepository: Symbol.for('IPostRepository'),
+    ISearchHistoryRepository: Symbol.for('ISearchHistoryRepository'),
+    ISearchHistoryService: Symbol.for('ISearchHistoryService'),
 }

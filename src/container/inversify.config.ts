@@ -31,6 +31,10 @@ import { NotificationService } from '../modules/notification/notification.servic
 import { NotificationResolver } from '../modules/notification/notification.resolver'
 import { IPostRepository } from '../modules/post/interfaces/IPost.repository'
 import { PostRepository } from '../modules/post/post.repository'
+import { ISearchHistoryRepository } from '../modules/search-history/interfaces/ISearchHistory.repository'
+import { SearchHistoryRepository } from '../modules/search-history/search-history.repository'
+import { ISearchHistoryService } from '../modules/search-history/interfaces/ISearchHistory.service'
+import { SearchHistoryService } from '../modules/search-history/search-history.service'
 
 
 export const bindings = new ContainerModule(bind => {
@@ -58,4 +62,7 @@ export const bindings = new ContainerModule(bind => {
     bind<NotificationResolver>(NotificationResolver).toSelf()
 
     bind<IPostRepository>(TYPES.IPostRepository).to(PostRepository)
+
+    bind<ISearchHistoryRepository>(TYPES.ISearchHistoryRepository).to(SearchHistoryRepository)
+    bind<ISearchHistoryService>(TYPES.ISearchHistoryService).to(SearchHistoryService)
 })
