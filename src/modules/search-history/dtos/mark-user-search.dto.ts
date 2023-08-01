@@ -5,8 +5,8 @@ import { ArgsType, Field } from 'type-graphql'
 export class MarkUserSearchDto {
 
     @Field(() => String, { nullable: true })
-    searchedUserId?: string
+    searchedUserId?: string | null
 
     @Field(() => String, { nullable: true })
-    searchedHashtagId?: string
+    searchedHashtagId?: string | null
 }
