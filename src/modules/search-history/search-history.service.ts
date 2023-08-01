@@ -1,17 +1,21 @@
 import { inject, injectable } from 'inversify'
 import { ISearchHistoryService } from './interfaces/ISearchHistory.service'
+import { ISearchHistoryRepository } from './interfaces/ISearchHistory.repository'
 import { IUserRepository } from '../user/interfaces/IUser.repository'
 import { IPostRepository } from '../post/interfaces/IPost.repository'
 import { TYPES } from '../../container/types'
 import { UserSearch } from './graphql.models/user-search.model'
 import { SearchUser } from '../user/graphql.models'
 import { IHashtag } from '../post/db.models/hashtag.model'
+import { MarkUserSearchDto } from './dtos'
+import { CustomValidationException } from '../../shared/exceptions'
 
 
 @injectable()
 export class SearchHistoryService implements ISearchHistoryService {
 
     constructor(
+        @inject(TYPES.ISearchHistoryRepository) private readonly _searchHistoryRepository: ISearchHistoryRepository,
         @inject(TYPES.IUserRepository) private readonly _userRepository: IUserRepository,
         @inject(TYPES.IPostRepository) private readonly _postRepository: IPostRepository) {
     }
@@ -38,5 +42,35 @@ export class SearchHistoryService implements ISearchHistoryService {
                 hashtag: null,
             }
         })
+    }
+
+    public async markUserSearch(searchingUserId: string, markUserSearchDto: MarkUserSearchDto): Promise<boolean> {
+        try {
+            if (!await this._userRepository.findUserById(searchingUserId)) {
+                return Promise.reject(new CustomValidationException('searchingUserId', `User with id ${searchingUserId} does not exist`))
+            }
+
+            const { searchedUserId, searchedHashtagId } = markUserSearchDto
+
+            if (searchedUserId) {
+                if (!await this._userRepository.findUserById(searchedUserId)) {
+                    return Promise.reject(new CustomValidationException('searchedUserId', `User with id ${searchedUserId} does not exist`))
+                }
+            }
+
+            if (searchedHashtagId) {
+                if (!await this._postRepository.findHashtagById(searchedHashtagId)) {
+                    return Promise.reject(new CustomValidationException('searchedHashtagId', `Hashtag with id ${searchedHashtagId} does not exist`))
+                }
+            }
+
+            await this._searchHistoryRepository.findSearchHistoryAndDelete(searchingUserId, searchedUserId ?? null, searchedHashtagId ?? null)
+
+            await this._searchHistoryRepository.createSearchHistory(searchingUserId, markUserSearchDto)
+
+            return true
+        } catch (err) {
+            throw err
+        }
     }
 }
