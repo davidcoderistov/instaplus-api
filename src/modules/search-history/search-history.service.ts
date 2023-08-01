@@ -109,4 +109,16 @@ export class SearchHistoryService implements ISearchHistoryService {
             throw err
         }
     }
+
+    public async clearSearchHistory(userId: string): Promise<boolean> {
+        try {
+            if (!await this._userRepository.findUserById(userId)) {
+                return Promise.reject(new CustomValidationException('searchingUserId', `User with id ${userId} does not exist`))
+            }
+
+            return await this._searchHistoryRepository.clearSearchHistory(userId) > 0
+        } catch (err) {
+            throw err
+        }
+    }
 }

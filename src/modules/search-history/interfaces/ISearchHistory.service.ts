@@ -9,4 +9,6 @@ export interface ISearchHistoryService {
     markUserSearch(searchingUserId: string, markUserSearchDto: MarkUserSearchDto): Promise<boolean>
 
     unmarkUserSearch(searchingUserId: string, unmarkUserSearchDto: UnmarkUserSearchDto): Promise<boolean>
+
+    clearSearchHistory(userId: string): Promise<boolean>
 }
