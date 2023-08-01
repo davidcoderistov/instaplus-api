@@ -17,4 +17,12 @@ export class SearchHistoryRepository implements ISearchHistoryRepository {
         await searchHistory.save()
         return searchHistory.toObject()
     }
+
+    public async findSearchHistoryAndDelete(searchingUserId: string, searchedUserId: string | null, searchedHashtagId: string | null): Promise<ISearchHistory | null> {
+        return SearchHistoryModel.findOneAndDelete({
+            searchingUserId,
+            searchedUserId,
+            searchedHashtagId,
+        })
+    }
 }
