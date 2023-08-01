@@ -7,4 +7,6 @@ export interface ISearchHistoryRepository {
     createSearchHistory(searchingUserId: string, markUserSearchDto: MarkUserSearchDto): Promise<ISearchHistory>
 
     findSearchHistoryAndDelete(searchingUserId: string, searchedUserId: string | null, searchedHashtagId: string | null): Promise<ISearchHistory | null>
+
+    clearSearchHistory(userId: string): Promise<number>
 }

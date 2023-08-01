@@ -25,4 +25,9 @@ export class SearchHistoryRepository implements ISearchHistoryRepository {
             searchedHashtagId,
         })
     }
+
+    public async clearSearchHistory(userId: string): Promise<number> {
+        const deletedUserSearches: { deletedCount: number } = await SearchHistoryModel.deleteMany({ searchingUserId: userId })
+        return deletedUserSearches.deletedCount
+    }
 }
