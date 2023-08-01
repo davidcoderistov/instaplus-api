@@ -23,4 +23,9 @@ export class PostRepository implements IPostRepository {
             .limit(limit)
             .lean()
     }
+
+    public async findHashtagById(id: string): Promise<IHashtag | null> {
+        const hashtag = await HashtagModel.findById(id)
+        return hashtag ? hashtag.toObject() : null
+    }
 }
