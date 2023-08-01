@@ -24,24 +24,7 @@ export class SearchHistoryService implements ISearchHistoryService {
         const searchUsers = await this._userRepository.findSearchUsersBySearchQuery(searchQuery, 15)
         const hashtags = await this._postRepository.findHashtagsBySearchQuery(searchQuery, 15)
 
-        const userSearches: (SearchUser | IHashtag)[] = [...searchUsers, ...hashtags]
-
-        return userSearches.sort((a, b) => {
-            const first = 'name' in a ? a.name : a.user.username
-            const second = 'name' in b ? b.name : b.user.username
-            return first.localeCompare(second)
-        }).map(userSearch => {
-            if ('name' in userSearch) {
-                return {
-                    searchUser: null,
-                    hashtag: userSearch,
-                }
-            }
-            return {
-                searchUser: userSearch,
-                hashtag: null,
-            }
-        })
+        return SearchHistoryService.sortUserSearches([...searchUsers, ...hashtags])
     }
 
     public async markUserSearch(searchingUserId: string, markUserSearchDto: MarkUserSearchDto): Promise<boolean> {
@@ -110,6 +93,23 @@ export class SearchHistoryService implements ISearchHistoryService {
         }
     }
 
+    public async findSearchHistory(userId: string): Promise<UserSearch[]> {
+        const searchHistory = await this._searchHistoryRepository.findSearchHistoryForUser(userId)
+
+        const userIds = searchHistory
+            .filter(searchHistory => searchHistory.searchedUserId)
+            .map(searchHistory => searchHistory.searchedUserId) as string[]
+
+        const hashtagIds = searchHistory
+            .filter(searchHistory => searchHistory.searchedHashtagId)
+            .map(searchHistory => searchHistory.searchedHashtagId) as string[]
+
+        const searchUsers = await this._userRepository.findSearchUsersByIds(userIds, 15)
+        const hashtags = await this._postRepository.findHashtagsByIds(hashtagIds, 15)
+
+        return SearchHistoryService.sortUserSearches([...searchUsers, ...hashtags])
+    }
+
     public async clearSearchHistory(userId: string): Promise<boolean> {
         try {
             if (!await this._userRepository.findUserById(userId)) {
@@ -120,5 +120,24 @@ export class SearchHistoryService implements ISearchHistoryService {
         } catch (err) {
             throw err
         }
+    }
+
+    private static sortUserSearches(userSearches: (SearchUser | IHashtag)[]) {
+        return userSearches.sort((a, b) => {
+            const first = 'name' in a ? a.name : a.user.username
+            const second = 'name' in b ? b.name : b.user.username
+            return first.localeCompare(second)
+        }).map(userSearch => {
+            if ('name' in userSearch) {
+                return {
+                    searchUser: null,
+                    hashtag: userSearch,
+                }
+            }
+            return {
+                searchUser: userSearch,
+                hashtag: null,
+            }
+        })
     }
 }
