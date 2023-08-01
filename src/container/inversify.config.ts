@@ -35,6 +35,7 @@ import { ISearchHistoryRepository } from '../modules/search-history/interfaces/I
 import { SearchHistoryRepository } from '../modules/search-history/search-history.repository'
 import { ISearchHistoryService } from '../modules/search-history/interfaces/ISearchHistory.service'
 import { SearchHistoryService } from '../modules/search-history/search-history.service'
+import { SearchHistoryResolver } from '../modules/search-history/search-history.resolver'
 
 
 export const bindings = new ContainerModule(bind => {
@@ -65,4 +66,5 @@ export const bindings = new ContainerModule(bind => {
 
     bind<ISearchHistoryRepository>(TYPES.ISearchHistoryRepository).to(SearchHistoryRepository)
     bind<ISearchHistoryService>(TYPES.ISearchHistoryService).to(SearchHistoryService)
+    bind<SearchHistoryResolver>(SearchHistoryResolver).toSelf()
 })
