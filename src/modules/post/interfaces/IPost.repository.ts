@@ -8,4 +8,6 @@ export interface IPostRepository {
     findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<IHashtag[]>
 
     findHashtagById(id: string): Promise<IHashtag | null>
+
+    findHashtagsByIds(ids: string[], limit: number): Promise<IHashtag[]>
 }
