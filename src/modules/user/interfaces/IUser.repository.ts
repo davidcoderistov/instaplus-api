@@ -17,6 +17,8 @@ export interface IUserRepository {
 
     findSearchUsersBySearchQuery(searchQuery: string, limit: number): Promise<SearchUser[]>
 
+    findSearchUsersByIds(ids: string[], limit: number): Promise<SearchUser[]>
+
     updateUserById(id: string, user: Partial<IUser>): Promise<IUser | null>
 
     findFollowByUserIds(followingUserId: string, followedUserId: string): Promise<IFollow | null>
