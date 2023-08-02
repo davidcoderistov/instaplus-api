@@ -241,6 +241,10 @@ export class UserRepository implements IUserRepository {
         }))
     }
 
+    public async findFollowedUserIds(userId: string): Promise<string[]> {
+        return FollowModel.find({ followingUserId: userId }).select('followedUserId')
+    }
+
     public async updateUserById(id: string, user: Partial<IUser>): Promise<IUser | null> {
         const updateUser = await UserModel.findOneAndUpdate({ _id: id }, user, { new: true })
         return updateUser ? updateUser.toObject() : null
