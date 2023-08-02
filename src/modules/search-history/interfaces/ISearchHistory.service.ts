@@ -4,7 +4,7 @@ import { MarkUserSearchDto, UnmarkUserSearchDto } from '../dtos'
 
 export interface ISearchHistoryService {
 
-    findUserSearchesBySearchQuery(searchQuery: string): Promise<UserSearch[]>
+    findUserSearchesBySearchQuery(userId: string, searchQuery: string): Promise<UserSearch[]>
 
     markUserSearch(searchingUserId: string, markUserSearchDto: MarkUserSearchDto): Promise<boolean>
 

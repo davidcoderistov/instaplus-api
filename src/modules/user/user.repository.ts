@@ -59,13 +59,15 @@ export class UserRepository implements IUserRepository {
             .lean()
     }
 
-    public async findSearchUsersBySearchQuery(searchQuery: string, limit: number): Promise<SearchUser[]> {
+    public async findSearchUsersBySearchQuery(userId: string, searchQuery: string, limit: number): Promise<SearchUser[]> {
         const regex = new RegExp(searchQuery, 'i')
 
         interface AggregateResult extends IUser {
             followers: IUser[]
             followedCount: number
         }
+
+        const followedUserIds = await this.findFollowedUserIds(userId)
 
         const aggregateResult = await UserModel.aggregate(
             [
@@ -89,6 +91,24 @@ export class UserRepository implements IUserRepository {
                         localField: 'userId',
                         foreignField: 'followedUserId',
                         as: 'follows',
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        firstName: 1,
+                        lastName: 1,
+                        username: 1,
+                        photoUrl: 1,
+                        follows: {
+                            $filter: {
+                                input: '$follows',
+                                as: 'follow',
+                                cond: {
+                                    $in: ['$$follow.followingUserId', followedUserIds],
+                                },
+                            },
+                        },
                     },
                 },
                 {
@@ -153,11 +173,13 @@ export class UserRepository implements IUserRepository {
         }))
     }
 
-    public async findSearchUsersByIds(ids: string[], limit: number): Promise<SearchUser[]> {
+    public async findSearchUsersByIds(userId: string, ids: string[], limit: number): Promise<SearchUser[]> {
         interface AggregateResult extends IUser {
             followers: IUser[]
             followedCount: number
         }
+
+        const followedUserIds = await this.findFollowedUserIds(userId)
 
         const aggregateResult = await UserModel.aggregate(
             [
@@ -177,6 +199,24 @@ export class UserRepository implements IUserRepository {
                         localField: 'userId',
                         foreignField: 'followedUserId',
                         as: 'follows',
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        firstName: 1,
+                        lastName: 1,
+                        username: 1,
+                        photoUrl: 1,
+                        follows: {
+                            $filter: {
+                                input: '$follows',
+                                as: 'follow',
+                                cond: {
+                                    $in: ['$$follow.followingUserId', followedUserIds],
+                                },
+                            },
+                        },
                     },
                 },
                 {
@@ -242,7 +282,11 @@ export class UserRepository implements IUserRepository {
     }
 
     public async findFollowedUserIds(userId: string): Promise<string[]> {
-        return FollowModel.find({ followingUserId: userId }).select('followedUserId')
+        const follows: IFollow[] = await FollowModel
+            .find({ followingUserId: userId })
+            .select('followedUserId')
+            .lean()
+        return follows.map(follow => follow.followedUserId)
     }
 
     public async updateUserById(id: string, user: Partial<IUser>): Promise<IUser | null> {

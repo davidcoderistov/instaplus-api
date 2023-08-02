@@ -20,8 +20,8 @@ export class SearchHistoryService implements ISearchHistoryService {
         @inject(TYPES.IPostRepository) private readonly _postRepository: IPostRepository) {
     }
 
-    public async findUserSearchesBySearchQuery(searchQuery: string): Promise<UserSearch[]> {
-        const searchUsers = await this._userRepository.findSearchUsersBySearchQuery(searchQuery, 15)
+    public async findUserSearchesBySearchQuery(userId: string, searchQuery: string): Promise<UserSearch[]> {
+        const searchUsers = await this._userRepository.findSearchUsersBySearchQuery(userId, searchQuery, 15)
         const hashtags = await this._postRepository.findHashtagsBySearchQuery(searchQuery, 15)
 
         return SearchHistoryService.sortUserSearches([...searchUsers, ...hashtags])
@@ -104,7 +104,7 @@ export class SearchHistoryService implements ISearchHistoryService {
             .filter(searchHistory => searchHistory.searchedHashtagId)
             .map(searchHistory => searchHistory.searchedHashtagId) as string[]
 
-        const searchUsers = await this._userRepository.findSearchUsersByIds(userIds, 15)
+        const searchUsers = await this._userRepository.findSearchUsersByIds(userId, userIds, 15)
         const searchUsersMap: { [key: string]: SearchUser } = searchUsers.reduce((searchUsersMap, searchUser) => ({
             ...searchUsersMap,
             [searchUser.user._id.toString()]: searchUser,

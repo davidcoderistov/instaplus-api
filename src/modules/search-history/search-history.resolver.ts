@@ -16,8 +16,8 @@ export class SearchHistoryResolver {
     }
 
     @Query(() => [UserSearch])
-    public async findUserSearchesBySearchQuery(@Arg('searchQuery') searchQuery: string): Promise<UserSearch[]> {
-        return this._searchHistoryService.findUserSearchesBySearchQuery(searchQuery)
+    public async findUserSearchesBySearchQuery(@Arg('searchQuery') searchQuery: string, @Ctx() { userId }: Context): Promise<UserSearch[]> {
+        return this._searchHistoryService.findUserSearchesBySearchQuery(userId, searchQuery)
     }
 
     @Mutation(() => Boolean)

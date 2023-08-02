@@ -15,9 +15,9 @@ export interface IUserRepository {
 
     findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto): Promise<IUser[]>
 
-    findSearchUsersBySearchQuery(searchQuery: string, limit: number): Promise<SearchUser[]>
+    findSearchUsersBySearchQuery(userId: string, searchQuery: string, limit: number): Promise<SearchUser[]>
 
-    findSearchUsersByIds(ids: string[], limit: number): Promise<SearchUser[]>
+    findSearchUsersByIds(userId: string, ids: string[], limit: number): Promise<SearchUser[]>
 
     findFollowedUserIds(userId: string): Promise<string[]>
 
