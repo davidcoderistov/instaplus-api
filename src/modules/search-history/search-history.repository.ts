@@ -21,6 +21,7 @@ export class SearchHistoryRepository implements ISearchHistoryRepository {
     public async findSearchHistoryForUser(userId: string): Promise<ISearchHistory[]> {
         return SearchHistoryModel
             .find({ searchingUserId: userId })
+            .sort({ createdAt: -1 })
             .limit(30)
             .lean()
     }

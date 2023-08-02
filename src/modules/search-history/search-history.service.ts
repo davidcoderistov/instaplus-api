@@ -105,9 +105,31 @@ export class SearchHistoryService implements ISearchHistoryService {
             .map(searchHistory => searchHistory.searchedHashtagId) as string[]
 
         const searchUsers = await this._userRepository.findSearchUsersByIds(userIds, 15)
-        const hashtags = await this._postRepository.findHashtagsByIds(hashtagIds, 15)
+        const searchUsersMap: { [key: string]: SearchUser } = searchUsers.reduce((searchUsersMap, searchUser) => ({
+            ...searchUsersMap,
+            [searchUser.user._id.toString()]: searchUser,
+        }), {})
 
-        return SearchHistoryService.sortUserSearches([...searchUsers, ...hashtags])
+        const hashtags = await this._postRepository.findHashtagsByIds(hashtagIds, 15)
+        const hashtagsMap: { [key: string]: IHashtag } = hashtags.reduce((hashtagsMap, hashtag) => ({
+            ...hashtagsMap,
+            [hashtag._id.toString()]: hashtag,
+        }), {})
+
+        return searchHistory.map(searchHistory => {
+            if (searchHistory.searchedUserId) {
+                return {
+                    searchUser: searchUsersMap[searchHistory.searchedUserId] as SearchUser,
+                    hashtag: null,
+                }
+            } else {
+                const hashtagId = searchHistory.searchedHashtagId as string
+                return {
+                    searchUser: null,
+                    hashtag: hashtagsMap[hashtagId] as IHashtag,
+                }
+            }
+        })
     }
 
     public async clearSearchHistory(userId: string): Promise<boolean> {
