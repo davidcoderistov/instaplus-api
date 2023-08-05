@@ -41,4 +41,10 @@ export class PostRepository implements IPostRepository {
             throw err
         }
     }
+
+    public async findHashtagsByNames(names: string[]): Promise<IHashtag[]> {
+        return HashtagModel
+            .find({ name: { $in: names } })
+            .lean()
+    }
 }
