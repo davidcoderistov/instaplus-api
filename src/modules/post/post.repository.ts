@@ -1,11 +1,29 @@
 import { injectable } from 'inversify'
 import { IPostRepository } from './interfaces/IPost.repository'
+import PostModel, { IPost } from './db.models/post.model'
 import HashtagModel, { IHashtag } from './db.models/hashtag.model'
+import { IUser } from '../user/db.models/user.model'
+import { CreatePostDto } from './dtos'
 import { Types } from 'mongoose'
 
 
 @injectable()
 export class PostRepository implements IPostRepository {
+
+    public async createPost(
+        createPostDto: Pick<CreatePostDto, 'caption' | 'location'>,
+        photoUrls: string[],
+        creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>): Promise<IPost> {
+        const { caption = null, location = null } = createPostDto
+        const post = new PostModel({
+            caption,
+            location,
+            photoUrls,
+            creator,
+        })
+        await post.save()
+        return post.toObject() as unknown as IPost
+    }
 
     public async createHashtag(name: string, postId: string): Promise<IHashtag> {
         const hashtag = new HashtagModel({

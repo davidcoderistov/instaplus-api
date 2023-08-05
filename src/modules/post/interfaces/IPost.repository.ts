@@ -1,7 +1,15 @@
+import { IPost } from '../db.models/post.model'
 import { IHashtag } from '../db.models/hashtag.model'
+import { IUser } from '../../user/db.models/user.model'
+import { CreatePostDto } from '../dtos'
 
 
 export interface IPostRepository {
+
+    createPost(
+        createPostDto: Pick<CreatePostDto, 'caption' | 'location'>,
+        photoUrls: string[],
+        creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>): Promise<IPost>
 
     createHashtag(name: string, postId: string): Promise<IHashtag>
 
