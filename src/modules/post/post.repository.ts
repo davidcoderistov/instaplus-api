@@ -2,6 +2,7 @@ import { injectable } from 'inversify'
 import { IPostRepository } from './interfaces/IPost.repository'
 import PostModel, { IPost } from './db.models/post.model'
 import HashtagModel, { IHashtag } from './db.models/hashtag.model'
+import HashtagPostModel, { IHashtagPost } from './db.models/hashtag-post.model'
 import { IUser } from '../user/db.models/user.model'
 import { CreatePostDto } from './dtos'
 import { Types } from 'mongoose'
@@ -22,7 +23,7 @@ export class PostRepository implements IPostRepository {
             creator,
         })
         await post.save()
-        return post.toObject() as unknown as IPost
+        return post.toObject()
     }
 
     public async createHashtag(name: string, postId: string): Promise<IHashtag> {
@@ -31,7 +32,16 @@ export class PostRepository implements IPostRepository {
             postIds: [postId],
         })
         await hashtag.save()
-        return hashtag.toObject() as unknown as IHashtag
+        return hashtag.toObject()
+    }
+
+    public async createHashtagPost(hashtagId: string, postId: string): Promise<IHashtagPost> {
+        const hashtagPost = new HashtagPostModel({
+            hashtagId,
+            postId,
+        })
+        await hashtagPost.save()
+        return hashtagPost.toObject()
     }
 
     public async findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<IHashtag[]> {
