@@ -85,7 +85,7 @@ export class PostRepository implements IPostRepository {
 
     public async findPostLike(postId: string, userId: string): Promise<IPostLike | null> {
         const postLikes: IPostLike[] = await PostLikeModel.find({ postId, userId }).lean()
-        return postLikes.length > 0 ? postLikes[0].toObject() : null
+        return postLikes.length > 0 ? postLikes[0] : null
     }
 
     public async createPostLike(postId: string, userId: string): Promise<IPostLike> {
@@ -103,7 +103,7 @@ export class PostRepository implements IPostRepository {
 
     public async findPostSave(postId: string, userId: string): Promise<IPostSave | null> {
         const postSaves: IPostSave[] = await PostSaveModel.find({ postId, userId }).lean()
-        return postSaves.length > 0 ? postSaves[0].toObject() : null
+        return postSaves.length > 0 ? postSaves[0] : null
     }
 
     public async createPostSave(postId: string, userId: string): Promise<IPostSave> {
