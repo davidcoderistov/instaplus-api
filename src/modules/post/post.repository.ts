@@ -101,4 +101,13 @@ export class PostRepository implements IPostRepository {
         const postSaves: IPostSave[] = await PostSaveModel.find({ postId, userId }).lean()
         return postSaves.length > 0 ? postSaves[0].toObject() : null
     }
+
+    public async createPostSave(postId: string, userId: string): Promise<IPostSave> {
+        const postSave = new PostSaveModel({
+            postId,
+            userId,
+        })
+        await postSave.save()
+        return postSave.toObject()
+    }
 }
