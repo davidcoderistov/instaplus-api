@@ -88,6 +88,15 @@ export class PostRepository implements IPostRepository {
         return postLikes.length > 0 ? postLikes[0].toObject() : null
     }
 
+    public async createPostLike(postId: string, userId: string): Promise<IPostLike> {
+        const postLike = new PostLikeModel({
+            postId,
+            userId,
+        })
+        await postLike.save()
+        return postLike.toObject()
+    }
+
     public async findPostSave(postId: string, userId: string): Promise<IPostSave | null> {
         const postSaves: IPostSave[] = await PostSaveModel.find({ postId, userId }).lean()
         return postSaves.length > 0 ? postSaves[0].toObject() : null

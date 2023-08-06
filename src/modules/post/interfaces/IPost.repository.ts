@@ -30,5 +30,7 @@ export interface IPostRepository {
 
     findPostLike(postId: string, userId: string): Promise<IPostLike | null>
 
+    createPostLike(postId: string, userId: string): Promise<IPostLike>
+
     findPostSave(postId: string, userId: string): Promise<IPostSave | null>
 }
