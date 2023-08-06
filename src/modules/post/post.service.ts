@@ -6,6 +6,7 @@ import { IFileRepository } from '../file/IFile.repository'
 import { TYPES } from '../../container/types'
 import { IHashtag } from './db.models/hashtag.model'
 import { IPost } from './db.models/post.model'
+import { IPostLike } from './db.models/post-like.model'
 import { CreatePostDto } from './dtos'
 import { CustomValidationException } from '../../shared/exceptions'
 import { FileUpload } from 'graphql-upload-ts'
@@ -84,5 +85,25 @@ export class PostService implements IPostService {
 
     public async findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<IHashtag[]> {
         return this._postRepository.findHashtagsBySearchQuery(searchQuery, limit)
+    }
+
+    public async likePost(postId: string, userId: string): Promise<IPostLike> {
+        try {
+            if (!await this._postRepository.findPostById(postId)) {
+                return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} does not exist`))
+            }
+
+            if (!await this._userRepository.findUserById(userId)) {
+                return Promise.reject(new CustomValidationException('userId', `User with id ${userId} does not exist`))
+            }
+
+            if (await this._postRepository.findPostLike(postId, userId)) {
+                return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} is already liked`))
+            }
+
+            return this._postRepository.createPostLike(postId, userId)
+        } catch (err) {
+            throw err
+        }
     }
 }
