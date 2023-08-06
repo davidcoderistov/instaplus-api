@@ -128,4 +128,24 @@ export class PostService implements IPostService {
             throw err
         }
     }
+
+    public async savePost(postId: string, userId: string): Promise<IPostLike> {
+        try {
+            if (!await this._postRepository.findPostById(postId)) {
+                return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} does not exist`))
+            }
+
+            if (!await this._userRepository.findUserById(userId)) {
+                return Promise.reject(new CustomValidationException('userId', `User with id ${userId} does not exist`))
+            }
+
+            if (await this._postRepository.findPostSave(postId, userId)) {
+                return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} is already saved`))
+            }
+
+            return this._postRepository.createPostSave(postId, userId)
+        } catch (err) {
+            throw err
+        }
+    }
 }

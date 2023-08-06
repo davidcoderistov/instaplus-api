@@ -13,4 +13,6 @@ export interface IPostService {
     likePost(postId: string, userId: string): Promise<IPostLike>
 
     unlikePost(postId: string, userId: string): Promise<IPostLike>
+
+    savePost(postId: string, userId: string): Promise<IPostLike>
 }
