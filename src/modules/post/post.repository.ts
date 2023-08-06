@@ -75,4 +75,9 @@ export class PostRepository implements IPostRepository {
             .find({ name: { $in: names } })
             .lean()
     }
+
+    public async findPostById(postId: string): Promise<IPost | null> {
+        const post = await PostModel.findById(postId)
+        return post ? post.toObject() : null
+    }
 }
