@@ -7,6 +7,7 @@ import { TYPES } from '../../container/types'
 import { IHashtag } from './db.models/hashtag.model'
 import { IPost } from './db.models/post.model'
 import { IPostLike } from './db.models/post-like.model'
+import { IPostSave } from './db.models/post-save.model'
 import { CreatePostDto } from './dtos'
 import { CustomValidationException } from '../../shared/exceptions'
 import { FileUpload } from 'graphql-upload-ts'
@@ -129,7 +130,7 @@ export class PostService implements IPostService {
         }
     }
 
-    public async savePost(postId: string, userId: string): Promise<IPostLike> {
+    public async savePost(postId: string, userId: string): Promise<IPostSave> {
         try {
             if (!await this._postRepository.findPostById(postId)) {
                 return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} does not exist`))
@@ -144,6 +145,28 @@ export class PostService implements IPostService {
             }
 
             return this._postRepository.createPostSave(postId, userId)
+        } catch (err) {
+            throw err
+        }
+    }
+
+    public async unsavePost(postId: string, userId: string): Promise<IPostSave> {
+        try {
+            if (!await this._postRepository.findPostById(postId)) {
+                return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} does not exist`))
+            }
+
+            if (!await this._userRepository.findUserById(userId)) {
+                return Promise.reject(new CustomValidationException('userId', `User with id ${userId} does not exist`))
+            }
+
+            const postSave = await this._postRepository.deletePostSave(postId, userId)
+
+            if (!postSave) {
+                return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} is not saved`))
+            }
+
+            return postSave
         } catch (err) {
             throw err
         }
