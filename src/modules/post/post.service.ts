@@ -8,6 +8,7 @@ import { IHashtag } from './db.models/hashtag.model'
 import { IPost } from './db.models/post.model'
 import { IPostLike } from './db.models/post-like.model'
 import { IPostSave } from './db.models/post-save.model'
+import { ICommentLike } from './db.models/comment-like.model'
 import { CreatePostDto } from './dtos'
 import { CustomValidationException } from '../../shared/exceptions'
 import { FileUpload } from 'graphql-upload-ts'
@@ -167,6 +168,26 @@ export class PostService implements IPostService {
             }
 
             return postSave
+        } catch (err) {
+            throw err
+        }
+    }
+
+    public async likeComment(commentId: string, userId: string): Promise<ICommentLike> {
+        try {
+            if (!await this._postRepository.findCommentById(commentId)) {
+                return Promise.reject(new CustomValidationException('commentId', `Comment with id ${commentId} does not exist`))
+            }
+
+            if (!await this._userRepository.findUserById(userId)) {
+                return Promise.reject(new CustomValidationException('userId', `User with id ${userId} does not exist`))
+            }
+
+            if (await this._postRepository.findCommentLike(commentId, userId)) {
+                return Promise.reject(new CustomValidationException('commentId', `Comment with id ${commentId} is already liked`))
+            }
+
+            return this._postRepository.createCommentLike(commentId, userId)
         } catch (err) {
             throw err
         }
