@@ -44,4 +44,6 @@ export interface IPostRepository {
     findCommentLike(commentId: string, userId: string): Promise<ICommentLike | null>
 
     createCommentLike(commentId: string, userId: string): Promise<ICommentLike>
+
+    deleteCommentLike(commentId: string, userId: string): Promise<ICommentLike | null>
 }

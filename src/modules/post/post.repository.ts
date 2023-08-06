@@ -133,4 +133,8 @@ export class PostRepository implements IPostRepository {
         await commentLike.save()
         return commentLike.toObject()
     }
+
+    public async deleteCommentLike(commentId: string, userId: string): Promise<ICommentLike | null> {
+        return CommentLikeModel.findOneAndDelete({ commentId, userId }).lean()
+    }
 }
