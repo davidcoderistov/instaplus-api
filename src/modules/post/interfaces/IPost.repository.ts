@@ -3,6 +3,7 @@ import { IHashtag } from '../db.models/hashtag.model'
 import { IHashtagPost } from '../db.models/hashtag-post.model'
 import { IUser } from '../../user/db.models/user.model'
 import { IPostLike } from '../db.models/post-like.model'
+import { IPostSave } from '../db.models/post-save.model'
 import { CreatePostDto } from '../dtos'
 
 
@@ -28,4 +29,6 @@ export interface IPostRepository {
     findPostById(postId: string): Promise<IPost | null>
 
     findPostLike(postId: string, userId: string): Promise<IPostLike | null>
+
+    findPostSave(postId: string, userId: string): Promise<IPostSave | null>
 }

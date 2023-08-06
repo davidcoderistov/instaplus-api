@@ -5,6 +5,7 @@ import HashtagModel, { IHashtag } from './db.models/hashtag.model'
 import HashtagPostModel, { IHashtagPost } from './db.models/hashtag-post.model'
 import { IUser } from '../user/db.models/user.model'
 import PostLikeModel, { IPostLike } from './db.models/post-like.model'
+import PostSaveModel, { IPostSave } from './db.models/post-save.model'
 import { CreatePostDto } from './dtos'
 import { Types } from 'mongoose'
 
@@ -85,5 +86,10 @@ export class PostRepository implements IPostRepository {
     public async findPostLike(postId: string, userId: string): Promise<IPostLike | null> {
         const postLikes: IPostLike[] = await PostLikeModel.find({ postId, userId }).lean()
         return postLikes.length > 0 ? postLikes[0].toObject() : null
+    }
+
+    public async findPostSave(postId: string, userId: string): Promise<IPostSave | null> {
+        const postSaves: IPostSave[] = await PostSaveModel.find({ postId, userId }).lean()
+        return postSaves.length > 0 ? postSaves[0].toObject() : null
     }
 }
