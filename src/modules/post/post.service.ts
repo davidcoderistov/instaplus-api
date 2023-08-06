@@ -192,4 +192,26 @@ export class PostService implements IPostService {
             throw err
         }
     }
+
+    public async unlikeComment(commentId: string, userId: string): Promise<ICommentLike> {
+        try {
+            if (!await this._postRepository.findCommentById(commentId)) {
+                return Promise.reject(new CustomValidationException('commentId', `Comment with id ${commentId} does not exist`))
+            }
+
+            if (!await this._userRepository.findUserById(userId)) {
+                return Promise.reject(new CustomValidationException('userId', `User with id ${userId} does not exist`))
+            }
+
+            const commentLike = await this._postRepository.deleteCommentLike(commentId, userId)
+
+            if (!commentLike) {
+                return Promise.reject(new CustomValidationException('commentId', `Comment with id ${commentId} is not liked`))
+            }
+
+            return commentLike
+        } catch (err) {
+            throw err
+        }
+    }
 }

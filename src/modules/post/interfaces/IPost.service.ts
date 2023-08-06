@@ -21,4 +21,6 @@ export interface IPostService {
     unsavePost(postId: string, userId: string): Promise<IPostSave>
 
     likeComment(commentId: string, userId: string): Promise<ICommentLike>
+
+    unlikeComment(commentId: string, userId: string): Promise<ICommentLike>
 }
