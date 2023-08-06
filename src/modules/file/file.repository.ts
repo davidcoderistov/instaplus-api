@@ -5,6 +5,8 @@ import { ReadStream } from 'fs'
 import { Readable } from 'stream'
 import sharp from 'sharp'
 import { v2 as cloudinary } from 'cloudinary'
+import { MongodbServerException } from '../../shared/exceptions'
+
 
 @injectable()
 export class FileRepository implements IFileRepository {
@@ -32,14 +34,20 @@ export class FileRepository implements IFileRepository {
 
         const buffer = await FileRepository.bufferFromStream(stream)
 
-        const { photoUrl, photoOrientation } = await this.storeImage(buffer, url, dimensions)
+        const [photo, previewPhoto]: (PromiseFulfilledResult<{ photoUrl: string, photoOrientation: 'landscape' | 'portrait' }> | PromiseRejectedResult)[] =
+            await Promise.allSettled([
+                this.storeImage(buffer, url, dimensions),
+                this.storeImage(buffer, url, { height: 1080, width: 1080 }),
+            ])
 
-        const { photoUrl: previewPhotoUrl } = await this.storeImage(buffer, url, { height: 1080, width: 1080 })
-
-        return {
-            photoUrl,
-            photoOrientation,
-            previewPhotoUrl,
+        if (photo.status === 'fulfilled' && previewPhoto.status === 'fulfilled') {
+            return {
+                photoUrl: photo.value.photoUrl,
+                photoOrientation: photo.value.photoOrientation,
+                previewPhotoUrl: previewPhoto.value.photoUrl,
+            }
+        } else {
+            return Promise.reject(new MongodbServerException('Could not upload image'))
         }
     }
 
