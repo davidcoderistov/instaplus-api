@@ -106,4 +106,26 @@ export class PostService implements IPostService {
             throw err
         }
     }
+
+    public async unlikePost(postId: string, userId: string): Promise<IPostLike> {
+        try {
+            if (!await this._postRepository.findPostById(postId)) {
+                return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} does not exist`))
+            }
+
+            if (!await this._userRepository.findUserById(userId)) {
+                return Promise.reject(new CustomValidationException('userId', `User with id ${userId} does not exist`))
+            }
+
+            const postLike = await this._postRepository.deletePostLike(postId, userId)
+
+            if (!postLike) {
+                return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} is not liked`))
+            }
+
+            return postLike
+        } catch (err) {
+            throw err
+        }
+    }
 }

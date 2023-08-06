@@ -11,4 +11,6 @@ export interface IPostService {
     findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<IHashtag[]>
 
     likePost(postId: string, userId: string): Promise<IPostLike>
+
+    unlikePost(postId: string, userId: string): Promise<IPostLike>
 }
