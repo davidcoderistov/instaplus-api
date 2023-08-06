@@ -120,6 +120,11 @@ export class PostRepository implements IPostRepository {
         return PostSaveModel.findOneAndDelete({ postId, userId }).lean()
     }
 
+    public async findCommentLike(commentId: string, userId: string): Promise<ICommentLike | null> {
+        const commentLikes: ICommentLike[] = await CommentLikeModel.find({ commentId, userId }).lean()
+        return commentLikes.length > 0 ? commentLikes[0] : null
+    }
+
     public async createCommentLike(commentId: string, userId: string): Promise<ICommentLike> {
         const commentLike = new CommentLikeModel({
             commentId,
