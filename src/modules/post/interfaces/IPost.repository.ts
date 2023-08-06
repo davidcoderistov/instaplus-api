@@ -4,6 +4,7 @@ import { IHashtagPost } from '../db.models/hashtag-post.model'
 import { IUser } from '../../user/db.models/user.model'
 import { IPostLike } from '../db.models/post-like.model'
 import { IPostSave } from '../db.models/post-save.model'
+import { IComment } from '../db.models/comment.model'
 import { ICommentLike } from '../db.models/comment-like.model'
 import { CreatePostDto } from '../dtos'
 
@@ -40,6 +41,8 @@ export interface IPostRepository {
     createPostSave(postId: string, userId: string): Promise<IPostSave>
 
     deletePostSave(postId: string, userId: string): Promise<IPostSave | null>
+
+    findCommentById(commentId: string): Promise<IComment | null>
 
     findCommentLike(commentId: string, userId: string): Promise<ICommentLike | null>
 
