@@ -2,6 +2,7 @@ import { IPost } from '../db.models/post.model'
 import { IHashtag } from '../db.models/hashtag.model'
 import { IHashtagPost } from '../db.models/hashtag-post.model'
 import { IUser } from '../../user/db.models/user.model'
+import { IPostLike } from '../db.models/post-like.model'
 import { CreatePostDto } from '../dtos'
 
 
@@ -25,4 +26,6 @@ export interface IPostRepository {
     findHashtagsByNames(names: string[]): Promise<IHashtag[]>
 
     findPostById(postId: string): Promise<IPost | null>
+
+    findPostLike(postId: string, userId: string): Promise<IPostLike | null>
 }
