@@ -114,4 +114,8 @@ export class PostRepository implements IPostRepository {
         await postSave.save()
         return postSave.toObject()
     }
+
+    public async deletePostSave(postId: string, userId: string): Promise<IPostSave | null> {
+        return PostSaveModel.findOneAndDelete({ postId, userId }).lean()
+    }
 }

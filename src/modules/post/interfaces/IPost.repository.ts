@@ -37,4 +37,6 @@ export interface IPostRepository {
     findPostSave(postId: string, userId: string): Promise<IPostSave | null>
 
     createPostSave(postId: string, userId: string): Promise<IPostSave>
+
+    deletePostSave(postId: string, userId: string): Promise<IPostSave | null>
 }
