@@ -9,8 +9,8 @@ import {
 } from 'type-graphql'
 import { IPostService } from './interfaces/IPost.service'
 import { TYPES } from '../../container/types'
-import { Hashtag, Post } from './graphql.models'
-import { CreatePostDto } from './dtos'
+import { Hashtag, Post, FollowedUsersPosts } from './graphql.models'
+import { CreatePostDto, FindFollowedUsersPostsDto } from './dtos'
 import { Context } from '../../shared/types'
 
 
@@ -30,5 +30,10 @@ export class PostResolver {
     @Mutation(() => Post)
     public async createPost(@Args() createPostDto: CreatePostDto, @Ctx() { userId }: Context): Promise<Post> {
         return await this._postService.createPost(createPostDto, userId) as unknown as Post
+    }
+
+    @Query(() => FollowedUsersPosts)
+    public async findFollowedUsersPosts(@Args() findFollowedUsersPostsDto: FindFollowedUsersPostsDto, @Ctx() { userId }: Context): Promise<FollowedUsersPosts> {
+        return this._postService.findFollowedUsersPosts(findFollowedUsersPostsDto, userId)
     }
 }
