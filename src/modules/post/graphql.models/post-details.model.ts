@@ -26,7 +26,7 @@ export class PostDetails {
     likesCount!: number
 
     @Field(() => User, { nullable: true })
-    latestLikeUser?: string | null
+    latestLikeUser?: User | null
 
     @Field(() => [User])
     latestThreeFollowedLikeUsers!: User[]
