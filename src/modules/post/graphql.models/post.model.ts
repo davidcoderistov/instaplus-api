@@ -20,4 +20,7 @@ export class Post {
 
     @Field(() => User)
     creator!: User
+
+    @Field()
+    createdAt!: Date
 }
