@@ -9,7 +9,8 @@ import { IPost } from './db.models/post.model'
 import { IPostLike } from './db.models/post-like.model'
 import { IPostSave } from './db.models/post-save.model'
 import { ICommentLike } from './db.models/comment-like.model'
-import { CreatePostDto } from './dtos'
+import { CreatePostDto, FindFollowedUsersPostsDto } from './dtos'
+import { FollowedUsersPosts } from './graphql.models'
 import { CustomValidationException } from '../../shared/exceptions'
 import { FileUpload } from 'graphql-upload-ts'
 import _difference from 'lodash/difference'
@@ -83,6 +84,10 @@ export class PostService implements IPostService {
         } catch (err) {
             throw err
         }
+    }
+
+    public async findFollowedUsersPosts(findFollowedUsersPostsDto: FindFollowedUsersPostsDto, userId: string): Promise<FollowedUsersPosts> {
+        return this._postRepository.findFollowedUsersPosts(findFollowedUsersPostsDto, userId)
     }
 
     public async findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<IHashtag[]> {

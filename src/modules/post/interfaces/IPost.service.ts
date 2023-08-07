@@ -3,12 +3,15 @@ import { IPost } from '../db.models/post.model'
 import { IPostLike } from '../db.models/post-like.model'
 import { IPostSave } from '../db.models/post-save.model'
 import { ICommentLike } from '../db.models/comment-like.model'
-import { CreatePostDto } from '../dtos'
+import { CreatePostDto, FindFollowedUsersPostsDto } from '../dtos'
+import { FollowedUsersPosts } from '../graphql.models'
 
 
 export interface IPostService {
 
     createPost(createPostDto: CreatePostDto, userId: string): Promise<IPost>
+
+    findFollowedUsersPosts(findFollowedUsersPostsDto: FindFollowedUsersPostsDto, userId: string): Promise<FollowedUsersPosts>
 
     findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<IHashtag[]>
 
