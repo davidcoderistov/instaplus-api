@@ -3,8 +3,8 @@ import { IPost } from '../db.models/post.model'
 import { IPostLike } from '../db.models/post-like.model'
 import { IPostSave } from '../db.models/post-save.model'
 import { ICommentLike } from '../db.models/comment-like.model'
-import { CreatePostDto, FindFollowedUsersPostsDto } from '../dtos'
-import { FollowedUsersPosts } from '../graphql.models'
+import { CreatePostDto, FindFollowedUsersPostsDto, FindUsersWhoLikedPostDto } from '../dtos'
+import { FollowedUsersPosts, UsersWhoLikedPost } from '../graphql.models'
 
 
 export interface IPostService {
@@ -26,4 +26,6 @@ export interface IPostService {
     likeComment(commentId: string, userId: string): Promise<ICommentLike>
 
     unlikeComment(commentId: string, userId: string): Promise<ICommentLike>
+
+    findUsersWhoLikedPost(findUsersWhoLikedPostDto: FindUsersWhoLikedPostDto, userId: string): Promise<UsersWhoLikedPost>
 }
