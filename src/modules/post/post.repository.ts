@@ -295,6 +295,13 @@ export class PostRepository implements IPostRepository {
                                     },
                                 },
                             },
+                            {
+                                $addFields: {
+                                    latestThreeFollowedLikeUsers: {
+                                        $slice: ['$latestThreeFollowedLikeUsers', 3],
+                                    },
+                                },
+                            },
                         ],
                         nextCursor: [
                             { $skip: limit },
