@@ -9,7 +9,7 @@ import {
 } from 'type-graphql'
 import { IPostService } from './interfaces/IPost.service'
 import { TYPES } from '../../container/types'
-import { Hashtag, Post, FollowedUsersPosts, UsersWhoLikedPost, PostLike } from './graphql.models'
+import { Hashtag, Post, FollowedUsersPosts, UsersWhoLikedPost, PostLike, PostSave } from './graphql.models'
 import { CreatePostDto, FindFollowedUsersPostsDto, FindUsersWhoLikedPostDto } from './dtos'
 import { Context } from '../../shared/types'
 
@@ -57,5 +57,15 @@ export class PostResolver {
     @Mutation(() => PostLike)
     public async unlikePost(@Arg('postId') postId: string, @Ctx() { userId }: Context): Promise<PostLike> {
         return await this._postService.unlikePost(postId, userId) as unknown as PostLike
+    }
+
+    @Mutation(() => PostSave)
+    public async savePost(@Arg('postId') postId: string, @Ctx() { userId }: Context): Promise<PostSave> {
+        return await this._postService.savePost(postId, userId) as unknown as PostSave
+    }
+
+    @Mutation(() => PostSave)
+    public async unsavePost(@Arg('postId') postId: string, @Ctx() { userId }: Context): Promise<PostSave> {
+        return await this._postService.unsavePost(postId, userId) as unknown as PostSave
     }
 }
