@@ -8,8 +8,9 @@ import { IHashtag } from './db.models/hashtag.model'
 import { IPost } from './db.models/post.model'
 import { IPostLike } from './db.models/post-like.model'
 import { IPostSave } from './db.models/post-save.model'
+import { IComment } from './db.models/comment.model'
 import { ICommentLike } from './db.models/comment-like.model'
-import { CreatePostDto, FindFollowedUsersPostsDto, FindUsersWhoLikedPostDto } from './dtos'
+import { CreatePostDto, FindFollowedUsersPostsDto, FindUsersWhoLikedPostDto, CreateCommentDto } from './dtos'
 import { FollowedUsersPosts, UsersWhoLikedPost } from './graphql.models'
 import { CustomValidationException } from '../../shared/exceptions'
 import { FileUpload } from 'graphql-upload-ts'
@@ -81,6 +82,34 @@ export class PostService implements IPostService {
             }
 
             return post
+        } catch (err) {
+            throw err
+        }
+    }
+
+    public async createComment(createCommentDto: CreateCommentDto, userId: string): Promise<IComment> {
+        try {
+            const { postId, replyCommentId } = createCommentDto
+            const creator = await this._userRepository.findUserById(userId)
+            if (!creator) {
+                return Promise.reject(new CustomValidationException('creatorId', `User ${userId} does not exist`))
+            }
+
+            if (!await this._postRepository.findPostById(postId)) {
+                return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} does not exist`))
+            }
+
+            if (replyCommentId) {
+                if (!await this._postRepository.findCommentById(replyCommentId)) {
+                    return Promise.reject(new CustomValidationException('commentId', `Comment with id ${replyCommentId} does not exist`))
+                }
+            }
+
+            return this._postRepository.createComment(createCommentDto, {
+                _id: creator._id,
+                username: creator.username,
+                photoUrl: creator.photoUrl,
+            })
         } catch (err) {
             throw err
         }
