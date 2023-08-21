@@ -36,7 +36,7 @@ export class PostResolver {
                 user: post.creator,
                 following: false,
             },
-        }
+        } as unknown as Post
     }
 
     @Query(() => FollowedUsersPosts)
