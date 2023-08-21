@@ -6,8 +6,14 @@ import { IPostLike } from '../db.models/post-like.model'
 import { IPostSave } from '../db.models/post-save.model'
 import { IComment } from '../db.models/comment.model'
 import { ICommentLike } from '../db.models/comment-like.model'
-import { CreatePostDto, CreateCommentDto, FindFollowedUsersPostsDto, FindUsersWhoLikedPostDto } from '../dtos'
-import { FollowedUsersPosts, UsersWhoLikedPost } from '../graphql.models'
+import {
+    CreatePostDto,
+    CreateCommentDto,
+    FindFollowedUsersPostsDto,
+    FindUsersWhoLikedPostDto,
+    FindCommentsForPostDto,
+} from '../dtos'
+import { FollowedUsersPosts, UsersWhoLikedPost, CommentsForPost } from '../graphql.models'
 
 
 export interface IPostRepository {
@@ -56,4 +62,6 @@ export interface IPostRepository {
     deleteCommentLike(commentId: string, userId: string): Promise<ICommentLike | null>
 
     findUsersWhoLikedPost(findUsersWhoLikedPostDto: FindUsersWhoLikedPostDto, userId: string): Promise<UsersWhoLikedPost>
+
+    findCommentsForPost(findCommentsForPostDto: FindCommentsForPostDto, userId: string): Promise<CommentsForPost>
 }
