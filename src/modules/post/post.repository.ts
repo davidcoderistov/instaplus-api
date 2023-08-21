@@ -10,7 +10,7 @@ import PostLikeModel, { IPostLike } from './db.models/post-like.model'
 import PostSaveModel, { IPostSave } from './db.models/post-save.model'
 import CommentModel, { IComment } from './db.models/comment.model'
 import CommentLikeModel, { ICommentLike } from './db.models/comment-like.model'
-import { CreatePostDto, FindFollowedUsersPostsDto, FindUsersWhoLikedPostDto } from './dtos'
+import { CreatePostDto, FindFollowedUsersPostsDto, FindUsersWhoLikedPostDto, CreateCommentDto } from './dtos'
 import { FollowedUsersPosts, UsersWhoLikedPost } from './graphql.models'
 import { getCursorPaginatedData } from '../../shared/utils/misc'
 import mongoose, { Types } from 'mongoose'
@@ -35,6 +35,21 @@ export class PostRepository implements IPostRepository {
         })
         await post.save()
         return post.toObject()
+    }
+
+    public async createComment({
+                                   text,
+                                   postId,
+                                   replyCommentId,
+                               }: CreateCommentDto, creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>): Promise<IComment> {
+        const comment = new CommentModel({
+            text,
+            creator,
+            postId,
+            ...replyCommentId && { commentId: replyCommentId },
+        })
+        await comment.save()
+        return comment.toObject()
     }
 
     public async createHashtag(name: string, postId: string): Promise<IHashtag> {
