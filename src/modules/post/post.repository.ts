@@ -328,7 +328,7 @@ export class PostRepository implements IPostRepository {
                                         $filter: {
                                             input: '$latestThreeFollowedLikeUsers',
                                             as: 'user',
-                                            cond: { $ne: ['$$user.photoURL', null] },
+                                            cond: { $ne: ['$$user.photoUrl', null] },
                                         },
                                     },
                                 },
