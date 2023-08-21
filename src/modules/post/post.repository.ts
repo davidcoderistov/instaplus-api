@@ -198,7 +198,7 @@ export class PostRepository implements IPostRepository {
                                 $cond: [{ $ifNull: ['$postLikes', false] }, 1, 0],
                             },
                         },
-                        latestLikeUserId: { $first: '$postLikes.userId' },
+                        latestTwoLikeUserIds: { $push: '$postLikes.userId' },
                         latestThreeFollowedLikeUserIds: {
                             $push: {
                                 $cond: {
@@ -239,7 +239,23 @@ export class PostRepository implements IPostRepository {
                             { $limit: limit },
                             {
                                 $addFields: {
-                                    latestLikeUserObjectId: { $toObjectId: '$latestLikeUserId' },
+                                    latestTwoLikeUserIds: {
+                                        $slice: ['$latestTwoLikeUserIds', 2],
+                                    },
+                                    latestThreeFollowedLikeUserIds: {
+                                        $slice: ['$latestThreeFollowedLikeUserIds', 3],
+                                    },
+                                },
+                            },
+                            {
+                                $addFields: {
+                                    latestTwoLikeUserObjectIds: {
+                                        $map: {
+                                            input: '$latestTwoLikeUserIds',
+                                            as: 'userId',
+                                            in: { $toObjectId: '$$userId' },
+                                        },
+                                    },
                                     latestThreeFollowedLikeUserObjectIds: {
                                         $map: {
                                             input: '$latestThreeFollowedLikeUserIds',
@@ -252,9 +268,28 @@ export class PostRepository implements IPostRepository {
                             {
                                 $lookup: {
                                     from: UserModel.collection.name,
-                                    localField: 'latestLikeUserObjectId',
-                                    foreignField: '_id',
-                                    as: 'latestLikeUser',
+                                    let: { latestTwoLikeUserObjectIds: '$latestTwoLikeUserObjectIds' },
+                                    pipeline: [
+                                        {
+                                            $match: {
+                                                $expr: { $in: ['$_id', '$$latestTwoLikeUserObjectIds'] },
+                                            },
+                                        },
+                                        {
+                                            $addFields: {
+                                                __order: { $indexOfArray: ['$$latestTwoLikeUserObjectIds', '$_id'] },
+                                            },
+                                        },
+                                        {
+                                            $sort: { __order: 1 },
+                                        },
+                                        {
+                                            $project: {
+                                                __order: 0,
+                                            },
+                                        },
+                                    ],
+                                    as: 'latestTwoLikeUsers',
                                 },
                             },
                             {
@@ -295,13 +330,6 @@ export class PostRepository implements IPostRepository {
                                             as: 'user',
                                             cond: { $ne: ['$$user.photoURL', null] },
                                         },
-                                    },
-                                },
-                            },
-                            {
-                                $addFields: {
-                                    latestThreeFollowedLikeUsers: {
-                                        $slice: ['$latestThreeFollowedLikeUsers', 3],
                                     },
                                 },
                             },
