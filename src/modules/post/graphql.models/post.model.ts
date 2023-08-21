@@ -1,5 +1,5 @@
 import { ObjectType, Field } from 'type-graphql'
-import { User } from '../../user/graphql.models'
+import { FollowableUser } from '../../user/graphql.models'
 import { Types } from 'mongoose'
 
 
@@ -18,8 +18,8 @@ export class Post {
     @Field(() => String, { nullable: true })
     location?: string | null
 
-    @Field(() => User)
-    creator!: User
+    @Field(() => FollowableUser)
+    creator!: FollowableUser
 
     @Field()
     createdAt!: Date

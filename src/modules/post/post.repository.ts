@@ -183,7 +183,10 @@ export class PostRepository implements IPostRepository {
                                 caption: '$caption',
                                 location: '$location',
                                 photoUrls: '$photoUrls',
-                                creator: '$creator',
+                                creator: {
+                                    user: '$creator',
+                                    following: true,
+                                },
                                 createdAt: '$createdAt',
                             },
                         },

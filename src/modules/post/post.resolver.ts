@@ -29,7 +29,14 @@ export class PostResolver {
 
     @Mutation(() => Post)
     public async createPost(@Args() createPostDto: CreatePostDto, @Ctx() { userId }: Context): Promise<Post> {
-        return await this._postService.createPost(createPostDto, userId) as unknown as Post
+        const post = await this._postService.createPost(createPostDto, userId)
+        return {
+            ...post,
+            creator: {
+                user: post.creator,
+                following: false,
+            },
+        }
     }
 
     @Query(() => FollowedUsersPosts)
