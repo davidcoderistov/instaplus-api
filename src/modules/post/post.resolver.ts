@@ -17,8 +17,15 @@ import {
     PostLike,
     PostSave,
     CommentsForPost,
+    UsersWhoLikedComment,
 } from './graphql.models'
-import { CreatePostDto, FindFollowedUsersPostsDto, FindUsersWhoLikedPostDto, FindCommentsForPostDto } from './dtos'
+import {
+    CreatePostDto,
+    FindFollowedUsersPostsDto,
+    FindUsersWhoLikedPostDto,
+    FindCommentsForPostDto,
+    FindUsersWhoLikedCommentDto,
+} from './dtos'
 import { Context } from '../../shared/types'
 
 
@@ -80,5 +87,10 @@ export class PostResolver {
     @Query(() => CommentsForPost)
     public async findCommentsForPost(@Args() findCommentsForPostDto: FindCommentsForPostDto, @Ctx() { userId }: Context): Promise<CommentsForPost> {
         return this._postService.findCommentsForPost(findCommentsForPostDto, userId)
+    }
+
+    @Query(() => UsersWhoLikedComment)
+    public async findUsersWhoLikedComment(@Args() findUsersWhoLikedCommentDto: FindUsersWhoLikedCommentDto, @Ctx() { userId }: Context): Promise<UsersWhoLikedComment> {
+        return this._postService.findUsersWhoLikedComment(findUsersWhoLikedCommentDto, userId)
     }
 }
