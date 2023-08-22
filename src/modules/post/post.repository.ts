@@ -16,8 +16,9 @@ import {
     FindUsersWhoLikedPostDto,
     CreateCommentDto,
     FindCommentsForPostDto,
+    FindUsersWhoLikedCommentDto,
 } from './dtos'
-import { FollowedUsersPosts, UsersWhoLikedPost, CommentsForPost } from './graphql.models'
+import { FollowedUsersPosts, UsersWhoLikedPost, CommentsForPost, UsersWhoLikedComment } from './graphql.models'
 import { getCursorPaginatedData, getOffsetPaginatedData } from '../../shared/utils/misc'
 import mongoose, { Types } from 'mongoose'
 
@@ -588,5 +589,95 @@ export class PostRepository implements IPostRepository {
             },
         ])
         return getOffsetPaginatedData(aggregateComments)
+    }
+
+    public async findUsersWhoLikedComment({
+                                              commentId,
+                                              cursor,
+                                              limit,
+                                          }: FindUsersWhoLikedCommentDto, userId: string): Promise<UsersWhoLikedComment> {
+        try {
+            const followedUsersIds = await this._userRepository.findFollowedUserIds(userId)
+
+            const usersWhoLikedComment = await CommentLikeModel.aggregate([
+                {
+                    $match: { commentId },
+                },
+                {
+                    $sort: { createdAt: -1, _id: -1 },
+                },
+                ...(cursor ? [
+                    {
+                        $match: {
+                            $or: [
+                                { createdAt: { $lt: cursor.createdAt } },
+                                {
+                                    $and: [
+                                        { createdAt: cursor.createdAt },
+                                        {
+                                            $or: [
+                                                { _id: { $lt: new mongoose.Types.ObjectId(cursor._id) } },
+                                                { _id: new mongoose.Types.ObjectId(cursor._id) },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ] : []),
+                {
+                    $facet: {
+                        data: [
+                            { $limit: limit },
+                            {
+                                $addFields: {
+                                    userObjectId: { $toObjectId: '$userId' },
+                                },
+                            },
+                            {
+                                $lookup: {
+                                    from: UserModel.collection.name,
+                                    localField: 'userObjectId',
+                                    foreignField: '_id',
+                                    as: 'user',
+                                },
+                            },
+                            {
+                                $addFields: {
+                                    user: {
+                                        $arrayElemAt: ['$user', 0],
+                                    },
+                                },
+                            },
+                            {
+                                $project: {
+                                    user: 1,
+                                    following: {
+                                        $in: ['$userId', followedUsersIds],
+                                    },
+                                },
+                            },
+                        ],
+                        nextCursor: [
+                            { $skip: limit },
+                            {
+                                $limit: 1,
+                            },
+                            {
+                                $project: {
+                                    _id: '$_id',
+                                    createdAt: '$createdAt',
+                                },
+                            },
+                        ],
+                    },
+                },
+            ])
+
+            return getCursorPaginatedData(usersWhoLikedComment) as unknown as UsersWhoLikedComment
+        } catch (err) {
+            throw err
+        }
     }
 }
