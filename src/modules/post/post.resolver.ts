@@ -20,9 +20,11 @@ import {
     UsersWhoLikedComment,
     CommentLike,
     CommentReplies,
+    Comment,
 } from './graphql.models'
 import {
     CreatePostDto,
+    CreateCommentDto,
     FindFollowedUsersPostsDto,
     FindUsersWhoLikedPostDto,
     FindCommentsForPostDto,
@@ -55,6 +57,17 @@ export class PostResolver {
                 following: false,
             },
         } as unknown as Post
+    }
+
+    @Mutation(() => Comment)
+    public async createComment(@Args() createCommentDto: CreateCommentDto, @Ctx() { userId }: Context): Promise<Comment> {
+        const comment = await this._postService.createComment(createCommentDto, userId)
+        return {
+            ...comment,
+            liked: false,
+            likesCount: 0,
+            repliesCount: 0,
+        } as unknown as Comment
     }
 
     @Query(() => FollowedUsersPosts)
