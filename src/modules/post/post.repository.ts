@@ -17,8 +17,15 @@ import {
     CreateCommentDto,
     FindCommentsForPostDto,
     FindUsersWhoLikedCommentDto,
+    FindCommentRepliesDto,
 } from './dtos'
-import { FollowedUsersPosts, UsersWhoLikedPost, CommentsForPost, UsersWhoLikedComment } from './graphql.models'
+import {
+    FollowedUsersPosts,
+    UsersWhoLikedPost,
+    CommentsForPost,
+    UsersWhoLikedComment,
+    CommentReplies,
+} from './graphql.models'
 import { getCursorPaginatedData, getOffsetPaginatedData } from '../../shared/utils/misc'
 import mongoose, { Types } from 'mongoose'
 
@@ -679,5 +686,69 @@ export class PostRepository implements IPostRepository {
         } catch (err) {
             throw err
         }
+    }
+
+    public async findCommentReplies({
+                                        commentId,
+                                        offset,
+                                        limit,
+                                    }: FindCommentRepliesDto, userId: string): Promise<CommentReplies> {
+
+        const aggregateComments = await CommentModel.aggregate([
+            {
+                $match: {
+                    commentId,
+                },
+            },
+            {
+                $sort: { createdAt: 1 },
+            },
+            {
+                $facet: {
+                    metadata: [{
+                        $count: 'count',
+                    }],
+                    data: [
+                        {
+                            $skip: offset,
+                        },
+                        {
+                            $limit: limit,
+                        },
+                        {
+                            $addFields: {
+                                commentId: { $toString: '$_id' },
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: CommentLikeModel.collection.name,
+                                localField: 'commentId',
+                                foreignField: 'commentId',
+                                as: 'commentLikes',
+                            },
+                        },
+                        {
+                            $lookup: {
+                                from: CommentModel.collection.name,
+                                localField: 'commentId',
+                                foreignField: 'commentId',
+                                as: 'commentReplies',
+                            },
+                        },
+                        {
+                            $addFields: {
+                                liked: {
+                                    $in: [userId, '$commentLikes.userId'],
+                                },
+                                likesCount: { $size: '$commentLikes' },
+                                repliesCount: { $size: '$commentReplies' },
+                            },
+                        },
+                    ],
+                },
+            },
+        ])
+        return getOffsetPaginatedData(aggregateComments)
     }
 }
