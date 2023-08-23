@@ -11,8 +11,15 @@ import {
     CreateCommentDto,
     FindCommentsForPostDto,
     FindUsersWhoLikedCommentDto,
+    FindCommentRepliesDto,
 } from '../dtos'
-import { FollowedUsersPosts, UsersWhoLikedPost, CommentsForPost, UsersWhoLikedComment } from '../graphql.models'
+import {
+    FollowedUsersPosts,
+    UsersWhoLikedPost,
+    CommentsForPost,
+    UsersWhoLikedComment,
+    CommentReplies,
+} from '../graphql.models'
 
 
 export interface IPostService {
@@ -42,4 +49,6 @@ export interface IPostService {
     findCommentsForPost(findCommentsForPostDto: FindCommentsForPostDto, userId: string): Promise<CommentsForPost>
 
     findUsersWhoLikedComment(findUsersWhoLikedCommentDto: FindUsersWhoLikedCommentDto, userId: string): Promise<UsersWhoLikedComment>
+
+    findCommentReplies(findCommentRepliesDto: FindCommentRepliesDto, userId: string): Promise<CommentReplies>
 }

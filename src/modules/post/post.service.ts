@@ -17,8 +17,15 @@ import {
     CreateCommentDto,
     FindCommentsForPostDto,
     FindUsersWhoLikedCommentDto,
+    FindCommentRepliesDto,
 } from './dtos'
-import { FollowedUsersPosts, UsersWhoLikedPost, CommentsForPost, UsersWhoLikedComment } from './graphql.models'
+import {
+    FollowedUsersPosts,
+    UsersWhoLikedPost,
+    CommentsForPost,
+    UsersWhoLikedComment,
+    CommentReplies,
+} from './graphql.models'
 import { CustomValidationException } from '../../shared/exceptions'
 import { FileUpload } from 'graphql-upload-ts'
 import _difference from 'lodash/difference'
@@ -266,5 +273,9 @@ export class PostService implements IPostService {
 
     public async findUsersWhoLikedComment(findUsersWhoLikedCommentDto: FindUsersWhoLikedCommentDto, userId: string): Promise<UsersWhoLikedComment> {
         return this._postRepository.findUsersWhoLikedComment(findUsersWhoLikedCommentDto, userId)
+    }
+
+    public async findCommentReplies(findCommentRepliesDto: FindCommentRepliesDto, userId: string): Promise<CommentReplies> {
+        return this._postRepository.findCommentReplies(findCommentRepliesDto, userId)
     }
 }
