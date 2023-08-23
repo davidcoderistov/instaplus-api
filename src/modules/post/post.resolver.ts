@@ -19,6 +19,7 @@ import {
     CommentsForPost,
     UsersWhoLikedComment,
     CommentLike,
+    CommentReplies,
 } from './graphql.models'
 import {
     CreatePostDto,
@@ -26,6 +27,7 @@ import {
     FindUsersWhoLikedPostDto,
     FindCommentsForPostDto,
     FindUsersWhoLikedCommentDto,
+    FindCommentRepliesDto,
 } from './dtos'
 import { Context } from '../../shared/types'
 
@@ -103,5 +105,10 @@ export class PostResolver {
     @Mutation(() => CommentLike)
     public async unlikeComment(@Arg('commentId') commentId: string, @Ctx() { userId }: Context): Promise<CommentLike> {
         return await this._postService.unlikeComment(commentId, userId) as unknown as CommentLike
+    }
+
+    @Query(() => CommentReplies)
+    public async findCommentReplies(@Args() findCommentRepliesDto: FindCommentRepliesDto, @Ctx() { userId }: Context): Promise<CommentReplies> {
+        return this._postService.findCommentReplies(findCommentRepliesDto, userId)
     }
 }
