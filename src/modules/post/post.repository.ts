@@ -145,102 +145,6 @@ export class PostRepository implements IPostRepository {
                     },
                 },
                 {
-                    $lookup: {
-                        from: CommentModel.collection.name,
-                        localField: 'postId',
-                        foreignField: 'postId',
-                        as: 'comments',
-                    },
-                },
-                {
-                    $project: {
-                        _id: 1,
-                        postId: 1,
-                        creatorId: 1,
-                        caption: 1,
-                        location: 1,
-                        photoUrls: 1,
-                        creator: 1,
-                        commentsCount: { $size: '$comments' },
-                        createdAt: 1,
-                    },
-                },
-                {
-                    $lookup: {
-                        from: PostLikeModel.collection.name,
-                        localField: 'postId',
-                        foreignField: 'postId',
-                        as: 'postLikes',
-                    },
-                },
-                {
-                    $addFields: {
-                        liked: {
-                            $in: [userId, '$postLikes.userId'],
-                        },
-                    },
-                },
-                {
-                    $lookup: {
-                        from: PostSaveModel.collection.name,
-                        localField: 'postId',
-                        foreignField: 'postId',
-                        as: 'postSaves',
-                    },
-                },
-                {
-                    $addFields: {
-                        saved: {
-                            $in: [userId, '$postSaves.userId'],
-                        },
-                    },
-                },
-                {
-                    $unwind: {
-                        path: '$postLikes',
-                        preserveNullAndEmptyArrays: true,
-                    },
-                },
-                {
-                    $sort: { 'postLikes.createdAt': -1 },
-                },
-                {
-                    $group: {
-                        _id: '$_id',
-                        post: {
-                            $first: {
-                                _id: '$_id',
-                                caption: '$caption',
-                                location: '$location',
-                                photoUrls: '$photoUrls',
-                                creator: {
-                                    user: '$creator',
-                                    following: true,
-                                },
-                                createdAt: '$createdAt',
-                            },
-                        },
-                        liked: { $first: '$liked' },
-                        saved: { $first: '$saved' },
-                        commentsCount: { $first: '$commentsCount' },
-                        likesCount: {
-                            $sum: {
-                                $cond: [{ $ifNull: ['$postLikes', false] }, 1, 0],
-                            },
-                        },
-                        latestTwoLikeUserIds: { $push: '$postLikes.userId' },
-                        latestThreeFollowedLikeUserIds: {
-                            $push: {
-                                $cond: {
-                                    if: { $in: ['$postLikes.userId', followedUsersIds] },
-                                    then: '$postLikes.userId',
-                                    else: '$$REMOVE',
-                                },
-                            },
-                        },
-                    },
-                },
-                {
                     $sort: { 'post.createdAt': -1, 'post._id': -1 },
                 },
                 ...(cursor ? [
@@ -267,6 +171,116 @@ export class PostRepository implements IPostRepository {
                     $facet: {
                         data: [
                             { $limit: limit },
+                            {
+                                $lookup: {
+                                    from: CommentModel.collection.name,
+                                    let: { postId: '$postId' },
+                                    pipeline: [
+                                        {
+                                            $match: {
+                                                $expr: {
+                                                    $and: [
+                                                        { $eq: ['$postId', '$$postId'] },
+                                                        { $eq: ['$commentId', null] },
+                                                    ],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                    as: 'comments',
+                                },
+                            },
+                            {
+                                $project: {
+                                    _id: 1,
+                                    postId: 1,
+                                    creatorId: 1,
+                                    caption: 1,
+                                    location: 1,
+                                    photoUrls: 1,
+                                    creator: 1,
+                                    commentsCount: { $size: '$comments' },
+                                    createdAt: 1,
+                                },
+                            },
+                            {
+                                $lookup: {
+                                    from: PostLikeModel.collection.name,
+                                    localField: 'postId',
+                                    foreignField: 'postId',
+                                    as: 'postLikes',
+                                },
+                            },
+                            {
+                                $addFields: {
+                                    liked: {
+                                        $in: [userId, '$postLikes.userId'],
+                                    },
+                                },
+                            },
+                            {
+                                $lookup: {
+                                    from: PostSaveModel.collection.name,
+                                    localField: 'postId',
+                                    foreignField: 'postId',
+                                    as: 'postSaves',
+                                },
+                            },
+                            {
+                                $addFields: {
+                                    saved: {
+                                        $in: [userId, '$postSaves.userId'],
+                                    },
+                                },
+                            },
+                            {
+                                $unwind: {
+                                    path: '$postLikes',
+                                    preserveNullAndEmptyArrays: true,
+                                },
+                            },
+                            {
+                                $sort: { 'postLikes.createdAt': -1 },
+                            },
+                            {
+                                $group: {
+                                    _id: '$_id',
+                                    post: {
+                                        $first: {
+                                            _id: '$_id',
+                                            caption: '$caption',
+                                            location: '$location',
+                                            photoUrls: '$photoUrls',
+                                            creator: {
+                                                user: '$creator',
+                                                following: true,
+                                            },
+                                            createdAt: '$createdAt',
+                                        },
+                                    },
+                                    liked: { $first: '$liked' },
+                                    saved: { $first: '$saved' },
+                                    commentsCount: { $first: '$commentsCount' },
+                                    likesCount: {
+                                        $sum: {
+                                            $cond: [{ $ifNull: ['$postLikes', false] }, 1, 0],
+                                        },
+                                    },
+                                    latestTwoLikeUserIds: { $push: '$postLikes.userId' },
+                                    latestThreeFollowedLikeUserIds: {
+                                        $push: {
+                                            $cond: {
+                                                if: { $in: ['$postLikes.userId', followedUsersIds] },
+                                                then: '$postLikes.userId',
+                                                else: '$$REMOVE',
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                            {
+                                $sort: { 'post.createdAt': -1, 'post._id': -1 },
+                            },
                             {
                                 $addFields: {
                                     latestTwoLikeUserIds: {
@@ -770,8 +784,19 @@ export class PostRepository implements IPostRepository {
                 {
                     $lookup: {
                         from: CommentModel.collection.name,
-                        localField: 'postId',
-                        foreignField: 'postId',
+                        let: { postId: '$postId' },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [
+                                            { $eq: ['$postId', '$$postId'] },
+                                            { $eq: ['$commentId', null] },
+                                        ],
+                                    },
+                                },
+                            },
+                        ],
                         as: 'comments',
                     },
                 },
