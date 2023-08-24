@@ -25,6 +25,7 @@ import {
     CommentsForPost,
     UsersWhoLikedComment,
     CommentReplies,
+    PostDetails,
 } from './graphql.models'
 import { CustomValidationException } from '../../shared/exceptions'
 import { FileUpload } from 'graphql-upload-ts'
@@ -277,5 +278,9 @@ export class PostService implements IPostService {
 
     public async findCommentReplies(findCommentRepliesDto: FindCommentRepliesDto, userId: string): Promise<CommentReplies> {
         return this._postRepository.findCommentReplies(findCommentRepliesDto, userId)
+    }
+
+    public async findPostDetailsById(postId: string, userId: string): Promise<PostDetails | null> {
+        return this._postRepository.findPostDetailsById(postId, userId)
     }
 }

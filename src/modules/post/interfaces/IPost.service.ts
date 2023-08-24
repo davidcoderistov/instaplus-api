@@ -19,6 +19,7 @@ import {
     CommentsForPost,
     UsersWhoLikedComment,
     CommentReplies,
+    PostDetails,
 } from '../graphql.models'
 
 
@@ -51,4 +52,6 @@ export interface IPostService {
     findUsersWhoLikedComment(findUsersWhoLikedCommentDto: FindUsersWhoLikedCommentDto, userId: string): Promise<UsersWhoLikedComment>
 
     findCommentReplies(findCommentRepliesDto: FindCommentRepliesDto, userId: string): Promise<CommentReplies>
+
+    findPostDetailsById(postId: string, userId: string): Promise<PostDetails | null>
 }
