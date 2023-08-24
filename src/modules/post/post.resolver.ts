@@ -21,6 +21,7 @@ import {
     CommentLike,
     CommentReplies,
     Comment,
+    PostDetails,
 } from './graphql.models'
 import {
     CreatePostDto,
@@ -123,5 +124,10 @@ export class PostResolver {
     @Query(() => CommentReplies)
     public async findCommentReplies(@Args() findCommentRepliesDto: FindCommentRepliesDto, @Ctx() { userId }: Context): Promise<CommentReplies> {
         return this._postService.findCommentReplies(findCommentRepliesDto, userId)
+    }
+
+    @Query(() => PostDetails)
+    public async findPostDetailsById(@Arg('postId') postId: string, @Ctx() { userId }: Context): Promise<PostDetails | null> {
+        return this._postService.findPostDetailsById(postId, userId)
     }
 }
