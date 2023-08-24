@@ -25,6 +25,7 @@ import {
     CommentsForPost,
     UsersWhoLikedComment,
     CommentReplies,
+    PostDetails,
 } from './graphql.models'
 import { getCursorPaginatedData, getOffsetPaginatedData } from '../../shared/utils/misc'
 import mongoose, { Types } from 'mongoose'
@@ -750,5 +751,223 @@ export class PostRepository implements IPostRepository {
             },
         ])
         return getOffsetPaginatedData(aggregateComments)
+    }
+
+    public async findPostDetailsById(postId: string, userId: string): Promise<PostDetails | null> {
+        try {
+            const followedUsersIds = await this._userRepository.findFollowedUserIds(userId)
+
+            const posts: PostDetails[] = await PostModel.aggregate([
+                {
+                    $addFields: {
+                        postId: { $toString: '$_id' },
+                        creatorId: { $toString: '$creator._id' },
+                    },
+                },
+                {
+                    $match: { postId },
+                },
+                {
+                    $lookup: {
+                        from: CommentModel.collection.name,
+                        localField: 'postId',
+                        foreignField: 'postId',
+                        as: 'comments',
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        postId: 1,
+                        creatorId: 1,
+                        caption: 1,
+                        location: 1,
+                        photoUrls: 1,
+                        creator: 1,
+                        commentsCount: { $size: '$comments' },
+                        createdAt: 1,
+                    },
+                },
+                {
+                    $lookup: {
+                        from: PostLikeModel.collection.name,
+                        localField: 'postId',
+                        foreignField: 'postId',
+                        as: 'postLikes',
+                    },
+                },
+                {
+                    $addFields: {
+                        liked: {
+                            $in: [userId, '$postLikes.userId'],
+                        },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: PostSaveModel.collection.name,
+                        localField: 'postId',
+                        foreignField: 'postId',
+                        as: 'postSaves',
+                    },
+                },
+                {
+                    $addFields: {
+                        saved: {
+                            $in: [userId, '$postSaves.userId'],
+                        },
+                    },
+                },
+                {
+                    $unwind: {
+                        path: '$postLikes',
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+                {
+                    $sort: { 'postLikes.createdAt': -1 },
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        post: {
+                            $first: {
+                                _id: '$_id',
+                                caption: '$caption',
+                                location: '$location',
+                                photoUrls: '$photoUrls',
+                                creator: {
+                                    user: '$creator',
+                                    following: true,
+                                },
+                                createdAt: '$createdAt',
+                            },
+                        },
+                        liked: { $first: '$liked' },
+                        saved: { $first: '$saved' },
+                        commentsCount: { $first: '$commentsCount' },
+                        likesCount: {
+                            $sum: {
+                                $cond: [{ $ifNull: ['$postLikes', false] }, 1, 0],
+                            },
+                        },
+                        latestTwoLikeUserIds: { $push: '$postLikes.userId' },
+                        latestThreeFollowedLikeUserIds: {
+                            $push: {
+                                $cond: {
+                                    if: { $in: ['$postLikes.userId', followedUsersIds] },
+                                    then: '$postLikes.userId',
+                                    else: '$$REMOVE',
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $addFields: {
+                        latestTwoLikeUserIds: {
+                            $slice: ['$latestTwoLikeUserIds', 2],
+                        },
+                        latestThreeFollowedLikeUserIds: {
+                            $slice: ['$latestThreeFollowedLikeUserIds', 3],
+                        },
+                    },
+                },
+                {
+                    $addFields: {
+                        latestTwoLikeUserObjectIds: {
+                            $map: {
+                                input: '$latestTwoLikeUserIds',
+                                as: 'userId',
+                                in: { $toObjectId: '$$userId' },
+                            },
+                        },
+                        latestThreeFollowedLikeUserObjectIds: {
+                            $map: {
+                                input: '$latestThreeFollowedLikeUserIds',
+                                as: 'userId',
+                                in: { $toObjectId: '$$userId' },
+                            },
+                        },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: UserModel.collection.name,
+                        let: { latestTwoLikeUserObjectIds: '$latestTwoLikeUserObjectIds' },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: { $in: ['$_id', '$$latestTwoLikeUserObjectIds'] },
+                                },
+                            },
+                            {
+                                $addFields: {
+                                    __order: { $indexOfArray: ['$$latestTwoLikeUserObjectIds', '$_id'] },
+                                },
+                            },
+                            {
+                                $sort: { __order: 1 },
+                            },
+                            {
+                                $project: {
+                                    __order: 0,
+                                },
+                            },
+                        ],
+                        as: 'latestTwoLikeUsers',
+                    },
+                },
+                {
+                    $lookup: {
+                        from: UserModel.collection.name,
+                        let: { latestThreeFollowedLikeUserObjectIds: '$latestThreeFollowedLikeUserObjectIds' },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: { $in: ['$_id', '$$latestThreeFollowedLikeUserObjectIds'] },
+                                },
+                            },
+                            {
+                                $addFields: {
+                                    __order: { $indexOfArray: ['$$latestThreeFollowedLikeUserObjectIds', '$_id'] },
+                                },
+                            },
+                            {
+                                $sort: { __order: 1 },
+                            },
+                            {
+                                $project: {
+                                    __order: 0,
+                                },
+                            },
+                        ],
+                        as: 'latestThreeFollowedLikeUsers',
+                    },
+                },
+                {
+                    $addFields: {
+                        latestLikeUser: {
+                            $arrayElemAt: ['$latestLikeUser', 0],
+                        },
+                        latestThreeFollowedLikeUsers: {
+                            $filter: {
+                                input: '$latestThreeFollowedLikeUsers',
+                                as: 'user',
+                                cond: { $ne: ['$$user.photoUrl', null] },
+                            },
+                        },
+                    },
+                },
+            ])
+
+            if (posts.length > 0) {
+                return posts[0]
+            }
+
+            return null
+        } catch (err) {
+            throw err
+        }
     }
 }
