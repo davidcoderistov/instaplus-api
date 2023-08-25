@@ -4,8 +4,9 @@ import {
     RefreshDto,
     FindUsersBySearchQueryDto,
     FindFollowingForUserDto,
+    FindFollowersForUserDto,
 } from '../dtos'
-import { AuthUser, User, FollowableUser, FollowingForUser } from '../graphql.models'
+import { AuthUser, User, FollowableUser, FollowingForUser, FollowersForUser } from '../graphql.models'
 
 
 export interface IUserService {
@@ -24,4 +25,6 @@ export interface IUserService {
     unfollowUser(followingUserId: string, followedUserId: string): Promise<FollowableUser>
 
     findFollowingForUser(findFollowingForUserDto: FindFollowingForUserDto, userId: string): Promise<FollowingForUser>
+
+    findFollowersForUser(findFollowersForUserDto: FindFollowersForUserDto, userId: string): Promise<FollowersForUser>
 }

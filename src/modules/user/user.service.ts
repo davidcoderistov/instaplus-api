@@ -7,8 +7,9 @@ import {
     RefreshDto,
     FindUsersBySearchQueryDto,
     FindFollowingForUserDto,
+    FindFollowersForUserDto,
 } from './dtos'
-import { AuthUser, User, FollowableUser, FollowingForUser } from './graphql.models'
+import { AuthUser, User, FollowableUser, FollowingForUser, FollowersForUser } from './graphql.models'
 import { TYPES } from '../../container/types'
 import bcrypt from 'bcrypt'
 import {
@@ -218,5 +219,9 @@ export class UserService implements IUserService {
 
     public async findFollowingForUser(findFollowingForUserDto: FindFollowingForUserDto, userId: string): Promise<FollowingForUser> {
         return this._userRepository.findFollowingForUser(findFollowingForUserDto, userId)
+    }
+
+    public async findFollowersForUser(findFollowersForUserDto: FindFollowersForUserDto, userId: string): Promise<FollowersForUser> {
+        return this._userRepository.findFollowersForUser(findFollowersForUserDto, userId)
     }
 }
