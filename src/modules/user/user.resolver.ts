@@ -6,8 +6,9 @@ import {
     SignUpDto,
     SignInDto,
     FindUsersBySearchQueryDto,
+    FindFollowingForUserDto,
 } from './dtos'
-import { AuthUser, User, FollowableUser } from './graphql.models'
+import { AuthUser, User, FollowableUser, FollowingForUser } from './graphql.models'
 import { Context } from '../../shared/types'
 
 
@@ -60,5 +61,10 @@ export class UserResolver {
     @Mutation(() => FollowableUser)
     public async unfollowUser(@Arg('followedUserId') followedUserId: string, @Ctx() { userId }: Context): Promise<FollowableUser> {
         return this._userService.unfollowUser(userId, followedUserId)
+    }
+
+    @Query(() => FollowingForUser)
+    public async findFollowingForUser(@Args() findFollowingForUserDto: FindFollowingForUserDto, @Ctx() { userId }: Context): Promise<FollowingForUser> {
+        return this._userService.findFollowingForUser(findFollowingForUserDto, userId)
     }
 }
