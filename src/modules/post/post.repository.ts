@@ -995,4 +995,12 @@ export class PostRepository implements IPostRepository {
             throw err
         }
     }
+
+    public async findPostsForUser(userId: string, limit: number): Promise<IPost[]> {
+        return PostModel
+            .find({ 'creator._id': new mongoose.Types.ObjectId(userId) })
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .lean()
+    }
 }

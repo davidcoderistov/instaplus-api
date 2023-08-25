@@ -79,4 +79,6 @@ export interface IPostRepository {
     findCommentReplies(findCommentRepliesDto: FindCommentRepliesDto, userId: string): Promise<CommentReplies>
 
     findPostDetailsById(postId: string, userId: string): Promise<PostDetails | null>
+
+    findPostsForUser(userId: string, limit: number): Promise<IPost[]>
 }
