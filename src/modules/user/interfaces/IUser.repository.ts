@@ -1,7 +1,7 @@
-import { SignUpDto, FindUsersBySearchQueryDto } from '../dtos'
+import { SignUpDto, FindUsersBySearchQueryDto, FindFollowingForUserDto } from '../dtos'
 import { IUser } from '../db.models/user.model'
 import { IFollow } from '../db.models/follow.model'
-import { SearchUser } from '../graphql.models'
+import { SearchUser, FollowingForUser } from '../graphql.models'
 
 
 export interface IUserRepository {
@@ -28,4 +28,6 @@ export interface IUserRepository {
     followUser(followingUserId: string, followedUserId: string): Promise<IFollow>
 
     unfollowUser(followingUserId: string, followedUserId: string): Promise<IFollow | null>
+
+    findFollowingForUser(findFollowingForUserDto: FindFollowingForUserDto, userId: string): Promise<FollowingForUser>
 }

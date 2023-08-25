@@ -2,9 +2,10 @@ import { injectable } from 'inversify'
 import { IUserRepository } from './interfaces/IUser.repository'
 import UserModel, { IUser } from './db.models/user.model'
 import FollowModel, { IFollow } from './db.models/follow.model'
-import { FindUsersBySearchQueryDto, SignUpDto } from './dtos'
-import { SearchUser } from './graphql.models'
+import { FindUsersBySearchQueryDto, SignUpDto, FindFollowingForUserDto } from './dtos'
+import { SearchUser, FollowingForUser } from './graphql.models'
 import { Types } from 'mongoose'
+import { getCursorPaginatedData } from '../../shared/utils/misc'
 
 
 @injectable()
@@ -310,5 +311,87 @@ export class UserRepository implements IUserRepository {
 
     public async unfollowUser(followingUserId: string, followedUserId: string): Promise<IFollow | null> {
         return FollowModel.findOneAndDelete({ followingUserId, followedUserId })
+    }
+
+    public async findFollowingForUser({
+                                          userId,
+                                          cursor,
+                                          limit,
+                                      }: FindFollowingForUserDto, loggedInUserId: string): Promise<FollowingForUser> {
+        try {
+            const followedUsersIds = await this.findFollowedUserIds(loggedInUserId)
+
+            const followingForUser = await FollowModel.aggregate([
+                {
+                    $match: { followingUserId: userId },
+                },
+                {
+                    $sort: { createdAt: -1, _id: -1 },
+                },
+                ...(cursor ? [
+                    {
+                        $match: {
+                            $or: [
+                                { createdAt: { $lt: cursor.createdAt } },
+                                {
+                                    $and: [
+                                        { createdAt: cursor.createdAt },
+                                        {
+                                            $or: [
+                                                { _id: { $lt: new Types.ObjectId(cursor._id) } },
+                                                { _id: new Types.ObjectId(cursor._id) },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ] : []),
+                {
+                    $facet: {
+                        data: [
+                            { $limit: limit },
+                            {
+                                $addFields: {
+                                    following: { $in: ['$followedUserId', followedUsersIds] },
+                                    followedUserObjectId: { $toObjectId: '$followedUserId' },
+                                },
+                            },
+                            {
+                                $lookup: {
+                                    from: UserModel.collection.name,
+                                    localField: 'followedUserObjectId',
+                                    foreignField: '_id',
+                                    as: 'followedUsers',
+                                },
+                            },
+                            {
+                                $project: {
+                                    user: { $ifNull: [{ $arrayElemAt: ['$followedUsers', 0] }, null] },
+                                    following: 1,
+                                },
+                            },
+                        ],
+                        nextCursor: [
+                            { $skip: limit },
+                            {
+                                $limit: 1,
+                            },
+                            {
+                                $project: {
+                                    _id: '$_id',
+                                    createdAt: '$createdAt',
+                                },
+                            },
+                        ],
+                    },
+                },
+            ])
+
+            return getCursorPaginatedData(followingForUser) as unknown as FollowingForUser
+        } catch (err) {
+            throw err
+        }
     }
 }
