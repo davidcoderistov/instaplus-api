@@ -130,4 +130,9 @@ export class PostResolver {
     public async findPostDetailsById(@Arg('postId') postId: string, @Ctx() { userId }: Context): Promise<PostDetails | null> {
         return this._postService.findPostDetailsById(postId, userId)
     }
+
+    @Query(() => [Post])
+    public async findPostsForUser(@Arg('limit') limit: number, @Ctx() { userId }: Context): Promise<Post[]> {
+        return await this._postService.findPostsForUser(userId, limit) as unknown as Post[]
+    }
 }
