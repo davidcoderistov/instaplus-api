@@ -31,6 +31,7 @@ import {
     FindCommentsForPostDto,
     FindUsersWhoLikedCommentDto,
     FindCommentRepliesDto,
+    FindPostsForUserDto,
 } from './dtos'
 import { Context } from '../../shared/types'
 
@@ -132,7 +133,7 @@ export class PostResolver {
     }
 
     @Query(() => [Post])
-    public async findPostsForUser(@Arg('limit') limit: number, @Ctx() { userId }: Context): Promise<Post[]> {
-        return await this._postService.findPostsForUser(userId, limit) as unknown as Post[]
+    public async findPostsForUser(@Args() findPostsForUserDto: FindPostsForUserDto): Promise<Post[]> {
+        return await this._postService.findPostsForUser(findPostsForUserDto) as unknown as Post[]
     }
 }

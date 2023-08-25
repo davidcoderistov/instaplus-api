@@ -18,6 +18,7 @@ import {
     FindCommentsForPostDto,
     FindUsersWhoLikedCommentDto,
     FindCommentRepliesDto,
+    FindPostsForUserDto,
 } from './dtos'
 import {
     FollowedUsersPosts,
@@ -284,7 +285,7 @@ export class PostService implements IPostService {
         return this._postRepository.findPostDetailsById(postId, userId)
     }
 
-    public async findPostsForUser(userId: string, limit: number): Promise<IPost[]> {
-        return this._postRepository.findPostsForUser(userId, limit)
+    public async findPostsForUser(findPostsForUserDto: FindPostsForUserDto): Promise<IPost[]> {
+        return this._postRepository.findPostsForUser(findPostsForUserDto)
     }
 }

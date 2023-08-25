@@ -14,6 +14,7 @@ import {
     FindCommentsForPostDto,
     FindUsersWhoLikedCommentDto,
     FindCommentRepliesDto,
+    FindPostsForUserDto,
 } from '../dtos'
 import {
     FollowedUsersPosts,
@@ -80,5 +81,5 @@ export interface IPostRepository {
 
     findPostDetailsById(postId: string, userId: string): Promise<PostDetails | null>
 
-    findPostsForUser(userId: string, limit: number): Promise<IPost[]>
+    findPostsForUser(findPostsForUserDto: FindPostsForUserDto): Promise<IPost[]>
 }

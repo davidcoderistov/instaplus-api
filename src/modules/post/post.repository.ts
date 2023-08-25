@@ -18,6 +18,7 @@ import {
     FindCommentsForPostDto,
     FindUsersWhoLikedCommentDto,
     FindCommentRepliesDto,
+    FindPostsForUserDto,
 } from './dtos'
 import {
     FollowedUsersPosts,
@@ -996,7 +997,7 @@ export class PostRepository implements IPostRepository {
         }
     }
 
-    public async findPostsForUser(userId: string, limit: number): Promise<IPost[]> {
+    public async findPostsForUser({ userId, limit }: FindPostsForUserDto): Promise<IPost[]> {
         return PostModel
             .find({ 'creator._id': new mongoose.Types.ObjectId(userId) })
             .sort({ createdAt: -1 })
