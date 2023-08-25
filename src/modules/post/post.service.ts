@@ -283,4 +283,8 @@ export class PostService implements IPostService {
     public async findPostDetailsById(postId: string, userId: string): Promise<PostDetails | null> {
         return this._postRepository.findPostDetailsById(postId, userId)
     }
+
+    public async findPostsForUser(userId: string, limit: number): Promise<IPost[]> {
+        return this._postRepository.findPostsForUser(userId, limit)
+    }
 }
