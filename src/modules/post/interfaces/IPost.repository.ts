@@ -82,4 +82,6 @@ export interface IPostRepository {
     findPostDetailsById(postId: string, userId: string): Promise<PostDetails | null>
 
     findPostsForUser(findPostsForUserDto: FindPostsForUserDto): Promise<IPost[]>
+
+    findPostsCount(userId: string): Promise<number>
 }

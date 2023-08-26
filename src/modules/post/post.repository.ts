@@ -1004,4 +1004,8 @@ export class PostRepository implements IPostRepository {
             .limit(limit)
             .lean()
     }
+
+    public async findPostsCount(userId: string): Promise<number> {
+        return PostModel.countDocuments({ 'creator._id': new mongoose.Types.ObjectId(userId) })
+    }
 }
