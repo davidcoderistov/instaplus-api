@@ -1,6 +1,8 @@
 import { inject, injectable } from 'inversify'
 import { IUserRepository } from './interfaces/IUser.repository'
+import { IPostRepository } from '../post/interfaces/IPost.repository'
 import { IUserService } from './interfaces/IUser.service'
+import { IUser } from './db.models/user.model'
 import {
     SignUpDto,
     SignInDto,
@@ -8,8 +10,9 @@ import {
     FindUsersBySearchQueryDto,
     FindFollowingForUserDto,
     FindFollowersForUserDto,
+    FindUserDetailsDto,
 } from './dtos'
-import { AuthUser, User, FollowableUser, FollowingForUser, FollowersForUser } from './graphql.models'
+import { AuthUser, User, FollowableUser, FollowingForUser, FollowersForUser, UserDetails } from './graphql.models'
 import { TYPES } from '../../container/types'
 import bcrypt from 'bcrypt'
 import {
@@ -31,7 +34,8 @@ import {
 export class UserService implements IUserService {
 
     constructor(
-        @inject(TYPES.IUserRepository) private readonly _userRepository: IUserRepository) {
+        @inject(TYPES.IUserRepository) private readonly _userRepository: IUserRepository,
+        @inject(TYPES.IPostRepository) private readonly _postRepository: IPostRepository) {
     }
 
     public async signUp(signUpDto: SignUpDto): Promise<AuthUser> {
@@ -223,5 +227,80 @@ export class UserService implements IUserService {
 
     public async findFollowersForUser(findFollowersForUserDto: FindFollowersForUserDto, userId: string): Promise<FollowersForUser> {
         return this._userRepository.findFollowersForUser(findFollowersForUserDto, userId)
+    }
+
+    public async findUserDetails({ userId }: FindUserDetailsDto, loggedInUserId: string): Promise<UserDetails> {
+        try {
+            const user = await this._userRepository.findUserById(userId)
+
+            if (!user) {
+                return Promise.reject(new CustomValidationException('userId', `User with id ${userId} does not exist`))
+            }
+
+            if (!await this._userRepository.findUserById(loggedInUserId)) {
+                return Promise.reject(new CustomValidationException('userId', `User with id ${loggedInUserId} does not exist`))
+            }
+
+            const [
+                postsCountResult,
+                followingCountResult,
+                followersCountResult,
+            ]: (PromiseFulfilledResult<number> | PromiseRejectedResult)[] = await Promise.allSettled([
+                this._postRepository.findPostsCount(userId),
+                this._userRepository.findFollowingCount(userId),
+                this._userRepository.findFollowersCount(userId),
+            ])
+
+            let postsCount, followingCount, followersCount = 0
+
+            if (postsCountResult.status === 'fulfilled' && followingCountResult.status === 'fulfilled' && followersCountResult.status === 'fulfilled') {
+                postsCount = postsCountResult.value
+                followingCount = followingCountResult.value
+                followersCount = followersCountResult.value
+            } else {
+                return Promise.reject(new CustomValidationException('count', `Could not obtain counts`))
+            }
+
+            const followedUsersIds = await this._userRepository.findFollowedUserIds(loggedInUserId)
+
+            const following = followedUsersIds.some(id => id === userId)
+
+            const mutualFollowersIds = await this._userRepository.findMutualFollowersIds(userId, followedUsersIds)
+
+            const mutualFollowersCount = mutualFollowersIds.length
+
+            const mutualFollowers: (PromiseFulfilledResult<IUser | null> | PromiseRejectedResult)[] = await Promise.allSettled(mutualFollowersIds.slice(0, 2)
+                .map(userId => this._userRepository.findUserById(userId)))
+
+            let latestTwoMutualFollowersUsernames: string[] = []
+
+            mutualFollowers.forEach(result => {
+                let found = false
+                if (result.status === 'fulfilled') {
+                    const user = result.value
+                    if (user) {
+                        latestTwoMutualFollowersUsernames.push(user.username)
+                        found = true
+                    }
+                }
+                if (!found) {
+                    return Promise.reject(new CustomValidationException('userId', `Mutual follower does not exist`))
+                }
+            })
+
+            return {
+                followableUser: {
+                    user,
+                    following,
+                },
+                postsCount,
+                followingCount,
+                followersCount,
+                mutualFollowersCount,
+                latestTwoMutualFollowersUsernames,
+            }
+        } catch (err) {
+            throw err
+        }
     }
 }
