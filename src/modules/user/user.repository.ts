@@ -484,4 +484,21 @@ export class UserRepository implements IUserRepository {
     public async findFollowersCount(userId: string): Promise<number> {
         return FollowModel.countDocuments({ followedUserId: userId })
     }
+
+    public async findMutualFollowersIds(userId: string, followedUsersIds: string[]): Promise<string[]> {
+        try {
+            const follows: IFollow[] = await FollowModel
+                .find({
+                    $and: [
+                        { followedUserId: userId },
+                        { followingUserId: { $in: followedUsersIds } },
+                    ],
+                })
+                .sort({ createdAt: -1 })
+                .lean()
+            return follows.map(follow => follow.followingUserId)
+        } catch (err) {
+            throw err
+        }
+    }
 }
