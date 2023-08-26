@@ -476,4 +476,8 @@ export class UserRepository implements IUserRepository {
             throw err
         }
     }
+
+    public async findFollowingCount(userId: string): Promise<number> {
+        return FollowModel.countDocuments({ followingUserId: userId })
+    }
 }

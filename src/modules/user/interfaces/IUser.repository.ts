@@ -32,4 +32,6 @@ export interface IUserRepository {
     findFollowingForUser(findFollowingForUserDto: FindFollowingForUserDto, userId: string): Promise<FollowingForUser>
 
     findFollowersForUser(findFollowersForUserDto: FindFollowersForUserDto, userId: string): Promise<FollowersForUser>
+
+    findFollowingCount(userId: string): Promise<number>
 }
