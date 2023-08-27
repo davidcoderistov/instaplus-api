@@ -19,6 +19,7 @@ import {
     FindUsersWhoLikedCommentDto,
     FindCommentRepliesDto,
     FindPostsForUserDto,
+    FindSavedPostsForUserDto,
 } from './dtos'
 import {
     FollowedUsersPosts,
@@ -28,6 +29,7 @@ import {
     CommentReplies,
     PostDetails,
     PostsForUser,
+    SavedPostsForUser,
 } from './graphql.models'
 import { CustomValidationException } from '../../shared/exceptions'
 import { FileUpload } from 'graphql-upload-ts'
@@ -288,5 +290,9 @@ export class PostService implements IPostService {
 
     public async findPostsForUser(findPostsForUserDto: FindPostsForUserDto): Promise<PostsForUser> {
         return this._postRepository.findPostsForUser(findPostsForUserDto)
+    }
+
+    public async findSavedPostsForUser(findSavedPostsForUser: FindSavedPostsForUserDto, userId: string): Promise<SavedPostsForUser> {
+        return this._postRepository.findSavedPostsForUser(findSavedPostsForUser, userId)
     }
 }
