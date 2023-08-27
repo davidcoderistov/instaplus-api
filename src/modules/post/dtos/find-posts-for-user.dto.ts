@@ -1,14 +1,10 @@
-import { ArgsType, Field, Int } from 'type-graphql'
-import { Min } from 'class-validator'
+import { ArgsType, Field } from 'type-graphql'
+import { OffsetPaginationArgs } from '../../../shared/graphql/offset-pagination-args'
 
 
 @ArgsType()
-export class FindPostsForUserDto {
+export class FindPostsForUserDto extends OffsetPaginationArgs {
 
     @Field(() => String)
     userId!: string
-
-    @Field(() => Int)
-    @Min(0)
-    limit!: number
 }

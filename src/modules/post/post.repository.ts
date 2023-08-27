@@ -27,6 +27,7 @@ import {
     UsersWhoLikedComment,
     CommentReplies,
     PostDetails,
+    PostsForUser,
 } from './graphql.models'
 import { getCursorPaginatedData, getOffsetPaginatedData } from '../../shared/utils/misc'
 import mongoose, { Types } from 'mongoose'
@@ -997,12 +998,37 @@ export class PostRepository implements IPostRepository {
         }
     }
 
-    public async findPostsForUser({ userId, limit }: FindPostsForUserDto): Promise<IPost[]> {
-        return PostModel
-            .find({ 'creator._id': new mongoose.Types.ObjectId(userId) })
-            .sort({ createdAt: -1 })
-            .limit(limit)
-            .lean()
+    public async findPostsForUser({ userId, offset, limit }: FindPostsForUserDto): Promise<PostsForUser> {
+        try {
+            const aggregatePosts = await PostModel.aggregate([
+                {
+                    $match: { 'creator._id': new mongoose.Types.ObjectId(userId) },
+                },
+                {
+                    $sort: { createdAt: -1 },
+                },
+                {
+                    $facet: {
+                        $facet: {
+                            metadata: [{
+                                $count: 'count',
+                            }],
+                            data: [
+                                {
+                                    $skip: offset,
+                                },
+                                {
+                                    $limit: limit,
+                                },
+                            ],
+                        },
+                    },
+                },
+            ])
+            return getOffsetPaginatedData(aggregatePosts)
+        } catch (err) {
+            throw err
+        }
     }
 
     public async findPostsCount(userId: string): Promise<number> {

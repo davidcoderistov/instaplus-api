@@ -23,6 +23,7 @@ import {
     UsersWhoLikedComment,
     CommentReplies,
     PostDetails,
+    PostsForUser,
 } from '../graphql.models'
 
 
@@ -81,7 +82,7 @@ export interface IPostRepository {
 
     findPostDetailsById(postId: string, userId: string): Promise<PostDetails | null>
 
-    findPostsForUser(findPostsForUserDto: FindPostsForUserDto): Promise<IPost[]>
+    findPostsForUser(findPostsForUserDto: FindPostsForUserDto): Promise<PostsForUser>
 
     findPostsCount(userId: string): Promise<number>
 }
