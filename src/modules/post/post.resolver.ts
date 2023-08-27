@@ -33,6 +33,7 @@ import {
     FindUsersWhoLikedCommentDto,
     FindCommentRepliesDto,
     FindPostsForUserDto,
+    FindLatestPostsForUserDto,
 } from './dtos'
 import { Context } from '../../shared/types'
 
@@ -136,5 +137,11 @@ export class PostResolver {
     @Query(() => PostsForUser)
     public async findPostsForUser(@Args() findPostsForUserDto: FindPostsForUserDto): Promise<PostsForUser> {
         return this._postService.findPostsForUser(findPostsForUserDto)
+    }
+
+    @Query(() => [Post])
+    public async findLatestPostsForUser(@Args() { userId, limit }: FindLatestPostsForUserDto): Promise<Post[]> {
+        const postsForUser = await this._postService.findPostsForUser({ offset: 0, limit, userId })
+        return postsForUser.data as unknown as Post[]
     }
 }
