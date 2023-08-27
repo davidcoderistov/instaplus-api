@@ -23,6 +23,7 @@ import {
     Comment,
     PostDetails,
     PostsForUser,
+    SavedPostsForUser,
 } from './graphql.models'
 import {
     CreatePostDto,
@@ -34,6 +35,7 @@ import {
     FindCommentRepliesDto,
     FindPostsForUserDto,
     FindLatestPostsForUserDto,
+    FindSavedPostsForUserDto,
 } from './dtos'
 import { Context } from '../../shared/types'
 
@@ -143,5 +145,10 @@ export class PostResolver {
     public async findLatestPostsForUser(@Args() { userId, limit }: FindLatestPostsForUserDto): Promise<Post[]> {
         const postsForUser = await this._postService.findPostsForUser({ offset: 0, limit, userId })
         return postsForUser.data as unknown as Post[]
+    }
+
+    @Query(() => SavedPostsForUser)
+    public async findSavedPostsForUser(@Args() findSavedPostsForUserDto: FindSavedPostsForUserDto, @Ctx() { userId }: Context): Promise<SavedPostsForUser> {
+        return this._postService.findSavedPostsForUser(findSavedPostsForUserDto, userId)
     }
 }
