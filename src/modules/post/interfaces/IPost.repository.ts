@@ -15,6 +15,7 @@ import {
     FindUsersWhoLikedCommentDto,
     FindCommentRepliesDto,
     FindPostsForUserDto,
+    FindSavedPostsForUserDto,
 } from '../dtos'
 import {
     FollowedUsersPosts,
@@ -24,6 +25,7 @@ import {
     CommentReplies,
     PostDetails,
     PostsForUser,
+    SavedPostsForUser,
 } from '../graphql.models'
 
 
@@ -85,4 +87,6 @@ export interface IPostRepository {
     findPostsForUser(findPostsForUserDto: FindPostsForUserDto): Promise<PostsForUser>
 
     findPostsCount(userId: string): Promise<number>
+
+    findSavedPostsForUser(findSavedPostsForUser: FindSavedPostsForUserDto, userId: string): Promise<SavedPostsForUser>
 }

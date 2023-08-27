@@ -19,6 +19,7 @@ import {
     FindUsersWhoLikedCommentDto,
     FindCommentRepliesDto,
     FindPostsForUserDto,
+    FindSavedPostsForUserDto,
 } from './dtos'
 import {
     FollowedUsersPosts,
@@ -28,6 +29,7 @@ import {
     CommentReplies,
     PostDetails,
     PostsForUser,
+    SavedPostsForUser,
 } from './graphql.models'
 import { getCursorPaginatedData, getOffsetPaginatedData } from '../../shared/utils/misc'
 import mongoose, { Types } from 'mongoose'
@@ -1009,19 +1011,17 @@ export class PostRepository implements IPostRepository {
                 },
                 {
                     $facet: {
-                        $facet: {
-                            metadata: [{
-                                $count: 'count',
-                            }],
-                            data: [
-                                {
-                                    $skip: offset,
-                                },
-                                {
-                                    $limit: limit,
-                                },
-                            ],
-                        },
+                        metadata: [{
+                            $count: 'count',
+                        }],
+                        data: [
+                            {
+                                $skip: offset,
+                            },
+                            {
+                                $limit: limit,
+                            },
+                        ],
                     },
                 },
             ])
@@ -1033,5 +1033,70 @@ export class PostRepository implements IPostRepository {
 
     public async findPostsCount(userId: string): Promise<number> {
         return PostModel.countDocuments({ 'creator._id': new mongoose.Types.ObjectId(userId) })
+    }
+
+    public async findSavedPostsForUser({
+                                           cursor,
+                                           limit,
+                                       }: FindSavedPostsForUserDto, userId: string): Promise<SavedPostsForUser> {
+        try {
+            const savedPosts: Pick<IPostSave, 'postId'>[] = await PostSaveModel
+                .find({ userId })
+                .select('postId')
+                .lean()
+            const savedPostsObjectIds = savedPosts.map(savedPost => new Types.ObjectId(savedPost.postId))
+
+            const aggregatePosts = await PostModel.aggregate([
+                {
+                    $match: { _id: { $in: savedPostsObjectIds } },
+                },
+                {
+                    $sort: { createdAt: -1, _id: -1 },
+                },
+                ...(cursor ? [
+                    {
+                        $match: {
+                            $or: [
+                                { createdAt: { $lt: cursor.createdAt } },
+                                {
+                                    $and: [
+                                        { createdAt: cursor.createdAt },
+                                        {
+                                            $or: [
+                                                { _id: { $lt: new mongoose.Types.ObjectId(cursor._id) } },
+                                                { _id: new mongoose.Types.ObjectId(cursor._id) },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    },
+                ] : []),
+                {
+                    $facet: {
+                        data: [
+                            { $limit: limit },
+                        ],
+                        nextCursor: [
+                            { $skip: limit },
+                            {
+                                $limit: 1,
+                            },
+                            {
+                                $project: {
+                                    _id: '$_id',
+                                    createdAt: '$createdAt',
+                                },
+                            },
+                        ],
+                    },
+                },
+            ])
+
+            return getCursorPaginatedData(aggregatePosts) as unknown as SavedPostsForUser
+        } catch (err) {
+            throw err
+        }
     }
 }
