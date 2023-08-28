@@ -24,6 +24,7 @@ import {
     PostDetails,
     PostsForUser,
     SavedPostsForUser,
+    PostsForHashtag,
 } from './graphql.models'
 import {
     CreatePostDto,
@@ -36,6 +37,7 @@ import {
     FindPostsForUserDto,
     FindLatestPostsForUserDto,
     FindSavedPostsForUserDto,
+    FindPostsForHashtagDto,
 } from './dtos'
 import { Context } from '../../shared/types'
 
@@ -150,5 +152,10 @@ export class PostResolver {
     @Query(() => SavedPostsForUser)
     public async findSavedPostsForUser(@Args() findSavedPostsForUserDto: FindSavedPostsForUserDto, @Ctx() { userId }: Context): Promise<SavedPostsForUser> {
         return this._postService.findSavedPostsForUser(findSavedPostsForUserDto, userId)
+    }
+
+    @Query(() => PostsForHashtag)
+    public async findPostsForHashtag(@Args() findPostsForHashtagDto: FindPostsForHashtagDto): Promise<PostsForHashtag> {
+        return this._postService.findPostsForHashtag(findPostsForHashtagDto)
     }
 }
