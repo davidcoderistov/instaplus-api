@@ -1040,15 +1040,9 @@ export class PostRepository implements IPostRepository {
                                            limit,
                                        }: FindSavedPostsForUserDto, userId: string): Promise<SavedPostsForUser> {
         try {
-            const savedPosts: Pick<IPostSave, 'postId'>[] = await PostSaveModel
-                .find({ userId })
-                .select('postId')
-                .lean()
-            const savedPostsObjectIds = savedPosts.map(savedPost => new Types.ObjectId(savedPost.postId))
-
-            const aggregatePosts = await PostModel.aggregate([
+            const aggregatePosts = await PostSaveModel.aggregate([
                 {
-                    $match: { _id: { $in: savedPostsObjectIds } },
+                    $match: { userId },
                 },
                 {
                     $sort: { createdAt: -1, _id: -1 },
@@ -1077,6 +1071,34 @@ export class PostRepository implements IPostRepository {
                     $facet: {
                         data: [
                             { $limit: limit },
+                            {
+                                $addFields: {
+                                    postObjectId: { $toObjectId: '$postId' },
+                                },
+                            },
+                            {
+                                $lookup: {
+                                    from: PostModel.collection.name,
+                                    localField: 'postObjectId',
+                                    foreignField: '_id',
+                                    as: 'posts',
+                                },
+                            },
+                            {
+                                $addFields: {
+                                    post: { $arrayElemAt: ['$posts', 0] },
+                                },
+                            },
+                            {
+                                $project: {
+                                    _id: '$post._id',
+                                    photoUrls: '$post.photoUrls',
+                                    caption: '$post.caption',
+                                    location: '$post.location',
+                                    creator: '$post.creator',
+                                    createdAt: '$post.createdAt',
+                                },
+                            },
                         ],
                         nextCursor: [
                             { $skip: limit },
