@@ -149,20 +149,20 @@ export class PostRepository implements IPostRepository {
                     },
                 },
                 {
-                    $sort: { 'post.createdAt': -1, 'post._id': -1 },
+                    $sort: { createdAt: -1, _id: -1 },
                 },
                 ...(cursor ? [
                     {
                         $match: {
                             $or: [
-                                { 'post.createdAt': { $lt: cursor.createdAt } },
+                                { createdAt: { $lt: cursor.createdAt } },
                                 {
                                     $and: [
-                                        { 'post.createdAt': cursor.createdAt },
+                                        { createdAt: cursor.createdAt },
                                         {
                                             $or: [
-                                                { 'post._id': { $lt: new mongoose.Types.ObjectId(cursor._id) } },
-                                                { 'post._id': new mongoose.Types.ObjectId(cursor._id) },
+                                                { _id: { $lt: new mongoose.Types.ObjectId(cursor._id) } },
+                                                { _id: new mongoose.Types.ObjectId(cursor._id) },
                                             ],
                                         },
                                     ],
@@ -389,8 +389,8 @@ export class PostRepository implements IPostRepository {
                             },
                             {
                                 $project: {
-                                    _id: '$post._id',
-                                    createdAt: '$post.createdAt',
+                                    _id: '$_id',
+                                    createdAt: '$createdAt',
                                 },
                             },
                         ],
