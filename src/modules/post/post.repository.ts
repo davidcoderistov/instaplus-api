@@ -20,6 +20,7 @@ import {
     FindCommentRepliesDto,
     FindPostsForUserDto,
     FindSavedPostsForUserDto,
+    FindPostsForHashtagDto,
 } from './dtos'
 import {
     FollowedUsersPosts,
@@ -31,6 +32,7 @@ import {
     PostsForUser,
     SavedPostsForUser,
     Hashtag,
+    PostsForHashtag,
 } from './graphql.models'
 import { getCursorPaginatedData, getOffsetPaginatedData } from '../../shared/utils/misc'
 import mongoose, { Types } from 'mongoose'
@@ -1139,6 +1141,68 @@ export class PostRepository implements IPostRepository {
             ])
 
             return getCursorPaginatedData(aggregatePosts) as unknown as SavedPostsForUser
+        } catch (err) {
+            throw err
+        }
+    }
+
+    public async findPostsForHashtag(hashtagId: string, {
+        offset,
+        limit,
+    }: Pick<FindPostsForHashtagDto, 'offset' | 'limit'>): Promise<PostsForHashtag> {
+        try {
+            const aggregatePosts = await HashtagPostModel.aggregate([
+                {
+                    $match: { hashtagId },
+                },
+                {
+                    $sort: { createdAt: -1 },
+                },
+                {
+                    $facet: {
+                        metadata: [{
+                            $count: 'count',
+                        }],
+                        data: [
+                            {
+                                $skip: offset,
+                            },
+                            {
+                                $limit: limit,
+                            },
+                            {
+                                $addFields: {
+                                    postObjectId: { $toObjectId: '$postId' },
+                                },
+                            },
+                            {
+                                $lookup: {
+                                    from: PostModel.collection.name,
+                                    localField: 'postObjectId',
+                                    foreignField: '_id',
+                                    as: 'posts',
+                                },
+                            },
+                            {
+                                $addFields: {
+                                    post: { $arrayElemAt: ['$posts', 0] },
+                                },
+                            },
+                            {
+                                $project: {
+                                    _id: '$post._id',
+                                    photoUrls: '$post.photoUrls',
+                                    caption: '$post.caption',
+                                    location: '$post.location',
+                                    creator: '$post.creator',
+                                    createdAt: '$post.createdAt',
+                                },
+                            },
+                        ],
+                    },
+                },
+            ])
+            return getOffsetPaginatedData(aggregatePosts)
         } catch (err) {
             throw err
         }

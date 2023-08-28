@@ -16,6 +16,7 @@ import {
     FindCommentRepliesDto,
     FindPostsForUserDto,
     FindSavedPostsForUserDto,
+    FindPostsForHashtagDto,
 } from '../dtos'
 import {
     FollowedUsersPosts,
@@ -27,6 +28,7 @@ import {
     PostsForUser,
     SavedPostsForUser,
     Hashtag,
+    PostsForHashtag,
 } from '../graphql.models'
 
 
@@ -90,4 +92,6 @@ export interface IPostRepository {
     findPostsCount(userId: string): Promise<number>
 
     findSavedPostsForUser(findSavedPostsForUser: FindSavedPostsForUserDto, userId: string): Promise<SavedPostsForUser>
+
+    findPostsForHashtag(hashtagId: string, findPostsForHashtagDto: Pick<FindPostsForHashtagDto, 'offset' | 'limit'>): Promise<PostsForHashtag>
 }
