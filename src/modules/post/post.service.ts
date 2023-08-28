@@ -20,6 +20,7 @@ import {
     FindCommentRepliesDto,
     FindPostsForUserDto,
     FindSavedPostsForUserDto,
+    FindPostsForHashtagDto,
 } from './dtos'
 import {
     FollowedUsersPosts,
@@ -31,6 +32,7 @@ import {
     PostsForUser,
     SavedPostsForUser,
     Hashtag,
+    PostsForHashtag,
 } from './graphql.models'
 import { CustomValidationException } from '../../shared/exceptions'
 import { FileUpload } from 'graphql-upload-ts'
@@ -295,5 +297,22 @@ export class PostService implements IPostService {
 
     public async findSavedPostsForUser(findSavedPostsForUser: FindSavedPostsForUserDto, userId: string): Promise<SavedPostsForUser> {
         return this._postRepository.findSavedPostsForUser(findSavedPostsForUser, userId)
+    }
+
+    public async findPostsForHashtag(findPostsForHashtagDto: FindPostsForHashtagDto): Promise<PostsForHashtag> {
+        try {
+            const hashtags = await this._postRepository.findHashtagsByNames([findPostsForHashtagDto.name])
+
+            if (hashtags.length > 0) {
+                return this._postRepository.findPostsForHashtag(hashtags[0]._id.toString(), findPostsForHashtagDto)
+            } else {
+                return {
+                    data: [],
+                    count: 0,
+                }
+            }
+        } catch (err) {
+            throw err
+        }
     }
 }

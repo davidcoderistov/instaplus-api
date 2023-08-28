@@ -13,6 +13,7 @@ import {
     FindCommentRepliesDto,
     FindPostsForUserDto,
     FindSavedPostsForUserDto,
+    FindPostsForHashtagDto,
 } from '../dtos'
 import {
     FollowedUsersPosts,
@@ -24,6 +25,7 @@ import {
     PostsForUser,
     SavedPostsForUser,
     Hashtag,
+    PostsForHashtag,
 } from '../graphql.models'
 
 
@@ -62,4 +64,6 @@ export interface IPostService {
     findPostsForUser(findPostsForUserDto: FindPostsForUserDto): Promise<PostsForUser>
 
     findSavedPostsForUser(findSavedPostsForUser: FindSavedPostsForUserDto, userId: string): Promise<SavedPostsForUser>
+
+    findPostsForHashtag(findPostsForHashtagDto: FindPostsForHashtagDto): Promise<PostsForHashtag>
 }
