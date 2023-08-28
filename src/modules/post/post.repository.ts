@@ -30,6 +30,7 @@ import {
     PostDetails,
     PostsForUser,
     SavedPostsForUser,
+    Hashtag,
 } from './graphql.models'
 import { getCursorPaginatedData, getOffsetPaginatedData } from '../../shared/utils/misc'
 import mongoose, { Types } from 'mongoose'
@@ -86,13 +87,37 @@ export class PostRepository implements IPostRepository {
         return hashtagPost.toObject()
     }
 
-    public async findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<IHashtag[]> {
+    public async findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<Hashtag[]> {
         const regex = new RegExp(searchQuery, 'i')
-        return HashtagModel
-            .find({ name: { $regex: regex } })
-            .sort('name')
-            .limit(limit)
-            .lean()
+        return HashtagModel.aggregate([
+            {
+                $match: { name: { $regex: regex } },
+            },
+            {
+                $sort: { name: 1 },
+            },
+            {
+                $limit: limit,
+            },
+            {
+                $addFields: {
+                    hashtagId: { $toString: '$_id' },
+                },
+            },
+            {
+                $lookup: {
+                    from: HashtagPostModel.collection.name,
+                    localField: 'hashtagId',
+                    foreignField: 'hashtagId',
+                    as: 'posts',
+                },
+            },
+            {
+                $addFields: {
+                    postsCount: { $size: '$posts' },
+                },
+            },
+        ])
     }
 
     public async findHashtagById(id: string): Promise<IHashtag | null> {

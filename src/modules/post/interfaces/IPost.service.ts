@@ -1,4 +1,3 @@
-import { IHashtag } from '../db.models/hashtag.model'
 import { IPost } from '../db.models/post.model'
 import { IPostLike } from '../db.models/post-like.model'
 import { IPostSave } from '../db.models/post-save.model'
@@ -24,6 +23,7 @@ import {
     PostDetails,
     PostsForUser,
     SavedPostsForUser,
+    Hashtag,
 } from '../graphql.models'
 
 
@@ -35,7 +35,7 @@ export interface IPostService {
 
     findFollowedUsersPosts(findFollowedUsersPostsDto: FindFollowedUsersPostsDto, userId: string): Promise<FollowedUsersPosts>
 
-    findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<IHashtag[]>
+    findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<Hashtag[]>
 
     likePost(postId: string, userId: string): Promise<IPostLike>
 

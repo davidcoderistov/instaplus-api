@@ -26,6 +26,7 @@ import {
     PostDetails,
     PostsForUser,
     SavedPostsForUser,
+    Hashtag,
 } from '../graphql.models'
 
 
@@ -42,7 +43,7 @@ export interface IPostRepository {
 
     createHashtagPost(hashtagId: string, postId: string): Promise<IHashtagPost>
 
-    findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<IHashtag[]>
+    findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<Hashtag[]>
 
     findHashtagById(id: string): Promise<IHashtag | null>
 

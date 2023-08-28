@@ -50,7 +50,7 @@ export class PostResolver {
 
     @Query(() => [Hashtag])
     public async findHashtagsBySearchQuery(@Arg('searchQuery') searchQuery: string): Promise<Hashtag[]> {
-        return await this._postService.findHashtagsBySearchQuery(searchQuery, 15) as unknown as Hashtag[]
+        return this._postService.findHashtagsBySearchQuery(searchQuery, 15)
     }
 
     @Mutation(() => Post)

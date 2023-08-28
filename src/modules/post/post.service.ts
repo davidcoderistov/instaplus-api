@@ -30,6 +30,7 @@ import {
     PostDetails,
     PostsForUser,
     SavedPostsForUser,
+    Hashtag,
 } from './graphql.models'
 import { CustomValidationException } from '../../shared/exceptions'
 import { FileUpload } from 'graphql-upload-ts'
@@ -138,7 +139,7 @@ export class PostService implements IPostService {
         return this._postRepository.findFollowedUsersPosts(findFollowedUsersPostsDto, userId)
     }
 
-    public async findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<IHashtag[]> {
+    public async findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<Hashtag[]> {
         return this._postRepository.findHashtagsBySearchQuery(searchQuery, limit)
     }
 
