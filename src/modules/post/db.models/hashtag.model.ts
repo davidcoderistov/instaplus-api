@@ -7,16 +7,11 @@ const HashtagSchema = new Schema({
         required: true,
         unique: true,
     },
-    postIds: {
-        type: [Schema.Types.String],
-        required: true,
-    },
 }, { timestamps: true })
 
 export interface IHashtag extends SchemaTimestampsConfig {
     _id: Types.ObjectId
     name: string
-    postIds: string[]
 }
 
 export default model('Hashtag', HashtagSchema)

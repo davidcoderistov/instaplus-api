@@ -1,4 +1,4 @@
-import { ObjectType, Field } from 'type-graphql'
+import { ObjectType, Field, Int } from 'type-graphql'
 import { Types } from 'mongoose'
 
 
@@ -11,6 +11,6 @@ export class Hashtag {
     @Field(() => String)
     name!: string
 
-    @Field(() => [String])
-    postIds!: string[]
+    @Field(() => Int)
+    postsCount!: number
 }

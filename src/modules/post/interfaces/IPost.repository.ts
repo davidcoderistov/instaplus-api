@@ -38,7 +38,7 @@ export interface IPostRepository {
 
     createComment(createCommentDto: CreateCommentDto, creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>): Promise<IComment>
 
-    createHashtag(name: string, postId: string): Promise<IHashtag>
+    createHashtag(name: string): Promise<IHashtag>
 
     createHashtagPost(hashtagId: string, postId: string): Promise<IHashtagPost>
 

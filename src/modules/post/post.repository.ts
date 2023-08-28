@@ -71,11 +71,8 @@ export class PostRepository implements IPostRepository {
         return comment.toObject()
     }
 
-    public async createHashtag(name: string, postId: string): Promise<IHashtag> {
-        const hashtag = new HashtagModel({
-            name,
-            postIds: [postId],
-        })
+    public async createHashtag(name: string): Promise<IHashtag> {
+        const hashtag = new HashtagModel({ name })
         await hashtag.save()
         return hashtag.toObject()
     }

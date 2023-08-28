@@ -90,7 +90,7 @@ export class PostService implements IPostService {
                 const savedHashtags = await this._postRepository.findHashtagsByNames(hashtags)
                 const unsavedHashtagsNames: string[] = _difference(hashtags, savedHashtags.map(hashtag => hashtag.name))
                 const unsavedHashtags: IHashtag[] = await Promise.all(
-                    unsavedHashtagsNames.map(name => this._postRepository.createHashtag(name, postId)),
+                    unsavedHashtagsNames.map(this._postRepository.createHashtag),
                 )
 
                 const hashtagIds = [
