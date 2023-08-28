@@ -6,7 +6,7 @@ import { IPostRepository } from '../post/interfaces/IPost.repository'
 import { TYPES } from '../../container/types'
 import { UserSearch } from './graphql.models/user-search.model'
 import { SearchUser } from '../user/graphql.models'
-import { IHashtag } from '../post/db.models/hashtag.model'
+import { Hashtag } from '../post/graphql.models'
 import { MarkUserSearchDto, UnmarkUserSearchDto } from './dtos'
 import { CustomValidationException, MongodbServerException } from '../../shared/exceptions'
 
@@ -111,7 +111,7 @@ export class SearchHistoryService implements ISearchHistoryService {
         }), {})
 
         const hashtags = await this._postRepository.findHashtagsByIds(hashtagIds, 15)
-        const hashtagsMap: { [key: string]: IHashtag } = hashtags.reduce((hashtagsMap, hashtag) => ({
+        const hashtagsMap: { [key: string]: Hashtag } = hashtags.reduce((hashtagsMap, hashtag) => ({
             ...hashtagsMap,
             [hashtag._id.toString()]: hashtag,
         }), {})
@@ -126,7 +126,7 @@ export class SearchHistoryService implements ISearchHistoryService {
                 const hashtagId = searchHistory.searchedHashtagId as string
                 return {
                     searchUser: null,
-                    hashtag: hashtagsMap[hashtagId] as IHashtag,
+                    hashtag: hashtagsMap[hashtagId] as Hashtag,
                 }
             }
         })
@@ -144,7 +144,7 @@ export class SearchHistoryService implements ISearchHistoryService {
         }
     }
 
-    private static sortUserSearches(userSearches: (SearchUser | IHashtag)[]) {
+    private static sortUserSearches(userSearches: (SearchUser | Hashtag)[]) {
         return userSearches.sort((a, b) => {
             const first = 'name' in a ? a.name : a.user.username
             const second = 'name' in b ? b.name : b.user.username
