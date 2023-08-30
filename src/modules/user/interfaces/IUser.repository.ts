@@ -38,4 +38,6 @@ export interface IUserRepository {
     findFollowersCount(userId: string): Promise<number>
 
     findMutualFollowersIds(userId: string, followedUsersIds: string[]): Promise<string[]>
+
+    findFollowersOfFollowedCountByUser(userId: string, followedUsersIds: string[]): Promise<{ _id: string, count: number }[]>
 }

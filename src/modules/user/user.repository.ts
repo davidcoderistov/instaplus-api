@@ -501,4 +501,24 @@ export class UserRepository implements IUserRepository {
             throw err
         }
     }
+
+    public async findFollowersOfFollowedCountByUser(userId: string, followedUsersIds: string[]): Promise<{ _id: string, count: number }[]> {
+        return FollowModel.aggregate([
+            {
+                $match: {
+                    followingUserId: { $in: followedUsersIds },
+                    followedUserId: {
+                        $ne: userId,
+                        $nin: followedUsersIds,
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: '$followedUserId',
+                    count: { $count: {} },
+                },
+            },
+        ])
+    }
 }
