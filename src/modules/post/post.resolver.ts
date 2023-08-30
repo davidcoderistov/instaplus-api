@@ -15,7 +15,6 @@ import {
     FollowedUsersPosts,
     UsersWhoLikedPost,
     PostLike,
-    PostSave,
     CommentsForPost,
     UsersWhoLikedComment,
     CommentLike,
@@ -98,14 +97,14 @@ export class PostResolver {
         return await this._postService.unlikePost(postId, userId) as unknown as PostLike
     }
 
-    @Mutation(() => PostSave)
-    public async savePost(@Arg('postId') postId: string, @Ctx() { userId }: Context): Promise<PostSave> {
-        return await this._postService.savePost(postId, userId) as unknown as PostSave
+    @Mutation(() => Post)
+    public async savePost(@Arg('postId') postId: string, @Ctx() { userId }: Context): Promise<Post> {
+        return await this._postService.savePost(postId, userId) as unknown as Post
     }
 
-    @Mutation(() => PostSave)
-    public async unsavePost(@Arg('postId') postId: string, @Ctx() { userId }: Context): Promise<PostSave> {
-        return await this._postService.unsavePost(postId, userId) as unknown as PostSave
+    @Mutation(() => Post)
+    public async unsavePost(@Arg('postId') postId: string, @Ctx() { userId }: Context): Promise<Post> {
+        return await this._postService.unsavePost(postId, userId) as unknown as Post
     }
 
     @Query(() => CommentsForPost)

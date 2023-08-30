@@ -7,7 +7,6 @@ import { TYPES } from '../../container/types'
 import { IHashtag } from './db.models/hashtag.model'
 import { IPost } from './db.models/post.model'
 import { IPostLike } from './db.models/post-like.model'
-import { IPostSave } from './db.models/post-save.model'
 import { IComment } from './db.models/comment.model'
 import { ICommentLike } from './db.models/comment-like.model'
 import {
@@ -187,9 +186,10 @@ export class PostService implements IPostService {
         }
     }
 
-    public async savePost(postId: string, userId: string): Promise<IPostSave> {
+    public async savePost(postId: string, userId: string): Promise<IPost> {
         try {
-            if (!await this._postRepository.findPostById(postId)) {
+            const post = await this._postRepository.findPostById(postId)
+            if (!post) {
                 return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} does not exist`))
             }
 
@@ -201,15 +201,17 @@ export class PostService implements IPostService {
                 return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} is already saved`))
             }
 
-            return this._postRepository.createPostSave(postId, userId)
+            await this._postRepository.createPostSave(postId, userId)
+            return post
         } catch (err) {
             throw err
         }
     }
 
-    public async unsavePost(postId: string, userId: string): Promise<IPostSave> {
+    public async unsavePost(postId: string, userId: string): Promise<IPost> {
         try {
-            if (!await this._postRepository.findPostById(postId)) {
+            const post = await this._postRepository.findPostById(postId)
+            if (!post) {
                 return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} does not exist`))
             }
 
@@ -223,7 +225,7 @@ export class PostService implements IPostService {
                 return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} is not saved`))
             }
 
-            return postSave
+            return post
         } catch (err) {
             throw err
         }

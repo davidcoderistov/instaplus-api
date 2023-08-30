@@ -1,6 +1,5 @@
 import { IPost } from '../db.models/post.model'
 import { IPostLike } from '../db.models/post-like.model'
-import { IPostSave } from '../db.models/post-save.model'
 import { IComment } from '../db.models/comment.model'
 import { ICommentLike } from '../db.models/comment-like.model'
 import {
@@ -43,9 +42,9 @@ export interface IPostService {
 
     unlikePost(postId: string, userId: string): Promise<IPostLike>
 
-    savePost(postId: string, userId: string): Promise<IPostSave>
+    savePost(postId: string, userId: string): Promise<IPost>
 
-    unsavePost(postId: string, userId: string): Promise<IPostSave>
+    unsavePost(postId: string, userId: string): Promise<IPost>
 
     likeComment(commentId: string, userId: string): Promise<ICommentLike>
 
