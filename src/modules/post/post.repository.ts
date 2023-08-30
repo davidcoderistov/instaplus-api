@@ -1262,6 +1262,11 @@ export class PostRepository implements IPostRepository {
     public async findLikedCommentsCountsByFollowersAndUser(userId: string, followedUsersIds: string[], postLikesIds: string[]): Promise<{ _id: string, count: number }[]> {
         return CommentModel.aggregate([
             {
+                $addFields: {
+                    userId: { $toString: '$creator._id' },
+                },
+            },
+            {
                 $match: {
                     postId: { $in: postLikesIds },
                     userId: {
@@ -1273,7 +1278,7 @@ export class PostRepository implements IPostRepository {
             {
                 $group: {
                     _id: {
-                        userId: '$creator._id',
+                        userId: '$userId',
                         postId: '$postId',
                     },
                 },
@@ -1282,12 +1287,6 @@ export class PostRepository implements IPostRepository {
                 $group: {
                     _id: '$_id.userId',
                     count: { $count: {} },
-                },
-            },
-            {
-                $project: {
-                    _id: { $toString: '$_id' },
-                    count: 1,
                 },
             },
         ])
