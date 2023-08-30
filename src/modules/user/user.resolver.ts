@@ -10,7 +10,15 @@ import {
     FindFollowersForUserDto,
     FindUserDetailsDto,
 } from './dtos'
-import { AuthUser, User, FollowableUser, FollowingForUser, FollowersForUser, UserDetails } from './graphql.models'
+import {
+    AuthUser,
+    User,
+    FollowableUser,
+    FollowingForUser,
+    FollowersForUser,
+    UserDetails,
+    SuggestedUser,
+} from './graphql.models'
 import { Context } from '../../shared/types'
 
 
@@ -78,5 +86,10 @@ export class UserResolver {
     @Query(() => UserDetails)
     public async findUserDetails(@Args() findUserDetailsDto: FindUserDetailsDto, @Ctx() { userId }: Context): Promise<UserDetails> {
         return this._userService.findUserDetails(findUserDetailsDto, userId)
+    }
+
+    @Query(() => [SuggestedUser])
+    public async findSuggestedUsers(@Ctx() { userId }: Context): Promise<SuggestedUser[]> {
+        return this._userService.findSuggestedUsers(userId)
     }
 }
