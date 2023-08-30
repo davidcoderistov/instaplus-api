@@ -49,7 +49,7 @@ export interface IPostRepository {
 
     findHashtagById(id: string): Promise<IHashtag | null>
 
-    findHashtagsByIds(ids: string[], limit: number): Promise<IHashtag[]>
+    findHashtagsByIds(ids: string[], limit: number): Promise<Hashtag[]>
 
     findHashtagsByNames(names: string[]): Promise<IHashtag[]>
 

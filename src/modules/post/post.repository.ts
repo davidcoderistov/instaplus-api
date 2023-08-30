@@ -127,13 +127,35 @@ export class PostRepository implements IPostRepository {
         return hashtag ? hashtag.toObject() : null
     }
 
-    public async findHashtagsByIds(ids: string[], limit: number): Promise<IHashtag[]> {
+    public async findHashtagsByIds(ids: string[], limit: number): Promise<Hashtag[]> {
         try {
             const hashtagIds = ids.map(id => new Types.ObjectId(id))
-            return HashtagModel
-                .find({ _id: { $in: hashtagIds } })
-                .limit(limit)
-                .lean()
+            return HashtagModel.aggregate([
+                {
+                    $match: { _id: { $in: hashtagIds } },
+                },
+                {
+                    $limit: limit,
+                },
+                {
+                    $addFields: {
+                        hashtagId: { $toString: '$_id' },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: HashtagPostModel.collection.name,
+                        localField: 'hashtagId',
+                        foreignField: 'hashtagId',
+                        as: 'posts',
+                    },
+                },
+                {
+                    $addFields: {
+                        postsCount: { $size: '$posts' },
+                    },
+                },
+            ])
         } catch (err) {
             throw err
         }
