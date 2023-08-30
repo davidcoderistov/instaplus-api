@@ -599,6 +599,7 @@ export class UserRepository implements IUserRepository {
             },
             {
                 $addFields: {
+                    following: false,
                     latestFollowerObjectId: {
                         $cond: {
                             if: { $ne: ['$latestFollowerId', null] },
@@ -620,13 +621,13 @@ export class UserRepository implements IUserRepository {
                 $project: {
                     followableUser: {
                         user: {
-                            _id: 1,
-                            firstName: 1,
-                            lastName: 1,
-                            username: 1,
-                            photoUrl: 1,
+                            _id: '$_id',
+                            firstName: '$firstName',
+                            lastName: '$lastName',
+                            username: '$username',
+                            photoUrl: '$photoUrl',
                         },
-                        following: false,
+                        following: '$following',
                     },
                     latestFollower: { $ifNull: [{ $arrayElemAt: ['$followers', 0] }, null] },
                     followersCount: '$followedCount',
