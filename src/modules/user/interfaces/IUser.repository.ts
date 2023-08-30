@@ -1,7 +1,7 @@
 import { SignUpDto, FindUsersBySearchQueryDto, FindFollowingForUserDto, FindFollowersForUserDto } from '../dtos'
 import { IUser } from '../db.models/user.model'
 import { IFollow } from '../db.models/follow.model'
-import { SearchUser, FollowingForUser, FollowersForUser } from '../graphql.models'
+import { SearchUser, FollowingForUser, FollowersForUser, SuggestedUser } from '../graphql.models'
 
 
 export interface IUserRepository {
@@ -40,4 +40,6 @@ export interface IUserRepository {
     findMutualFollowersIds(userId: string, followedUsersIds: string[]): Promise<string[]>
 
     findFollowersOfFollowedCountByUser(userId: string, followedUsersIds: string[]): Promise<{ _id: string, count: number }[]>
+
+    findSuggestedUsers(suggestedUsersIds: string[], followedUsersIds: string[]): Promise<SuggestedUser[]>
 }

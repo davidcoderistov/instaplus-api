@@ -3,7 +3,7 @@ import { IUserRepository } from './interfaces/IUser.repository'
 import UserModel, { IUser } from './db.models/user.model'
 import FollowModel, { IFollow } from './db.models/follow.model'
 import { FindUsersBySearchQueryDto, SignUpDto, FindFollowingForUserDto, FindFollowersForUserDto } from './dtos'
-import { SearchUser, FollowingForUser, FollowersForUser } from './graphql.models'
+import { SearchUser, FollowingForUser, FollowersForUser, SuggestedUser } from './graphql.models'
 import { Types } from 'mongoose'
 import { getCursorPaginatedData } from '../../shared/utils/misc'
 
@@ -517,6 +517,119 @@ export class UserRepository implements IUserRepository {
                 $group: {
                     _id: '$followedUserId',
                     count: { $count: {} },
+                },
+            },
+        ])
+    }
+
+    public async findSuggestedUsers(suggestedUsersIds: string[], followedUsersIds: string[]): Promise<SuggestedUser[]> {
+        return UserModel.aggregate([
+            {
+                $addFields: {
+                    _userId: { $toString: '$_id' },
+                },
+            },
+            {
+                $match: {
+                    _userId: { $in: suggestedUsersIds },
+                },
+            },
+            {
+                $lookup: {
+                    from: FollowModel.collection.name,
+                    localField: '_userId',
+                    foreignField: 'followedUserId',
+                    as: 'follows',
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    firstName: 1,
+                    lastName: 1,
+                    username: 1,
+                    photoUrl: 1,
+                    follows: {
+                        $filter: {
+                            input: '$follows',
+                            as: 'follow',
+                            cond: {
+                                $in: ['$$follow.followingUserId', followedUsersIds],
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $unwind: {
+                    path: '$follows',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $sort: {
+                    'follows.createdAt': -1,
+                },
+            },
+            {
+                $addFields: {
+                    isFollowed: {
+                        $in: ['$follows.followingUserId', followedUsersIds],
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    firstName: { $first: '$firstName' },
+                    lastName: { $first: '$lastName' },
+                    photoUrl: { $first: '$photoUrl' },
+                    username: { $first: '$username' },
+                    latestFollowerId: { $first: '$follows.followingUserId' },
+                    followedCount: {
+                        $sum: {
+                            $cond: {
+                                if: { $eq: ['$isFollowed', true] },
+                                then: 1,
+                                else: 0,
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                $addFields: {
+                    latestFollowerObjectId: {
+                        $cond: {
+                            if: { $ne: ['$latestFollowerId', null] },
+                            then: { $toObjectId: '$latestFollowerId' },
+                            else: null,
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: UserModel.collection.name,
+                    localField: 'latestFollowerObjectId',
+                    foreignField: '_id',
+                    as: 'followers',
+                },
+            },
+            {
+                $project: {
+                    followableUser: {
+                        user: {
+                            _id: 1,
+                            firstName: 1,
+                            lastName: 1,
+                            username: 1,
+                            photoUrl: 1,
+                        },
+                        following: false,
+                    },
+                    latestFollower: { $ifNull: [{ $arrayElemAt: ['$followers', 0] }, null] },
+                    followersCount: '$followedCount',
                 },
             },
         ])
