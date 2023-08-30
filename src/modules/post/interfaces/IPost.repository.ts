@@ -96,4 +96,6 @@ export interface IPostRepository {
     findPostsForHashtag(hashtagId: string, findPostsForHashtagDto: Pick<FindPostsForHashtagDto, 'offset' | 'limit'>): Promise<PostsForHashtag>
 
     findLikedPostIdsByFollowersAndUser(userId: string, followedUsersIds: string[]): Promise<string[]>
+
+    findLikedPostsCountsByFollowersAndUser(userId: string, followedUsersIds: string[], postLikesIds: string[]): Promise<{ _id: string, count: number }[]>
 }

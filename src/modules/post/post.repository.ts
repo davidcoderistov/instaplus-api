@@ -1238,4 +1238,24 @@ export class PostRepository implements IPostRepository {
             ],
         }).distinct('postId')
     }
+
+    public async findLikedPostsCountsByFollowersAndUser(userId: string, followedUsersIds: string[], postLikesIds: string[]): Promise<{ _id: string, count: number }[]> {
+        return PostLikeModel.aggregate([
+            {
+                $match: {
+                    postId: { $in: postLikesIds },
+                    userId: {
+                        $ne: userId,
+                        $nin: followedUsersIds,
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: '$userId',
+                    count: { $count: {} },
+                },
+            },
+        ])
+    }
 }
