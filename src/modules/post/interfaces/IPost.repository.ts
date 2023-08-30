@@ -94,4 +94,6 @@ export interface IPostRepository {
     findSavedPostsForUser(findSavedPostsForUser: FindSavedPostsForUserDto, userId: string): Promise<SavedPostsForUser>
 
     findPostsForHashtag(hashtagId: string, findPostsForHashtagDto: Pick<FindPostsForHashtagDto, 'offset' | 'limit'>): Promise<PostsForHashtag>
+
+    findLikedPostIdsByFollowersAndUser(userId: string, followedUsersIds: string[]): Promise<string[]>
 }

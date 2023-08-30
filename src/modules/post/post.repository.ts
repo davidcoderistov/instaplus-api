@@ -1229,4 +1229,13 @@ export class PostRepository implements IPostRepository {
             throw err
         }
     }
+
+    public async findLikedPostIdsByFollowersAndUser(userId: string, followedUsersIds: string[]): Promise<string[]> {
+        return PostLikeModel.find({
+            $or: [
+                { userId: { $in: followedUsersIds } },
+                { userId },
+            ],
+        }).distinct('postId')
+    }
 }
