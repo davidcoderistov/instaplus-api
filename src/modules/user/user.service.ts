@@ -12,7 +12,15 @@ import {
     FindFollowersForUserDto,
     FindUserDetailsDto,
 } from './dtos'
-import { AuthUser, User, FollowableUser, FollowingForUser, FollowersForUser, UserDetails } from './graphql.models'
+import {
+    AuthUser,
+    User,
+    FollowableUser,
+    FollowingForUser,
+    FollowersForUser,
+    UserDetails,
+    SuggestedUser,
+} from './graphql.models'
 import { TYPES } from '../../container/types'
 import bcrypt from 'bcrypt'
 import {
@@ -299,6 +307,52 @@ export class UserService implements IUserService {
                 mutualFollowersCount,
                 latestTwoMutualFollowersUsernames,
             }
+        } catch (err) {
+            throw err
+        }
+    }
+
+    public async findSuggestedUsers(userId: string): Promise<SuggestedUser[]> {
+        try {
+            if (!await this._userRepository.findUserById(userId)) {
+                return Promise.reject(new CustomValidationException('userId', `User with id ${userId} does not exist`))
+            }
+
+            const followedUsersIds = await this._userRepository.findFollowedUserIds(userId)
+
+            const usersWithFollowedCount = await this._userRepository.findFollowersOfFollowedCountByUser(userId, followedUsersIds)
+
+            const userPostLikesIds = await this._postRepository.findLikedPostIdsByFollowersAndUser(userId, followedUsersIds)
+
+            const usersWithPostLikesCount = await this._postRepository.findLikedPostsCountsByFollowersAndUser(userId, followedUsersIds, userPostLikesIds)
+
+            const usersWithCommentsCount = await this._postRepository.findLikedCommentsCountsByFollowersAndUser(userId, followedUsersIds, userPostLikesIds)
+
+            const suggestedUsersWithCount: { [key: string]: number } = [
+                ...usersWithFollowedCount,
+                ...usersWithPostLikesCount,
+                ...usersWithCommentsCount,
+            ].reduce((users: { [key: string]: number }, user) => ({
+                ...users,
+                [user._id]: (users[user._id] ?? 0) + user.count,
+            }), {})
+
+            const allSuggestedUsersIds = Object
+                .keys(suggestedUsersWithCount)
+                .sort((a, b) => suggestedUsersWithCount[b] - suggestedUsersWithCount[a])
+
+            const suggestedUsersIds = allSuggestedUsersIds.slice(0, 15)
+
+            const suggestedUsers = await this._userRepository.findSuggestedUsers(suggestedUsersIds, followedUsersIds)
+
+            return suggestedUsers
+                .sort((a, b) => {
+                    const countWeight = suggestedUsersWithCount[b.followableUser.user._id.toString()] - suggestedUsersWithCount[a.followableUser.user._id.toString()]
+                    if (countWeight === 0) {
+                        return b.followersCount - a.followersCount
+                    }
+                    return countWeight
+                })
         } catch (err) {
             throw err
         }
