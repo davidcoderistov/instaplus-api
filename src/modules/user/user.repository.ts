@@ -657,4 +657,24 @@ export class UserRepository implements IUserRepository {
             },
         ])
     }
+
+    public async findPopularUsersExcludedIdsByFollowedConnections(userId: string, followedUsersIds: string[], popularUsersIds: string[]): Promise<string[]> {
+        try {
+            const otherPopularUsers: Pick<IUser, '_id'> = await UserModel
+                .find({
+                    _id: {
+                        $nin: [
+                            userId,
+                            ...followedUsersIds.map(id => new Types.ObjectId(id)),
+                            ...popularUsersIds.map(id => new Types.ObjectId(id)),
+                        ],
+                    },
+                })
+                .limit(50)
+                .select('_id')
+            return otherPopularUsers.map(user => user._id.toString())
+        } catch (err) {
+            throw err
+        }
+    }
 }
