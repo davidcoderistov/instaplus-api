@@ -1355,4 +1355,40 @@ export class PostRepository implements IPostRepository {
             },
         ])
     }
+
+    public async findCommentedPostsCountsByFollowedConnections(followedUsersIds: string[], followedUsersPostsIds: string[]): Promise<{ _id: string, count: number }[]> {
+        return CommentModel.aggregate([
+            {
+                $addFields: {
+                    userId: { $toString: '$creator._id' },
+                },
+            },
+            {
+                $match: {
+                    userId: { $in: followedUsersIds },
+                    postId: { $nin: followedUsersPostsIds },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        userId: '$userId',
+                        postId: '$postId',
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: '$_id.postId',
+                    count: { $count: {} },
+                },
+            },
+            {
+                $sort: { count: -1 },
+            },
+            {
+                $limit: 50,
+            },
+        ])
+    }
 }
