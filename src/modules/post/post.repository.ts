@@ -1332,4 +1332,27 @@ export class PostRepository implements IPostRepository {
             },
         ])
     }
+
+    public async findSavedPostsCountsByFollowedConnections(followedUsersIds: string[], followedUsersPostsIds: string[]): Promise<{ _id: string, count: number }[]> {
+        return PostSaveModel.aggregate([
+            {
+                $match: {
+                    userId: { $in: followedUsersIds },
+                    postId: { $nin: followedUsersPostsIds },
+                },
+            },
+            {
+                $group: {
+                    _id: '$postId',
+                    count: { $count: {} },
+                },
+            },
+            {
+                $sort: { count: -1 },
+            },
+            {
+                $limit: 50,
+            },
+        ])
+    }
 }
