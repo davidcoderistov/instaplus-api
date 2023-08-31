@@ -1424,4 +1424,12 @@ export class PostRepository implements IPostRepository {
             throw err
         }
     }
+
+    public async findPostsByIds(postIds: string[]): Promise<IPost[]> {
+        return PostModel
+            .find({
+                _id: { $in: postIds.map(id => new Types.ObjectId(id)) },
+            })
+            .lean()
+    }
 }
