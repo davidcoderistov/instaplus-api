@@ -660,7 +660,7 @@ export class UserRepository implements IUserRepository {
 
     public async findPopularUsersExcludedIdsByFollowedConnections(userId: string, followedUsersIds: string[], popularUsersIds: string[]): Promise<string[]> {
         try {
-            const otherPopularUsers: Pick<IUser, '_id'> = await UserModel
+            const otherPopularUsers: Pick<IUser, '_id'>[] = await UserModel
                 .find({
                     _id: {
                         $nin: [
@@ -672,6 +672,7 @@ export class UserRepository implements IUserRepository {
                 })
                 .limit(50)
                 .select('_id')
+                .lean()
             return otherPopularUsers.map(user => user._id.toString())
         } catch (err) {
             throw err
