@@ -108,4 +108,6 @@ export interface IPostRepository {
     findSavedPostsCountsByFollowedConnections(followedUsersIds: string[], followedUsersPostsIds: string[]): Promise<{ _id: string, count: number }[]>
 
     findCommentedPostsCountsByFollowedConnections(followedUsersIds: string[], followedUsersPostsIds: string[]): Promise<{ _id: string, count: number }[]>
+
+    findPostsIdsByFollowedConnections(postIds: string[], userIds: string[]): Promise<string[]>
 }

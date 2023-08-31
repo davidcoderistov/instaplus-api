@@ -1391,4 +1391,34 @@ export class PostRepository implements IPostRepository {
             },
         ])
     }
+
+    public async findPostsIdsByFollowedConnections(postIds: string[], userIds: string[]): Promise<string[]> {
+        try {
+            const posts: { postId: Types.ObjectId }[] = await PostModel.aggregate([
+                {
+                    $match: {
+                        _id: { $nin: postIds.map(id => new Types.ObjectId(id)) },
+                        userId: { $in: userIds },
+                    },
+                },
+                {
+                    $sort: { createdAt: -1 },
+                },
+                {
+                    $group: {
+                        _id: '$userId',
+                        postId: {
+                            $first: '$_id',
+                        },
+                    },
+                },
+                {
+                    $limit: 50,
+                },
+            ])
+            return posts.map(({ postId }) => postId.toString())
+        } catch (err) {
+            throw err
+        }
+    }
 }
