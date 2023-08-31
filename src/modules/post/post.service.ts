@@ -32,10 +32,12 @@ import {
     SavedPostsForUser,
     Hashtag,
     PostsForHashtag,
+    Post,
 } from './graphql.models'
 import { CustomValidationException } from '../../shared/exceptions'
 import { FileUpload } from 'graphql-upload-ts'
 import _difference from 'lodash/difference'
+import _uniq from 'lodash/uniq'
 
 
 @injectable()
@@ -313,6 +315,74 @@ export class PostService implements IPostService {
                     count: 0,
                 }
             }
+        } catch (err) {
+            throw err
+        }
+    }
+
+    public async findSuggestedPosts(userId: string): Promise<Post[]> {
+        try {
+            if (!await this._userRepository.findUserById(userId)) {
+                return Promise.reject(new CustomValidationException('userId', `User with id ${userId} does not exist`))
+            }
+
+            const followedUsersIds = await this._userRepository.findFollowedUserIds(userId)
+
+            const followedUsersPostsIds = await this._postRepository.findFollowedUsersPostsIds(userId, followedUsersIds)
+
+            const likedPostsCount = await this._postRepository.findLikedPostsCountsByFollowedConnections(followedUsersIds, followedUsersPostsIds)
+
+            const savedPostsCount = await this._postRepository.findSavedPostsCountsByFollowedConnections(followedUsersIds, followedUsersPostsIds)
+
+            const commentedPostsCount = await this._postRepository.findCommentedPostsCountsByFollowedConnections(followedUsersIds, followedUsersPostsIds)
+
+            const followingSuggestedPostsWithCount: { [key: string]: number } = [
+                ...likedPostsCount,
+                ...savedPostsCount,
+                ...commentedPostsCount,
+            ].reduce((posts: { [key: string]: number }, post) => ({
+                ...posts,
+                [post._id]: (posts[post._id] ?? 0) + post.count,
+            }), {})
+
+            const followingSuggestedPostsIds = Object
+                .keys(followingSuggestedPostsWithCount)
+                .sort((a, b) => followingSuggestedPostsWithCount[b] - followingSuggestedPostsWithCount[a])
+
+            const popularUsersCount = await this._userRepository.findPopularUsersCountsByFollowedConnections(userId, followedUsersIds)
+            const popularUsersIds = popularUsersCount.map(user => user._id)
+
+            const otherPopularUsersIds = await this._userRepository.findPopularUsersExcludedIdsByFollowedConnections(userId, followedUsersIds, popularUsersIds)
+
+            const allPopularUsersIds = [
+                ...popularUsersIds,
+                ...otherPopularUsersIds,
+            ]
+
+            const popularPosts = await this._postRepository.findPostsByFollowedConnections(followingSuggestedPostsIds, allPopularUsersIds)
+
+            const postsByUser: { [key: string]: string } = popularPosts.reduce((posts: { [key: string]: string }, post) => ({
+                ...posts,
+                [post.userId]: post.postId,
+            }), {})
+
+            const popularPostsIds = allPopularUsersIds
+                .filter(userId => postsByUser.hasOwnProperty(userId))
+                .map(userId => postsByUser[userId])
+
+            const suggestedPostsIds = _uniq([
+                ...followingSuggestedPostsIds,
+                ...popularPostsIds,
+            ])
+
+            const suggestedPosts = await this._postRepository.findPostsByIds(suggestedPostsIds)
+
+            const suggestedPostsById: { [postId: string]: IPost } = suggestedPosts.reduce((posts: { [postId: string]: IPost }, post) => ({
+                ...posts,
+                [post._id.toString()]: post,
+            }), {})
+
+            return suggestedPostsIds.map(suggestedPostId => suggestedPostsById[suggestedPostId]) as unknown as Post[]
         } catch (err) {
             throw err
         }

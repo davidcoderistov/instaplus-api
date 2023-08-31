@@ -25,6 +25,7 @@ import {
     SavedPostsForUser,
     Hashtag,
     PostsForHashtag,
+    Post,
 } from '../graphql.models'
 
 
@@ -65,4 +66,6 @@ export interface IPostService {
     findSavedPostsForUser(findSavedPostsForUser: FindSavedPostsForUserDto, userId: string): Promise<SavedPostsForUser>
 
     findPostsForHashtag(findPostsForHashtagDto: FindPostsForHashtagDto): Promise<PostsForHashtag>
+
+    findSuggestedPosts(userId: string): Promise<Post[]>
 }
