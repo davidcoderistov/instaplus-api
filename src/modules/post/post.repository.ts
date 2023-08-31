@@ -1291,4 +1291,16 @@ export class PostRepository implements IPostRepository {
             },
         ])
     }
+
+    public async findFollowedUsersPostsIds(userId: string, followedUsersIds: string[]): Promise<string[]> {
+        try {
+            const followedUsersPosts: Pick<IPost, '_id'>[] = await PostModel
+                .find({ userId: { $in: [userId, ...followedUsersIds] } })
+                .select('_id')
+                .lean()
+            return followedUsersPosts.map(post => post._id.toString())
+        } catch (err) {
+            throw err
+        }
+    }
 }
