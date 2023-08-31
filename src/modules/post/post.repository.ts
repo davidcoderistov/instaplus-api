@@ -1392,9 +1392,9 @@ export class PostRepository implements IPostRepository {
         ])
     }
 
-    public async findPostsIdsByFollowedConnections(postIds: string[], userIds: string[]): Promise<string[]> {
+    public async findPostsByFollowedConnections(postIds: string[], userIds: string[]): Promise<{ userId: string, postId: string }[]> {
         try {
-            const posts: { postId: Types.ObjectId }[] = await PostModel.aggregate([
+            const posts: { _id: string, postId: Types.ObjectId }[] = await PostModel.aggregate([
                 {
                     $match: {
                         _id: { $nin: postIds.map(id => new Types.ObjectId(id)) },
@@ -1416,7 +1416,10 @@ export class PostRepository implements IPostRepository {
                     $limit: 50,
                 },
             ])
-            return posts.map(({ postId }) => postId.toString())
+            return posts.map(({ _id, postId }) => ({
+                userId: _id,
+                postId: postId.toString(),
+            }))
         } catch (err) {
             throw err
         }
