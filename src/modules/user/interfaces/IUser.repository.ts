@@ -42,4 +42,6 @@ export interface IUserRepository {
     findFollowersOfFollowedCountByUser(userId: string, followedUsersIds: string[]): Promise<{ _id: string, count: number }[]>
 
     findSuggestedUsers(suggestedUsersIds: string[], followedUsersIds: string[]): Promise<SuggestedUser[]>
+
+    findPopularUsersCountsByFollowedConnections(userId: string, followedUsersIds: string[]): Promise<{ _id: string, count: number }[]>
 }

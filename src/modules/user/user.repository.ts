@@ -635,4 +635,26 @@ export class UserRepository implements IUserRepository {
             },
         ])
     }
+
+    public async findPopularUsersCountsByFollowedConnections(userId: string, followedUsersIds: string[]): Promise<{ _id: string, count: number }[]> {
+        return FollowModel.aggregate([
+            {
+                $match: {
+                    followedUserId: { $nin: [userId, ...followedUsersIds] },
+                },
+            },
+            {
+                $group: {
+                    _id: '$followedUserId',
+                    count: { $count: {} },
+                },
+            },
+            {
+                $sort: { count: -1 },
+            },
+            {
+                $limit: 50,
+            },
+        ])
+    }
 }
