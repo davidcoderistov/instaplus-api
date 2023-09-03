@@ -33,6 +33,8 @@ import { IPostRepository } from '../modules/post/interfaces/IPost.repository'
 import { PostRepository } from '../modules/post/post.repository'
 import { IPostService } from '../modules/post/interfaces/IPost.service'
 import { PostService } from '../modules/post/post.service'
+import { IPostLoader } from '../modules/post/interfaces/IPost.loader'
+import { PostLoader } from '../modules/post/post.loader'
 import { PostResolver } from '../modules/post/post.resolver'
 import { ISearchHistoryRepository } from '../modules/search-history/interfaces/ISearchHistory.repository'
 import { SearchHistoryRepository } from '../modules/search-history/search-history.repository'
@@ -67,6 +69,7 @@ export const bindings = new ContainerModule(bind => {
 
     bind<IPostRepository>(TYPES.IPostRepository).to(PostRepository)
     bind<IPostService>(TYPES.IPostService).to(PostService)
+    bind<IPostLoader>(TYPES.IPostLoader).to(PostLoader)
     bind<PostResolver>(PostResolver).toSelf()
 
     bind<ISearchHistoryRepository>(TYPES.ISearchHistoryRepository).to(SearchHistoryRepository)
