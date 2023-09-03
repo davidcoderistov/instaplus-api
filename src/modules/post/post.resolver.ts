@@ -8,6 +8,7 @@ import {
     Resolver,
 } from 'type-graphql'
 import { IPostService } from './interfaces/IPost.service'
+import { IPostLoader } from './interfaces/IPost.loader'
 import { TYPES } from '../../container/types'
 import {
     Hashtag,
@@ -24,6 +25,7 @@ import {
     PostsForUser,
     SavedPostsForUser,
     PostsForHashtag,
+    SuggestedPosts,
 } from './graphql.models'
 import {
     CreatePostDto,
@@ -37,6 +39,7 @@ import {
     FindLatestPostsForUserDto,
     FindSavedPostsForUserDto,
     FindPostsForHashtagDto,
+    FindSuggestedPostsDto,
 } from './dtos'
 import { Context } from '../../shared/types'
 
@@ -46,7 +49,8 @@ import { Context } from '../../shared/types'
 export class PostResolver {
 
     constructor(
-        @inject(TYPES.IPostService) private readonly _postService: IPostService) {
+        @inject(TYPES.IPostService) private readonly _postService: IPostService,
+        @inject(TYPES.IPostLoader) private readonly _postLoader: IPostLoader) {
     }
 
     @Query(() => [Hashtag])
@@ -156,5 +160,20 @@ export class PostResolver {
     @Query(() => PostsForHashtag)
     public async findPostsForHashtag(@Args() findPostsForHashtagDto: FindPostsForHashtagDto): Promise<PostsForHashtag> {
         return this._postService.findPostsForHashtag(findPostsForHashtagDto)
+    }
+
+    @Query(() => SuggestedPosts)
+    public async findSuggestedPosts(@Args() {
+        offset,
+        limit,
+    }: FindSuggestedPostsDto, @Ctx() { userId }: Context): Promise<SuggestedPosts> {
+        if (offset === 0) {
+            this._postLoader.clearSuggestedPosts(userId)
+        }
+        const suggestedPosts = await this._postLoader.loadSuggestedPosts(userId)
+        return {
+            data: suggestedPosts.slice(offset, offset + limit),
+            count: suggestedPosts.length,
+        }
     }
 }
