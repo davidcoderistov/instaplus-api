@@ -913,7 +913,9 @@ export class PostRepository implements IPostRepository {
                                 photoUrls: '$photoUrls',
                                 creator: {
                                     user: '$creator',
-                                    following: true,
+                                    following: {
+                                        $in: ['$creatorId', followedUsersIds],
+                                    },
                                 },
                                 createdAt: '$createdAt',
                             },
