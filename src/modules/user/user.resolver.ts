@@ -11,6 +11,7 @@ import {
     FindUserDetailsDto,
     UpdateUserDto,
     ChangePasswordDto,
+    ChangeProfilePhotoDto,
 } from './dtos'
 import {
     AuthUser,
@@ -76,6 +77,13 @@ export class UserResolver {
         userId,
     }: Context): Promise<AuthUser> {
         const user = await this._userService.changePassword(changePasswordDto, userId)
+        setRefreshTokenCookie(user.refreshToken as string)
+        return user
+    }
+
+    @Mutation(() => AuthUser)
+    public async changeProfilePhoto(@Args() changeProfilePhotoDto: ChangeProfilePhotoDto, @Ctx() { setRefreshTokenCookie }: Context): Promise<AuthUser> {
+        const user = await this._userService.changeProfilePhoto(changeProfilePhotoDto)
         setRefreshTokenCookie(user.refreshToken as string)
         return user
     }
