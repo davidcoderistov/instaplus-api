@@ -432,4 +432,8 @@ export class ChatRepository implements IChatRepository {
     public async updateChatsByCreator(creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>): Promise<void> {
         await ChatModel.updateMany({ 'creator._id': creator._id }, { $set: { creator } })
     }
+
+    public async updateChatsByChatMember(chatMember: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>): Promise<void> {
+        await ChatModel.updateMany({ 'chatMembers._id': chatMember._id }, { $set: { 'chatMembers.$': chatMember } })
+    }
 }
