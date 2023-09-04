@@ -1,6 +1,7 @@
 import { injectable } from 'inversify'
 import { INotificationRepository } from './interfaces/INotification.repository'
 import { INotification, Notification } from './notification.model'
+import { IUser } from '../user/db.models/user.model'
 import { FindNotificationsDto } from './dtos'
 import { Notifications } from './graphql.models'
 import { getOffsetPaginatedData } from '../../shared/utils/misc'
@@ -205,5 +206,13 @@ export class NotificationRepository implements INotificationRepository {
             ],
         )
         return getOffsetPaginatedData(aggregateNotifications)
+    }
+
+    public async updateNotificationsByUser(user: Pick<IUser, '_id' | 'username' | 'photoUrl'>): Promise<void> {
+        const now = moment()
+
+        const startDate = now.clone().subtract(4, 'months').toDate()
+
+        await Notification.updateMany({ 'user._id': user._id, createdAt: { $gte: startDate } }, { $set: { user } })
     }
 }
