@@ -216,12 +216,12 @@ export class UserService implements IUserService {
             }
 
             if (newPassword !== confirmNewPassword) {
-                return Promise.reject(getCustomValidationError('confirmNewPassword', 'Passwords do not match'))
+                return Promise.reject(new CustomValidationException('confirmNewPassword', 'Passwords do not match'))
             }
 
             const passwordMatch = await bcrypt.compare(oldPassword, findUser.password)
             if (!passwordMatch) {
-                return Promise.reject(getCustomValidationError('oldPassword', 'Wrong old password'))
+                return Promise.reject(new CustomValidationException('oldPassword', 'Wrong old password'))
             }
 
             const password = await bcrypt.hash(newPassword, 10)

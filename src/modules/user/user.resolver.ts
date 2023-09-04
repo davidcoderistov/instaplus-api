@@ -82,8 +82,11 @@ export class UserResolver {
     }
 
     @Mutation(() => AuthUser)
-    public async changeProfilePhoto(@Args() changeProfilePhotoDto: ChangeProfilePhotoDto, @Ctx() { setRefreshTokenCookie }: Context): Promise<AuthUser> {
-        const user = await this._userService.changeProfilePhoto(changeProfilePhotoDto)
+    public async changeProfilePhoto(@Args() changeProfilePhotoDto: ChangeProfilePhotoDto, @Ctx() {
+        setRefreshTokenCookie,
+        userId,
+    }: Context): Promise<AuthUser> {
+        const user = await this._userService.changeProfilePhoto(changeProfilePhotoDto, userId)
         setRefreshTokenCookie(user.refreshToken as string)
         return user
     }
