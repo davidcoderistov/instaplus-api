@@ -113,5 +113,7 @@ export interface IPostRepository {
 
     findPostsByIds(postIds: string[]): Promise<IPost[]>
 
+    updatePostsByCreator(creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>): Promise<void>
+
     updateCommentsByCreator(creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>): Promise<void>
 }
