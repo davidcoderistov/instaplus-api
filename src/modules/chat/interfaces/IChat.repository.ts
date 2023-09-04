@@ -47,4 +47,6 @@ export interface IChatRepository {
     updateChatsByCreator(creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>): Promise<void>
 
     updateChatsByChatMember(chatMember: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>): Promise<void>
+
+    updateMessagesByCreator(creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>): Promise<void>
 }
