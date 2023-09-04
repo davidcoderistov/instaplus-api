@@ -43,4 +43,6 @@ export interface IChatRepository {
     findMessageByReactionAndUpdate(messageId: string, userId: string, reaction: string): Promise<IMessage | null>
 
     addMessageReaction(messageId: string, creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>, reaction: string): Promise<IMessage | null>
+
+    updateChatsByCreator(creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>): Promise<void>
 }
