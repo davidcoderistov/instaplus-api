@@ -189,7 +189,14 @@ export class UserService implements IUserService {
 
             return Promise.reject(new CustomValidationException('_id', `User with id ${userId} does not exist`))
         } catch (err) {
-            throw new CustomValidationException('username', `User ${updateUserDto.username} already exists.`)
+            if (err instanceof MongoError) {
+                if (err.code === 11000) {
+                    throw new CustomValidationException('username', `${updateUserDto.username} already exists`)
+                }
+            } else if (err instanceof Error.ValidationError) {
+                throw new ValidationException(err)
+            }
+            throw new MongodbServerException('Could not sign up. Please try again later')
         }
     }
 
