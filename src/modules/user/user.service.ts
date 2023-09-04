@@ -12,6 +12,7 @@ import {
     FindFollowersForUserDto,
     FindUserDetailsDto,
     UpdateUserDto,
+    ChangePasswordDto,
 } from './dtos'
 import {
     AuthUser,
@@ -197,6 +198,49 @@ export class UserService implements IUserService {
                 throw new ValidationException(err)
             }
             throw new MongodbServerException('Could not sign up. Please try again later')
+        }
+    }
+
+    public async changePassword({
+                                    oldPassword,
+                                    newPassword,
+                                    confirmNewPassword,
+                                }: ChangePasswordDto, userId: string): Promise<AuthUser> {
+        try {
+            const findUser = await this._userRepository.findUserById(userId)
+            if (!findUser) {
+                return Promise.reject(new CustomValidationException('_id', `User with id ${userId} does not exist`))
+            }
+
+            if (newPassword !== confirmNewPassword) {
+                return Promise.reject(getCustomValidationError('confirmNewPassword', 'Passwords do not match'))
+            }
+
+            const passwordMatch = await bcrypt.compare(oldPassword, findUser.password)
+            if (!passwordMatch) {
+                return Promise.reject(getCustomValidationError('oldPassword', 'Wrong old password'))
+            }
+
+            const password = await bcrypt.hash(newPassword, 10)
+
+            const refreshToken = generateRefreshToken(userId)
+
+            const updatedUser = await this._userRepository.updateUserById(userId, {
+                password,
+                refreshToken,
+            })
+
+            if (updatedUser) {
+                return {
+                    user: updatedUser,
+                    refreshToken,
+                    accessToken: generateAccessToken(userId),
+                }
+            }
+
+            return Promise.reject(new CustomValidationException('_id', `User with id ${userId} does not exist`))
+        } catch (err) {
+            throw new MongodbServerException('Could not change password. Please try again later')
         }
     }
 
