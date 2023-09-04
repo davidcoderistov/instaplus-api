@@ -254,23 +254,20 @@ export class UserService implements IUserService {
 
     public async changeProfilePhoto({ photo }: ChangeProfilePhotoDto, userId: string): Promise<AuthUser> {
         try {
-            const { photoUrl } = await this._fileRepository.storeUpload(photo, '/instaplus/storage/posts', {
+            const { photoUrl } = await this._fileRepository.storeUpload(photo, '/instaplus/storage/avatars', {
                 height: 180,
                 width: 180,
             })
 
-            const refreshToken = generateRefreshToken(userId)
-
             const updatedUser = await this._userRepository.updateUserById(userId, {
                 photoUrl,
-                refreshToken,
             })
 
             if (updatedUser) {
                 this.updateEmbeddedUser(updatedUser)
                 return {
                     user: updatedUser,
-                    refreshToken,
+                    refreshToken: updatedUser.refreshToken,
                     accessToken: generateAccessToken(userId),
                 }
             }
