@@ -10,6 +10,7 @@ import {
     FindFollowersForUserDto,
     FindUserDetailsDto,
     UpdateUserDto,
+    ChangePasswordDto,
 } from './dtos'
 import {
     AuthUser,
@@ -65,6 +66,16 @@ export class UserResolver {
         userId,
     }: Context): Promise<AuthUser> {
         const user = await this._userService.updateUser(updateUserDto, userId)
+        setRefreshTokenCookie(user.refreshToken as string)
+        return user
+    }
+
+    @Mutation(() => AuthUser)
+    public async changePassword(@Args() changePasswordDto: ChangePasswordDto, @Ctx() {
+        setRefreshTokenCookie,
+        userId,
+    }: Context): Promise<AuthUser> {
+        const user = await this._userService.changePassword(changePasswordDto, userId)
         setRefreshTokenCookie(user.refreshToken as string)
         return user
     }
