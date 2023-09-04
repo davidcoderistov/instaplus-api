@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify'
 import { IUserRepository } from './interfaces/IUser.repository'
 import { IPostRepository } from '../post/interfaces/IPost.repository'
+import { IFileRepository } from '../file/IFile.repository'
 import { IUserService } from './interfaces/IUser.service'
 import { IUser } from './db.models/user.model'
 import {
@@ -13,6 +14,7 @@ import {
     FindUserDetailsDto,
     UpdateUserDto,
     ChangePasswordDto,
+    ChangeProfilePhotoDto,
 } from './dtos'
 import {
     AuthUser,
@@ -45,7 +47,8 @@ export class UserService implements IUserService {
 
     constructor(
         @inject(TYPES.IUserRepository) private readonly _userRepository: IUserRepository,
-        @inject(TYPES.IPostRepository) private readonly _postRepository: IPostRepository) {
+        @inject(TYPES.IPostRepository) private readonly _postRepository: IPostRepository,
+        @inject(TYPES.IFileRepository) private readonly _fileRepository: IFileRepository) {
     }
 
     public async signUp(signUpDto: SignUpDto): Promise<AuthUser> {
@@ -241,6 +244,34 @@ export class UserService implements IUserService {
             return Promise.reject(new CustomValidationException('_id', `User with id ${userId} does not exist`))
         } catch (err) {
             throw new MongodbServerException('Could not change password. Please try again later')
+        }
+    }
+
+    public async changeProfilePhoto({ photo }: ChangeProfilePhotoDto, userId: string): Promise<AuthUser> {
+        try {
+            const { photoUrl } = await this._fileRepository.storeUpload(photo, '/instaplus/storage/posts', {
+                height: 180,
+                width: 180,
+            })
+
+            const refreshToken = generateRefreshToken(userId)
+
+            const updatedUser = await this._userRepository.updateUserById(userId, {
+                photoUrl,
+                refreshToken,
+            })
+
+            if (updatedUser) {
+                return {
+                    user: updatedUser,
+                    refreshToken,
+                    accessToken: generateAccessToken(userId),
+                }
+            }
+
+            return Promise.reject(new CustomValidationException('_id', `User with id ${userId} does not exist`))
+        } catch (err) {
+            throw new MongodbServerException('Could not change profile photo. Please try again later')
         }
     }
 

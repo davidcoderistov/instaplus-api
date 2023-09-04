@@ -8,6 +8,7 @@ import {
     FindUserDetailsDto,
     UpdateUserDto,
     ChangePasswordDto,
+    ChangeProfilePhotoDto,
 } from '../dtos'
 import {
     AuthUser,
@@ -32,6 +33,8 @@ export interface IUserService {
     updateUser(updateUserDto: UpdateUserDto, userId: string): Promise<AuthUser>
 
     changePassword(changePasswordDto: ChangePasswordDto, userId: string): Promise<AuthUser>
+
+    changeProfilePhoto(changeProfilePhotoDto: ChangeProfilePhotoDto, userId: string): Promise<AuthUser>
 
     findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto, authUserId: string): Promise<User[]>
 
