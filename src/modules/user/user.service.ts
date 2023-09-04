@@ -11,6 +11,7 @@ import {
     FindFollowingForUserDto,
     FindFollowersForUserDto,
     FindUserDetailsDto,
+    UpdateUserDto,
 } from './dtos'
 import {
     AuthUser,
@@ -164,6 +165,31 @@ export class UserService implements IUserService {
             }
         } catch (err) {
             throw new InvalidSessionException()
+        }
+    }
+
+    public async updateUser(updateUserDto: UpdateUserDto, userId: string): Promise<AuthUser> {
+        try {
+            const refreshToken = generateRefreshToken(userId)
+
+            const updatedUser = await this._userRepository.updateUserById(userId, {
+                firstName: updateUserDto.firstName,
+                lastName: updateUserDto.lastName,
+                username: updateUserDto.username,
+                refreshToken,
+            })
+
+            if (updatedUser) {
+                return {
+                    user: updatedUser,
+                    refreshToken,
+                    accessToken: generateAccessToken(userId),
+                }
+            }
+
+            return Promise.reject(new CustomValidationException('_id', `User with id ${userId} does not exist`))
+        } catch (err) {
+            throw new CustomValidationException('username', `User ${updateUserDto.username} already exists.`)
         }
     }
 

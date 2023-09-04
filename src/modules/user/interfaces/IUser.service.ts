@@ -6,6 +6,7 @@ import {
     FindFollowingForUserDto,
     FindFollowersForUserDto,
     FindUserDetailsDto,
+    UpdateUserDto,
 } from '../dtos'
 import {
     AuthUser,
@@ -26,6 +27,8 @@ export interface IUserService {
     refresh(refreshDto: RefreshDto): Promise<AuthUser>
 
     logout(refreshDto: RefreshDto): Promise<AuthUser>
+
+    updateUser(updateUserDto: UpdateUserDto, userId: string): Promise<AuthUser>
 
     findUsersBySearchQuery(findUsersBySearchQueryDto: FindUsersBySearchQueryDto, authUserId: string): Promise<User[]>
 
