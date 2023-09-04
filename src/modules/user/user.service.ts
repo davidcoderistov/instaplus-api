@@ -1,6 +1,8 @@
 import { inject, injectable } from 'inversify'
 import { IUserRepository } from './interfaces/IUser.repository'
 import { IPostRepository } from '../post/interfaces/IPost.repository'
+import { IChatRepository } from '../chat/interfaces/IChat.repository'
+import { INotificationRepository } from '../notification/interfaces/INotification.repository'
 import { IFileRepository } from '../file/IFile.repository'
 import { IUserService } from './interfaces/IUser.service'
 import { IUser } from './db.models/user.model'
@@ -48,6 +50,8 @@ export class UserService implements IUserService {
     constructor(
         @inject(TYPES.IUserRepository) private readonly _userRepository: IUserRepository,
         @inject(TYPES.IPostRepository) private readonly _postRepository: IPostRepository,
+        @inject(TYPES.INotificationRepository) private readonly _notificationRepository: INotificationRepository,
+        @inject(TYPES.IChatRepository) private readonly _chatRepository: IChatRepository,
         @inject(TYPES.IFileRepository) private readonly _fileRepository: IFileRepository) {
     }
 
@@ -184,6 +188,7 @@ export class UserService implements IUserService {
             })
 
             if (updatedUser) {
+                this.updateEmbeddedUser(updatedUser)
                 return {
                     user: updatedUser,
                     refreshToken,
@@ -262,6 +267,7 @@ export class UserService implements IUserService {
             })
 
             if (updatedUser) {
+                this.updateEmbeddedUser(updatedUser)
                 return {
                     user: updatedUser,
                     refreshToken,
@@ -464,5 +470,33 @@ export class UserService implements IUserService {
         } catch (err) {
             throw err
         }
+    }
+
+    private updateEmbeddedUser(user: IUser) {
+        const fullUser = {
+            _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            username: user.username,
+            photoUrl: user.photoUrl,
+        }
+
+        const partialUser = {
+            _id: user._id,
+            username: user.username,
+            photoUrl: user.photoUrl,
+        }
+
+        this._chatRepository.updateChatsByCreator(fullUser)
+        this._chatRepository.updateChatsByChatMember(fullUser)
+
+        this._chatRepository.updateMessagesByCreator(partialUser)
+        this._chatRepository.updateMessagesByReplyCreator(partialUser)
+        this._chatRepository.updateMessagesByReactionCreator(fullUser)
+
+        this._notificationRepository.updateNotificationsByUser(partialUser)
+
+        this._postRepository.updatePostsByCreator(fullUser)
+        this._postRepository.updateCommentsByCreator(partialUser)
     }
 }
