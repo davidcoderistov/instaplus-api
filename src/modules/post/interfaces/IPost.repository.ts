@@ -112,4 +112,6 @@ export interface IPostRepository {
     findPostsByFollowedConnections(postIds: string[], userIds: string[]): Promise<{ userId: string, postId: string }[]>
 
     findPostsByIds(postIds: string[]): Promise<IPost[]>
+
+    updateCommentsByCreator(creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>): Promise<void>
 }

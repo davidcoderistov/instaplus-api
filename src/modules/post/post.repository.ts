@@ -1434,4 +1434,8 @@ export class PostRepository implements IPostRepository {
             })
             .lean()
     }
+
+    public async updateCommentsByCreator(creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>): Promise<void> {
+        await CommentModel.updateMany({ 'creator._id': creator._id }, { $set: { creator } })
+    }
 }
