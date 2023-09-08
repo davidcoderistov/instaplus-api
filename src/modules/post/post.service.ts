@@ -120,7 +120,8 @@ export class PostService implements IPostService {
                 return Promise.reject(new CustomValidationException('creatorId', `User ${userId} does not exist`))
             }
 
-            if (!await this._postRepository.findPostById(postId)) {
+            const post = await this._postRepository.findPostById(postId)
+            if (!post) {
                 return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} does not exist`))
             }
 
@@ -130,11 +131,20 @@ export class PostService implements IPostService {
                 }
             }
 
-            return this._postRepository.createComment(createCommentDto, {
+            const comment = await this._postRepository.createComment(createCommentDto, {
                 _id: creator._id,
                 username: creator.username,
                 photoUrl: creator.photoUrl,
             })
+            this._notificationRepository.createPostLikeNotification({
+                _id: post._id,
+                photoUrls: post.photoUrls,
+            }, {
+                _id: creator._id,
+                username: creator.username,
+                photoUrl: creator.photoUrl,
+            }, post.creator._id.toString())
+            return comment
         } catch (err) {
             throw err
         }
