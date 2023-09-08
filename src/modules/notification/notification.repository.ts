@@ -1,6 +1,6 @@
 import { injectable } from 'inversify'
 import { INotificationRepository } from './interfaces/INotification.repository'
-import { INotification, Notification } from './notification.model'
+import { INotification, Notification, FollowNotification } from './notification.model'
 import { IUser } from '../user/db.models/user.model'
 import { FindNotificationsDto } from './dtos'
 import { Notifications } from './graphql.models'
@@ -10,6 +10,16 @@ import moment from 'moment'
 
 @injectable()
 export class NotificationRepository implements INotificationRepository {
+
+    public async createFollowNotification(followingUser: Pick<IUser, '_id' | 'username' | 'photoUrl'>, followedUserId: string): Promise<INotification> {
+        const notification = new FollowNotification({
+            type: 'follow',
+            userId: followedUserId,
+            user: followingUser,
+        })
+        await notification.save()
+        return notification.toObject()
+    }
 
     public async findDailyNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications> {
 
