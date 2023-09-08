@@ -11,6 +11,8 @@ export interface INotificationRepository {
 
     createPostLikeNotification(post: Pick<IPost, '_id' | 'photoUrls'>, user: Pick<IUser, '_id' | 'username' | 'photoUrl'>, userId: string): Promise<INotification>
 
+    createPostCommentNotification(post: Pick<IPost, '_id' | 'photoUrls'>, user: Pick<IUser, '_id' | 'username' | 'photoUrl'>, userId: string): Promise<INotification>
+
     findDailyNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications>
 
     findWeeklyNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications>

@@ -1,6 +1,12 @@
 import { injectable } from 'inversify'
 import { INotificationRepository } from './interfaces/INotification.repository'
-import { INotification, Notification, FollowNotification, PostLikeNotification } from './notification.model'
+import {
+    INotification,
+    Notification,
+    FollowNotification,
+    PostLikeNotification,
+    PostCommentNotification,
+} from './notification.model'
 import { IUser } from '../user/db.models/user.model'
 import { IPost } from '../post/db.models/post.model'
 import { FindNotificationsDto } from './dtos'
@@ -25,6 +31,17 @@ export class NotificationRepository implements INotificationRepository {
     public async createPostLikeNotification(post: Pick<IPost, '_id' | 'photoUrls'>, user: Pick<IUser, '_id' | 'username' | 'photoUrl'>, userId: string): Promise<INotification> {
         const notification = new PostLikeNotification({
             type: 'like',
+            userId,
+            post,
+            user,
+        })
+        await notification.save()
+        return notification.toObject()
+    }
+
+    public async createPostCommentNotification(post: Pick<IPost, '_id' | 'photoUrls'>, user: Pick<IUser, '_id' | 'username' | 'photoUrl'>, userId: string): Promise<INotification> {
+        const notification = new PostCommentNotification({
+            type: 'comment',
             userId,
             post,
             user,
