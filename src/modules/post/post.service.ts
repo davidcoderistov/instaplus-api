@@ -136,7 +136,7 @@ export class PostService implements IPostService {
                 username: creator.username,
                 photoUrl: creator.photoUrl,
             })
-            this._notificationRepository.createPostLikeNotification({
+            this._notificationRepository.createPostCommentNotification({
                 _id: post._id,
                 photoUrls: post.photoUrls,
             }, {
