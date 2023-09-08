@@ -460,7 +460,11 @@ export class UserService implements IUserService {
                 .sort((a, b) => {
                     const countWeight = suggestedUsersWithCount[b.followableUser.user._id.toString()] - suggestedUsersWithCount[a.followableUser.user._id.toString()]
                     if (countWeight === 0) {
-                        return b.followersCount - a.followersCount
+                        const followersCount = b.followersCount - a.followersCount
+                        if (followersCount === 0) {
+                            return a.followableUser.user.username.toLowerCase().localeCompare(b.followableUser.user.username.toLowerCase())
+                        }
+                        return followersCount
                     }
                     return countWeight
                 })
