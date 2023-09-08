@@ -2,6 +2,7 @@ import { inject, injectable } from 'inversify'
 import { IPostService } from './interfaces/IPost.service'
 import { IPostRepository } from './interfaces/IPost.repository'
 import { IUserRepository } from '../user/interfaces/IUser.repository'
+import { INotificationRepository } from '../notification/interfaces/INotification.repository'
 import { IFileRepository } from '../file/IFile.repository'
 import { TYPES } from '../../container/types'
 import { IHashtag } from './db.models/hashtag.model'
@@ -46,6 +47,7 @@ export class PostService implements IPostService {
     constructor(
         @inject(TYPES.IPostRepository) private readonly _postRepository: IPostRepository,
         @inject(TYPES.IUserRepository) private readonly _userRepository: IUserRepository,
+        @inject(TYPES.INotificationRepository) private readonly _notificationRepository: INotificationRepository,
         @inject(TYPES.IFileRepository) private readonly _fileRepository: IFileRepository) {
     }
 
@@ -148,11 +150,13 @@ export class PostService implements IPostService {
 
     public async likePost(postId: string, userId: string): Promise<IPostLike> {
         try {
-            if (!await this._postRepository.findPostById(postId)) {
+            const post = await this._postRepository.findPostById(postId)
+            if (!post) {
                 return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} does not exist`))
             }
 
-            if (!await this._userRepository.findUserById(userId)) {
+            const user = await this._userRepository.findUserById(userId)
+            if (!user) {
                 return Promise.reject(new CustomValidationException('userId', `User with id ${userId} does not exist`))
             }
 
@@ -160,7 +164,16 @@ export class PostService implements IPostService {
                 return Promise.reject(new CustomValidationException('postId', `Post with id ${postId} is already liked`))
             }
 
-            return this._postRepository.createPostLike(postId, userId)
+            const postLike = await this._postRepository.createPostLike(postId, userId)
+            this._notificationRepository.createPostLikeNotification({
+                _id: post._id,
+                photoUrls: post.photoUrls,
+            }, {
+                _id: user._id,
+                username: user.username,
+                photoUrl: user.photoUrl,
+            }, post.creator._id.toString())
+            return postLike
         } catch (err) {
             throw err
         }
