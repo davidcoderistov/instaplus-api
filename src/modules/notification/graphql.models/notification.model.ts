@@ -1,7 +1,7 @@
 import { ObjectType, Field, Int } from 'type-graphql'
 import { Types } from 'mongoose'
 import { User } from '../../user/graphql.models'
-import { Post } from '../../post/graphql.models/post.model'
+import { Post } from '../../post/graphql.models'
 
 
 @ObjectType()
