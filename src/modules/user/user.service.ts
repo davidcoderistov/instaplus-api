@@ -294,7 +294,8 @@ export class UserService implements IUserService {
 
     public async followUser(followingUserId: string, followedUserId: string): Promise<FollowableUser> {
         try {
-            if (!await this._userRepository.findUserById(followingUserId)) {
+            const followingUser = await this._userRepository.findUserById(followingUserId)
+            if (!followingUser) {
                 return Promise.reject(new CustomValidationException('followingUserId', `User with id ${followingUserId} does not exist`))
             }
 
@@ -308,6 +309,11 @@ export class UserService implements IUserService {
             }
 
             await this._userRepository.followUser(followingUserId, followedUserId)
+            this._notificationRepository.createFollowNotification({
+                _id: followingUser._id,
+                username: followingUser.username,
+                photoUrl: followingUser.photoUrl,
+            }, followedUserId)
             return {
                 user: followedUser,
                 following: true,
