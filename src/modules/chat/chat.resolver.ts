@@ -23,7 +23,14 @@ import {
     CreateMessageDto,
     ReactToMessageDto,
 } from './dtos'
-import { Chat, ChatsWithLatestMessage, ChatWithLatestMessage, Message, Messages } from './graphql.models'
+import {
+    Chat,
+    ChatsWithLatestMessage,
+    ChatWithLatestMessage,
+    Message,
+    Messages,
+    UnreadMessagesCount,
+} from './graphql.models'
 import { IMessage } from './db.models/message.model'
 import { User } from '../user/graphql.models'
 
@@ -116,5 +123,11 @@ export class ChatResolver {
     public async markMessageAsRead(@Arg('messageId') messageId: string, @Ctx() { userId }: Context): Promise<Message> {
         const message = await this._chatService.markMessageAsRead(messageId, userId)
         return message as unknown as Message
+    }
+
+    @Query(() => UnreadMessagesCount)
+    public async findUnreadMessagesCountForUser(@Ctx() { userId }: Context): Promise<UnreadMessagesCount> {
+        const count = await this._chatService.findUnreadMessagesCountForUser(userId)
+        return { count }
     }
 }
