@@ -250,4 +250,8 @@ export class ChatService implements IChatService {
             throw err
         }
     }
+
+    public async findUnreadMessagesCountForUser(userId: string): Promise<number> {
+        return this._chatRepository.findUnreadMessagesCountForUser(userId)
+    }
 }

@@ -29,4 +29,6 @@ export interface IChatService {
     reactToMessage(reactToMessageDto: ReactToMessageDto, creatorId: string): Promise<{ message: IMessage, chatMemberIds: string[] }>
 
     markMessageAsRead(messageId: string, userId: string): Promise<IMessage>
+
+    findUnreadMessagesCountForUser(userId: string): Promise<number>
 }
