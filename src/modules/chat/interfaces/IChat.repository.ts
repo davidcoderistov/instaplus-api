@@ -53,4 +53,6 @@ export interface IChatRepository {
     updateMessagesByReplyCreator(creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>): Promise<void>
 
     updateMessagesByReactionCreator(creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>): Promise<void>
+
+    findUnreadMessagesCountForUser(userId: string): Promise<number>
 }

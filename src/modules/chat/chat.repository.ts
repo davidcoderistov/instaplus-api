@@ -448,4 +448,106 @@ export class ChatRepository implements IChatRepository {
     public async updateMessagesByReactionCreator(creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>): Promise<void> {
         await MessageModel.updateMany({ 'reactions.creator._id': creator._id }, { $set: { 'reactions.$.creator': creator } })
     }
+
+    public async findUnreadMessagesCountForUser(userId: string): Promise<number> {
+        const messagesCount: { unreadMessagesCount: number }[] = await ChatModel.aggregate([
+            {
+                $match: {
+                    'chatMembers._id': new mongoose.Types.ObjectId(userId),
+                },
+            },
+            {
+                $addFields: {
+                    chatId: { $toString: '$_id' },
+                },
+            },
+            {
+                $lookup: {
+                    from: UserDeletedChatModel.collection.name,
+                    let: {
+                        chatId: '$chatId',
+                        userId: userId,
+                    },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$userId', '$$userId'] },
+                                        { $eq: ['$chatId', '$$chatId'] },
+                                    ],
+                                },
+                            },
+                        },
+                    ],
+                    as: 'userDeletedChat',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$userDeletedChat',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
+                    from: MessageModel.collection.name,
+                    localField: 'chatId',
+                    foreignField: 'chatId',
+                    as: 'messages',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$messages',
+                    preserveNullAndEmptyArrays: false,
+                },
+            },
+            {
+                $match: {
+                    $expr: {
+                        $cond: [
+                            {
+                                $eq: ['$userDeletedChat', null],
+                            },
+                            true,
+                            {
+                                $gt: ['$messages.createdAt', '$userDeletedChat.updatedAt'],
+                            },
+                        ],
+                    },
+                },
+            },
+            {
+                $sort: { 'messages.createdAt': -1, 'messages._id': -1 },
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    message: { $first: '$messages' },
+                },
+            },
+            {
+                $project: {
+                    isMessageUnread: {
+                        $cond: [
+                            {
+                                $in: [userId, '$message.seenByUserIds'],
+                            },
+                            0,
+                            1,
+                        ],
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    unreadMessagesCount: { $sum: '$isMessageUnread' },
+                },
+            },
+        ])
+
+        return messagesCount.length > 0 ? messagesCount[0].unreadMessagesCount : 0
+    }
 }
