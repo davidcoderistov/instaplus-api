@@ -2,6 +2,7 @@ import { inject, injectable } from 'inversify'
 import { INotificationService } from './interfaces/INotification.service'
 import { FindNotificationsDto } from './dtos'
 import { Notifications } from './graphql.models'
+import { IUserNotificationHistory } from './db.models/user-notification-history.model'
 import { TYPES } from '../../container/types'
 import { INotificationRepository } from './interfaces/INotification.repository'
 
@@ -27,5 +28,9 @@ export class NotificationService implements INotificationService {
 
     public async findEarlierNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications> {
         return this._notificationRepository.findEarlierNotifications(findNotificationsDto, userId)
+    }
+
+    public async updateNotificationHistoryForUser(userId: string, date: Date): Promise<IUserNotificationHistory> {
+        return this._notificationRepository.upsertUserNotificationHistory(userId, date)
     }
 }

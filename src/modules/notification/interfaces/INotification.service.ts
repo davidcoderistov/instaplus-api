@@ -1,5 +1,6 @@
 import { FindNotificationsDto } from '../dtos'
 import { Notifications } from '../graphql.models'
+import { IUserNotificationHistory } from '../db.models/user-notification-history.model'
 
 
 export interface INotificationService {
@@ -11,5 +12,7 @@ export interface INotificationService {
     findMonthlyNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications>
 
     findEarlierNotifications(findNotificationsDto: FindNotificationsDto, userId: string): Promise<Notifications>
+
+    updateNotificationHistoryForUser(userId: string, date: Date): Promise<IUserNotificationHistory>
 
 }
