@@ -1,10 +1,11 @@
 import { inject, injectable } from 'inversify'
 import { INotificationService } from './interfaces/INotification.service'
 import { FindNotificationsDto } from './dtos'
-import { Notifications } from './graphql.models'
+import { Notifications, UserHasUnseenNotifications } from './graphql.models'
 import { IUserNotificationHistory } from './db.models/user-notification-history.model'
 import { TYPES } from '../../container/types'
 import { INotificationRepository } from './interfaces/INotification.repository'
+import { Types } from 'mongoose'
 
 
 @injectable()
@@ -32,5 +33,17 @@ export class NotificationService implements INotificationService {
 
     public async updateNotificationHistoryForUser(userId: string, date: Date): Promise<IUserNotificationHistory> {
         return this._notificationRepository.upsertUserNotificationHistory(userId, date)
+    }
+
+    public async findUserHasUnseenNotifications(userId: string): Promise<UserHasUnseenNotifications> {
+        const userNotificationHistory = await this._notificationRepository.findUserNotificationHistory(userId)
+
+        const hasUnseenNotifications = await this._notificationRepository.findUserHasUnseenNotifications(userId, userNotificationHistory ? userNotificationHistory.updatedAt as Date : new Date(0))
+
+        return {
+            _id: new Types.ObjectId(userId),
+            userId,
+            hasUnseenNotifications,
+        }
     }
 }
