@@ -3,13 +3,14 @@ import {
     Args,
     Ctx,
     Query,
-    Resolver,
+    Mutation,
+    Resolver, Arg,
 } from 'type-graphql'
 import { TYPES } from '../../container/types'
 import { INotificationService } from './interfaces/INotification.service'
 import { Context } from '../../shared/types'
 import { FindNotificationsDto } from './dtos'
-import { Notifications } from './graphql.models'
+import { Notifications, UserNotificationHistory } from './graphql.models'
 
 
 @injectable()
@@ -38,5 +39,11 @@ export class NotificationResolver {
     @Query(() => Notifications)
     public async findEarlierNotifications(@Args() findNotificationsDto: FindNotificationsDto, @Ctx() { userId }: Context): Promise<Notifications> {
         return this._notificationService.findEarlierNotifications(findNotificationsDto, userId)
+    }
+
+    @Mutation(() => UserNotificationHistory)
+    public async updateNotificationHistoryForUser(@Arg('date') date: Date, @Ctx() { userId }: Context) {
+        const userNotificationHistory = await this._notificationService.updateNotificationHistoryForUser(userId, date)
+        return userNotificationHistory as unknown as UserNotificationHistory
     }
 }
