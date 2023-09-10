@@ -26,4 +26,6 @@ export interface INotificationRepository {
 
     upsertUserNotificationHistory(userId: string, date: Date): Promise<IUserNotificationHistory>
 
+    findUserNotificationHistory(userId: string): Promise<IUserNotificationHistory | null>
+
 }
