@@ -266,4 +266,9 @@ export class NotificationRepository implements INotificationRepository {
         const userNotificationHistory = await UserNotificationHistory.findOne({ userId })
         return userNotificationHistory ? userNotificationHistory.toObject() : null
     }
+
+    public async findUserHasUnseenNotifications(userId: string, date: Date): Promise<boolean> {
+        const unseenNotificationsCount = await Notification.find({ userId, createdAt: { $gt: date } }).count()
+        return unseenNotificationsCount > 0
+    }
 }

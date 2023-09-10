@@ -28,4 +28,6 @@ export interface INotificationRepository {
 
     findUserNotificationHistory(userId: string): Promise<IUserNotificationHistory | null>
 
+    findUserHasUnseenNotifications(userId: string, date: Date): Promise<boolean>
+
 }
