@@ -10,7 +10,7 @@ import { TYPES } from '../../container/types'
 import { INotificationService } from './interfaces/INotification.service'
 import { Context } from '../../shared/types'
 import { FindNotificationsDto } from './dtos'
-import { Notifications, UserNotificationHistory } from './graphql.models'
+import { Notifications, UserNotificationHistory, UserHasUnseenNotifications } from './graphql.models'
 
 
 @injectable()
@@ -42,8 +42,13 @@ export class NotificationResolver {
     }
 
     @Mutation(() => UserNotificationHistory)
-    public async updateNotificationHistoryForUser(@Arg('date') date: Date, @Ctx() { userId }: Context) {
+    public async updateNotificationHistoryForUser(@Arg('date') date: Date, @Ctx() { userId }: Context): Promise<UserNotificationHistory> {
         const userNotificationHistory = await this._notificationService.updateNotificationHistoryForUser(userId, date)
         return userNotificationHistory as unknown as UserNotificationHistory
+    }
+
+    @Query(() => UserHasUnseenNotifications)
+    public async findUserHasUnseenNotifications(@Ctx() { userId }: Context): Promise<UserHasUnseenNotifications> {
+        return this._notificationService.findUserHasUnseenNotifications(userId)
     }
 }
