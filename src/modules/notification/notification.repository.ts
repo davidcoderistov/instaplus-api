@@ -6,7 +6,7 @@ import {
     FollowNotification,
     PostLikeNotification,
     PostCommentNotification,
-} from './notification.model'
+} from './db.models/notification.model'
 import { IUser } from '../user/db.models/user.model'
 import { IPost } from '../post/db.models/post.model'
 import { FindNotificationsDto } from './dtos'

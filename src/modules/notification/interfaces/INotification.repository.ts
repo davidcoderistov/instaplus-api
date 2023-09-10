@@ -1,5 +1,5 @@
 import { FindNotificationsDto } from '../dtos'
-import { INotification } from '../notification.model'
+import { INotification } from '../db.models/notification.model'
 import { Notifications } from '../graphql.models'
 import { IUser } from '../../user/db.models/user.model'
 import { IPost } from '../../post/db.models/post.model'
