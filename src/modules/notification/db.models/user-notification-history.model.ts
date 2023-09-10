@@ -6,11 +6,16 @@ const UserNotificationHistorySchema = new Schema({
         type: Schema.Types.String,
         required: true,
     },
+    seenAt: {
+        type: Schema.Types.Date,
+        required: true,
+    },
 }, { timestamps: true })
 
 export interface IUserNotificationHistory extends SchemaTimestampsConfig {
     _id: Types.ObjectId
     userId: string
+    seenAt: Date
 }
 
 export default model('UserNotificationHistory', UserNotificationHistorySchema)

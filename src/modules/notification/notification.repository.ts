@@ -259,7 +259,7 @@ export class NotificationRepository implements INotificationRepository {
     public async upsertUserNotificationHistory(userId: string, date: Date): Promise<IUserNotificationHistory> {
         return UserNotificationHistory.findOneAndUpdate({
             userId: userId,
-        }, { $set: { updatedAt: date } }, { upsert: true, new: true, lean: true })
+        }, { $set: { seenAt: date } }, { upsert: true, new: true, lean: true })
     }
 
     public async findUserNotificationHistory(userId: string): Promise<IUserNotificationHistory | null> {
