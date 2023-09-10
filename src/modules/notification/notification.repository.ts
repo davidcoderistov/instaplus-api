@@ -7,6 +7,7 @@ import {
     PostLikeNotification,
     PostCommentNotification,
 } from './db.models/notification.model'
+import UserNotificationHistory, { IUserNotificationHistory } from './db.models/user-notification-history.model'
 import { IUser } from '../user/db.models/user.model'
 import { IPost } from '../post/db.models/post.model'
 import { FindNotificationsDto } from './dtos'
@@ -253,5 +254,11 @@ export class NotificationRepository implements INotificationRepository {
         const startDate = now.clone().subtract(4, 'months').toDate()
 
         await Notification.updateMany({ 'user._id': user._id, createdAt: { $gte: startDate } }, { $set: { user } })
+    }
+
+    public async upsertUserNotificationHistory(userId: string, date: Date): Promise<IUserNotificationHistory> {
+        return UserNotificationHistory.findOneAndUpdate({
+            userId: userId,
+        }, { $set: { updatedAt: date } }, { upsert: true, new: true, lean: true })
     }
 }
