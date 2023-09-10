@@ -38,7 +38,7 @@ export class NotificationService implements INotificationService {
     public async findUserHasUnseenNotifications(userId: string): Promise<UserHasUnseenNotifications> {
         const userNotificationHistory = await this._notificationRepository.findUserNotificationHistory(userId)
 
-        const hasUnseenNotifications = await this._notificationRepository.findUserHasUnseenNotifications(userId, userNotificationHistory ? userNotificationHistory.updatedAt as Date : new Date(0))
+        const hasUnseenNotifications = await this._notificationRepository.findUserHasUnseenNotifications(userId, userNotificationHistory ? userNotificationHistory.updatedAt as unknown as Date : new Date(0))
 
         return {
             _id: new Types.ObjectId(userId),
