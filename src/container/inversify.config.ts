@@ -10,6 +10,8 @@ import { IGraphQLSchemaService } from '../core/graphql.schema/IGraphQLSchema.ser
 import { GraphQLSchemaService } from '../core/graphql.schema/graphql.schema.service'
 import { IDatabaseService } from '../core/database/IDatabase.service'
 import { DatabaseService } from '../core/database/database.service'
+import { ISeederService } from '../core/seeder/ISeeder.service'
+import { SeederService } from '../core/seeder/seeder.service'
 import { ICloudinaryService } from '../core/cloudinary/ICloudinary.service'
 import { CloudinaryService } from '../core/cloudinary/cloudinary.service'
 import { IFileRepository } from '../modules/file/IFile.repository'
@@ -50,6 +52,8 @@ export const bindings = new ContainerModule(bind => {
     bind<IGraphQLSchemaService>(TYPES.IGraphQLSchemaService).to(GraphQLSchemaService)
 
     bind<IDatabaseService>(TYPES.IDatabaseService).to(DatabaseService)
+
+    bind<ISeederService>(TYPES.ISeederService).to(SeederService)
 
     bind<ICloudinaryService>(TYPES.ICloudinaryService).to(CloudinaryService)
 
