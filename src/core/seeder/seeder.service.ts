@@ -1,6 +1,7 @@
 import { injectable } from 'inversify'
 import { ISeederService } from './ISeeder.service'
 import UserModel, { IUser } from '../../modules/user/db.models/user.model'
+import ChatModel, { IChat } from '../../modules/chat/db.models/chat.model'
 import bcrypt from 'bcrypt'
 import { faker } from '@faker-js/faker'
 
@@ -90,10 +91,70 @@ export class SeederService implements ISeederService {
         return dbUsers.map(user => user.toObject())
     }
 
+    private static getFullUser(user: Omit<IUser, 'password' | 'refreshToken'>): Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'> {
+        return {
+            _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            username: user.username,
+            photoUrl: user.photoUrl,
+        }
+    }
+
+    private static getShortUser(user: Omit<IUser, 'password' | 'refreshToken'>): Pick<IUser, '_id' | 'username' | 'photoUrl'> {
+        return {
+            _id: user._id,
+            username: user.username,
+            photoUrl: user.photoUrl,
+        }
+    }
+
+    private async generateRandomChats(users: Omit<IUser, 'password' | 'refreshToken'>[]): Promise<IChat[]> {
+        const chats: {
+            creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>,
+            chatMembers: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>[]
+        }[] = []
+
+        for (let i = 0; i < users.length - 1; ++i) {
+            chats.push({
+                creator: SeederService.getFullUser(users[i]),
+                chatMembers: [
+                    SeederService.getFullUser(users[i]),
+                    SeederService.getFullUser(users[i + 1]),
+                ],
+            })
+        }
+
+        const generateGroupChats = (membersCount: number) => {
+            for (let i = 0; i < users.length; i += membersCount) {
+                const chatMembers = users.slice(i, i + membersCount)
+                if (chatMembers.length === membersCount) {
+                    chats.push({
+                        creator: SeederService.getFullUser(users[i]),
+                        chatMembers: chatMembers.map(SeederService.getFullUser),
+                    })
+                }
+            }
+        }
+
+        generateGroupChats(3)
+
+        generateGroupChats(4)
+
+        const dbChats = await Promise.all(chats.map(chat => {
+            const chatModel = new ChatModel(chat)
+            return chatModel.save()
+        }))
+
+        return dbChats.map(chat => chat.toObject())
+    }
+
     async seed(): Promise<void> {
         console.log('GENERATING RANDOM USERS...')
 
         const users = await this.generateRandomUsers()
+
+        const chats = await this.generateRandomChats(users)
 
         console.log('GENERATING RANDOM USERS...DONE')
     }
