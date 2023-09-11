@@ -113,7 +113,7 @@ export class SeederService implements ISeederService {
                     uniqueUsernames.set(user.username, true)
                     users.push({
                         ...user,
-                        photoUrl: photoUrls[index],
+                        photoUrl: photoUrls.length > 0 ? photoUrls[index] : null,
                     })
                     ++index
                 }
@@ -123,6 +123,10 @@ export class SeederService implements ISeederService {
         await genRandomUsers('male', SeederService.maleAvatars, SeederService.maleAvatars.length)
 
         await genRandomUsers('female', SeederService.femaleAvatars, SeederService.maleAvatars.length + SeederService.femaleAvatars.length)
+
+        await genRandomUsers('male', [], SeederService.maleAvatars.length + SeederService.femaleAvatars.length + 8)
+
+        await genRandomUsers('female', [], SeederService.maleAvatars.length + SeederService.femaleAvatars.length + 16)
 
         const dbUsers = await Promise.all(users.map(user => {
             const userModel = new UserModel(user)
