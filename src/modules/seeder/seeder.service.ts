@@ -1,7 +1,7 @@
 import { injectable } from 'inversify'
 import { ISeederService } from './ISeeder.service'
-import UserModel, { IUser } from '../../modules/user/db.models/user.model'
-import ChatModel, { IChat } from '../../modules/chat/db.models/chat.model'
+import UserModel, { IUser } from '../user/db.models/user.model'
+import ChatModel, { IChat } from '../chat/db.models/chat.model'
 import bcrypt from 'bcrypt'
 import { faker } from '@faker-js/faker'
 
