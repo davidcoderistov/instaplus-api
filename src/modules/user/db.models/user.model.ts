@@ -29,7 +29,7 @@ export interface IUser {
     username: string
     firstName: string
     lastName: string
-    photoUrl: string
+    photoUrl: string | null
     password: string
     accessToken?: string | null
     refreshToken?: string | null

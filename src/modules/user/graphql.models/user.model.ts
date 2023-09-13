@@ -17,6 +17,6 @@ export class User {
     @Field()
     username!: string
 
-    @Field({ nullable: true })
-    photoUrl?: string
+    @Field(() => String,{ nullable: true })
+    photoUrl?: string | null
 }
