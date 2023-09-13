@@ -194,6 +194,21 @@ export class SeederService implements ISeederService {
         return dbChats.map(chat => chat.toObject())
     }
 
+    private* combinationN<T>(array: T[], n: number): Generator<T[]> {
+        if (n === 1) {
+            for (const a of array) {
+                yield [a]
+            }
+            return
+        }
+
+        for (let i = 0; i <= array.length - n; i++) {
+            for (const c of this.combinationN(array.slice(i + 1), n - 1)) {
+                yield [array[i], ...c]
+            }
+        }
+    }
+
     async seed(): Promise<void> {
         console.log('GENERATING RANDOM USERS...')
 
