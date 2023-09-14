@@ -4,6 +4,8 @@ import UserModel, { IUser } from '../user/db.models/user.model'
 import ChatModel, { IChat } from '../chat/db.models/chat.model'
 import bcrypt from 'bcrypt'
 import { faker } from '@faker-js/faker'
+import _random from 'lodash/random'
+import _sampleSize from 'lodash/sampleSize'
 
 
 @injectable()
@@ -160,31 +162,76 @@ export class SeederService implements ISeederService {
             chatMembers: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>[]
         }[] = []
 
-        for (let i = 0; i < users.length - 1; ++i) {
-            chats.push({
-                creator: SeederService.getFullUser(users[i]),
-                chatMembers: [
-                    SeederService.getFullUser(users[i]),
-                    SeederService.getFullUser(users[i + 1]),
-                ],
+        const top5Users: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(users, 5)
+
+        const generateOneToOneChats = () => {
+
+            const top5UsersIds = top5Users.map(user => user._id.toString())
+
+            const allUserCombinations = this.combinationN<Omit<IUser, 'password' | 'refreshToken'>>([
+                ...top5Users,
+                ...users.filter(user => !top5Users.some(top5User => top5User._id.toString() === user._id.toString())),
+            ], 2)
+            const top5UserCombinations: Omit<IUser, 'password' | 'refreshToken'>[][] = []
+
+            for (const pair of allUserCombinations) {
+                if (top5UsersIds.includes(pair[0]._id.toString()) || top5UsersIds.includes(pair[1]._id.toString())) {
+                    top5UserCombinations.push(pair)
+                }
+            }
+
+            let top5UserCombinationsMax35: Omit<IUser, 'password' | 'refreshToken'>[][] = []
+
+            top5Users.forEach(user => {
+                const findIndex = top5UserCombinations.findIndex(pair => pair[0]._id.toString() === user._id.toString())
+                if (findIndex >= 0) {
+                    top5UserCombinationsMax35 = [...top5UserCombinationsMax35, ...top5UserCombinations.slice(findIndex, findIndex + 35)]
+                }
+            })
+
+            top5UserCombinationsMax35.forEach(pair => {
+                chats.push({
+                    creator: SeederService.getFullUser(pair[_random(0, 1)]),
+                    chatMembers: [
+                        SeederService.getFullUser(pair[0]),
+                        SeederService.getFullUser(pair[1]),
+                    ],
+                })
             })
         }
 
-        const generateGroupChats = (membersCount: number) => {
-            for (let i = 0; i < users.length; i += membersCount) {
-                const chatMembers = users.slice(i, i + membersCount)
-                if (chatMembers.length === membersCount) {
-                    chats.push({
-                        creator: SeederService.getFullUser(users[i]),
-                        chatMembers: chatMembers.map(SeederService.getFullUser),
-                    })
-                }
+        const generateGroupChats = () => {
+            const combinations3 = this.combinationN<Omit<IUser, 'password' | 'refreshToken'>>(top5Users, 3)
+
+            for (const pair of combinations3) {
+                chats.push({
+                    creator: SeederService.getFullUser(pair[_random(0, 2)]),
+                    chatMembers: [
+                        SeederService.getFullUser(pair[0]),
+                        SeederService.getFullUser(pair[1]),
+                        SeederService.getFullUser(pair[2]),
+                    ],
+                })
+            }
+
+            const combinations4 = this.combinationN<Omit<IUser, 'password' | 'refreshToken'>>(top5Users, 4)
+
+            for (const pair of combinations4) {
+                chats.push({
+                    creator: SeederService.getFullUser(pair[_random(0, 3)]),
+                    chatMembers: [
+                        SeederService.getFullUser(pair[0]),
+                        SeederService.getFullUser(pair[1]),
+                        SeederService.getFullUser(pair[2]),
+                        SeederService.getFullUser(pair[3]),
+                    ],
+                })
             }
         }
 
-        generateGroupChats(3)
+        generateOneToOneChats()
 
-        generateGroupChats(4)
+        generateGroupChats()
 
         const dbChats = await Promise.all(chats.map(chat => {
             const chatModel = new ChatModel(chat)
