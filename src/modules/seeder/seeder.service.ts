@@ -293,46 +293,72 @@ export class SeederService implements ISeederService {
         return dbChats.map(chat => chat.toObject())
     }
 
+    private async createMessage({
+                                    chatId,
+                                    creator,
+                                    text = null,
+                                    photoUrl = null,
+                                    photoOrientation = null,
+                                    previewPhotoUrl = null,
+                                    reply = null,
+                                    createdAt,
+                                }: {
+        chatId: string,
+        creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>,
+        text?: string | null,
+        photoUrl?: string | null,
+        photoOrientation?: 'landscape' | 'portrait' | null,
+        previewPhotoUrl?: string | null,
+        reply?: Pick<IMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation' | 'previewPhotoUrl'> | null,
+        createdAt: Date,
+    }): Promise<IMessage> {
+        const message = new MessageModel({
+            chatId,
+            creator,
+            text,
+            photoUrl,
+            photoOrientation,
+            previewPhotoUrl,
+            reply,
+            createdAt,
+            seenByUserIds: [creator._id.toString()],
+        })
+
+        await message.save()
+
+        return message.toObject()
+    }
+
     private async generateRandomMessages(chats: IChat[], min: number, max: number): Promise<void> {
         const messages: Promise<IMessage>[] = []
 
-        const generateMessage = async (chat: IChat, data: {
-            text: string | null,
-            photoUrl: string | null,
-            photoOrientation: string | null,
-            previewPhotoUrl: string | null,
-            reply: Pick<IMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation' | 'previewPhotoUrl'> | null,
-            createdAt: Date
-        }): Promise<IMessage> => {
+        const getRandomCreator = (chat: IChat): Pick<IUser, '_id' | 'username' | 'photoUrl'> => {
             const creator = chat.chatMembers[_random(0, chat.chatMembers.length - 1) as number]
-
-            const message = new MessageModel({
-                chatId: chat._id.toString(),
-                creator: { _id: creator._id, username: creator.username, photoUrl: creator.photoUrl },
-                seenByUserIds: [creator._id.toString()],
-                ...data,
-            })
-
-            await message.save()
-            return message.toObject()
+            return { _id: creator._id, username: creator.username, photoUrl: creator.photoUrl }
         }
 
         const generateReplyMessage = async (chat: IChat, index: number, total: number): Promise<IMessage> => {
             const createdAt = moment().subtract(_random(0, 86400), 'minutes')
-            const message = await generateMessage(chat, {
+            const creator = getRandomCreator(chat)
+            const message = await this.createMessage({
+                chatId: chat._id.toString(),
                 text: faker.lorem.sentences({ min: 1, max: 4 }),
-                photoUrl: null,
-                previewPhotoUrl: null,
-                photoOrientation: null,
-                reply: null,
+                creator,
                 createdAt: createdAt.toDate(),
             })
             if (index > total - 3) {
-                messages.push(generateMessage(chat, {
+                messages.push(this.createMessage({
+                    chatId: chat._id.toString(),
                     text: faker.lorem.words({ min: 2, max: 5 }),
-                    photoUrl: null,
-                    previewPhotoUrl: null,
-                    photoOrientation: null,
+                    creator: chat.chatMembers[0]._id.toString() === creator._id.toString() ? {
+                        _id: chat.chatMembers[1]._id,
+                        username: chat.chatMembers[1].username,
+                        photoUrl: chat.chatMembers[1].photoUrl,
+                    } : {
+                        _id: chat.chatMembers[0]._id,
+                        username: chat.chatMembers[0].username,
+                        photoUrl: chat.chatMembers[0].photoUrl,
+                    },
                     reply: {
                         _id: message._id,
                         creator: message.creator,
@@ -354,21 +380,21 @@ export class SeederService implements ISeederService {
             })
             if (_random(0, 1) > 0) {
                 const photoIndices = _sampleSize(_range(SeederService.messagePhotoUrls.length), 2)
-                messages.push(generateMessage(chat, {
-                    text: null,
+                messages.push(this.createMessage({
+                    chatId: chat._id.toString(),
+                    creator: getRandomCreator(chat),
                     photoUrl: SeederService.messagePhotoUrls[photoIndices[0]],
                     previewPhotoUrl: SeederService.messagePreviewPhotoUrls[photoIndices[0]],
                     photoOrientation: 'portrait',
-                    reply: null,
                     createdAt: moment().subtract(_random(0, 86400), 'minutes').toDate(),
                 }))
                 if (_random(0, 1) > 0) {
-                    messages.push(generateMessage(chat, {
-                        text: null,
+                    messages.push(this.createMessage({
+                        chatId: chat._id.toString(),
+                        creator: getRandomCreator(chat),
                         photoUrl: SeederService.messagePhotoUrls[photoIndices[1]],
                         previewPhotoUrl: SeederService.messagePreviewPhotoUrls[photoIndices[1]],
                         photoOrientation: 'portrait',
-                        reply: null,
                         createdAt: moment().subtract(_random(0, 86400), 'minutes').toDate(),
                     }))
                 }
