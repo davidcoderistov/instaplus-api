@@ -5,7 +5,6 @@ import ChatModel, { IChat } from '../chat/db.models/chat.model'
 import MessageModel, { IMessage } from '../chat/db.models/message.model'
 import FollowModel from '../user/db.models/follow.model'
 import { FollowNotification } from '../notification/db.models/notification.model'
-import { Model } from 'mongoose'
 import bcrypt from 'bcrypt'
 import { faker } from '@faker-js/faker'
 import _range from 'lodash/range'
@@ -297,84 +296,81 @@ export class SeederService implements ISeederService {
     private async generateRandomMessages(chats: IChat[], min: number, max: number): Promise<void> {
         const messages: Promise<IMessage>[] = []
 
-        const generateMessage = (chat: IChat, data: {
+        const generateMessage = async (chat: IChat, data: {
             text: string | null,
             photoUrl: string | null,
             photoOrientation: string | null,
             previewPhotoUrl: string | null,
             reply: Pick<IMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation' | 'previewPhotoUrl'> | null,
             createdAt: Date
-        }): Model<any> => {
+        }): Promise<IMessage> => {
             const creator = chat.chatMembers[_random(0, chat.chatMembers.length - 1) as number]
 
-            return new MessageModel({
+            const message = new MessageModel({
                 chatId: chat._id.toString(),
                 creator: { _id: creator._id, username: creator.username, photoUrl: creator.photoUrl },
                 seenByUserIds: [creator._id.toString()],
                 ...data,
             })
+
+            await message.save()
+            return message.toObject()
+        }
+
+        const generateReplyMessage = async (chat: IChat, index: number, total: number): Promise<IMessage> => {
+            const createdAt = moment().subtract(_random(0, 86400), 'minutes')
+            const message = await generateMessage(chat, {
+                text: faker.lorem.sentences({ min: 1, max: 4 }),
+                photoUrl: null,
+                previewPhotoUrl: null,
+                photoOrientation: null,
+                reply: null,
+                createdAt: createdAt.toDate(),
+            })
+            if (index > total - 3) {
+                messages.push(generateMessage(chat, {
+                    text: faker.lorem.words({ min: 2, max: 5 }),
+                    photoUrl: null,
+                    previewPhotoUrl: null,
+                    photoOrientation: null,
+                    reply: {
+                        _id: message._id,
+                        creator: message.creator,
+                        text: message.text,
+                        photoUrl: message.photoUrl,
+                        photoOrientation: message.photoOrientation,
+                        previewPhotoUrl: message.previewPhotoUrl,
+                    },
+                    createdAt: createdAt.clone().add(_random(20, 40), 'seconds').toDate(),
+                }))
+            }
+            return message
         }
 
         chats.forEach(chat => {
             const total = _random(min, max)
             _range(total).forEach((index) => {
-                messages.push(async () => {
-                    const createdAt = moment().subtract(_random(0, 86400), 'minutes')
-                    const message = generateMessage(chat, {
-                        text: faker.lorem.sentences({ min: 1, max: 4 }),
-                        photoUrl: null,
-                        previewPhotoUrl: null,
-                        photoOrientation: null,
-                        reply: null,
-                        createdAt: createdAt.toDate(),
-                    })
-                    await message.save()
-                    const m: IMessage = message.toObject()
-                    if (index > total - 3) {
-                        const replyMessage = generateMessage(chat, {
-                            text: faker.lorem.sentences({ min: 1, max: 2 }),
-                            photoUrl: null,
-                            previewPhotoUrl: null,
-                            photoOrientation: null,
-                            reply: {
-                                _id: m._id,
-                                creator: m.creator,
-                                text: m.text,
-                                photoUrl: m.photoUrl,
-                                photoOrientation: m.photoOrientation,
-                                previewPhotoUrl: m.previewPhotoUrl,
-                            },
-                            createdAt: createdAt.clone().add(_random(20, 40), 'seconds').toDate(),
-                        })
-                        await replyMessage.save()
-                    }
-                })
+                messages.push(generateReplyMessage(chat, index, total))
             })
             if (_random(0, 1) > 0) {
                 const photoIndices = _sampleSize(_range(SeederService.messagePhotoUrls.length), 2)
-                messages.push(async () => {
-                    const message = generateMessage(chat, {
+                messages.push(generateMessage(chat, {
+                    text: null,
+                    photoUrl: SeederService.messagePhotoUrls[photoIndices[0]],
+                    previewPhotoUrl: SeederService.messagePreviewPhotoUrls[photoIndices[0]],
+                    photoOrientation: 'portrait',
+                    reply: null,
+                    createdAt: moment().subtract(_random(0, 86400), 'minutes').toDate(),
+                }))
+                if (_random(0, 1) > 0) {
+                    messages.push(generateMessage(chat, {
                         text: null,
-                        photoUrl: SeederService.messagePhotoUrls[photoIndices[0]],
-                        previewPhotoUrl: SeederService.messagePreviewPhotoUrls[photoIndices[0]],
+                        photoUrl: SeederService.messagePhotoUrls[photoIndices[1]],
+                        previewPhotoUrl: SeederService.messagePreviewPhotoUrls[photoIndices[1]],
                         photoOrientation: 'portrait',
                         reply: null,
                         createdAt: moment().subtract(_random(0, 86400), 'minutes').toDate(),
-                    })
-                    await message.save()
-                })
-                if (_random(0, 1) > 0) {
-                    messages.push(async () => {
-                        const message = generateMessage(chat, {
-                            text: null,
-                            photoUrl: SeederService.messagePhotoUrls[photoIndices[1]],
-                            previewPhotoUrl: SeederService.messagePreviewPhotoUrls[photoIndices[1]],
-                            photoOrientation: 'portrait',
-                            reply: null,
-                            createdAt: moment().subtract(_random(0, 86400), 'minutes').toDate(),
-                        })
-                        await message.save()
-                    })
+                    }))
                 }
             }
         })
