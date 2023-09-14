@@ -2,10 +2,13 @@ import { injectable } from 'inversify'
 import { ISeederService } from './ISeeder.service'
 import UserModel, { IUser } from '../user/db.models/user.model'
 import ChatModel, { IChat } from '../chat/db.models/chat.model'
+import FollowModel from '../user/db.models/follow.model'
+import { FollowNotification } from '../notification/db.models/notification.model'
 import bcrypt from 'bcrypt'
 import { faker } from '@faker-js/faker'
 import _random from 'lodash/random'
 import _sampleSize from 'lodash/sampleSize'
+import moment from 'moment'
 
 
 @injectable()
@@ -154,6 +157,41 @@ export class SeederService implements ISeederService {
             username: user.username,
             photoUrl: user.photoUrl,
         }
+    }
+
+    private async generateRandomFollowers(users: Omit<IUser, 'password' | 'refreshToken'>[]): Promise<void> {
+
+        const combinations = this.combinationN<Omit<IUser, 'password' | 'refreshToken'>>(users, 2)
+        let permutations: Omit<IUser, 'password' | 'refreshToken'>[][] = []
+
+        for (const pair of combinations) {
+            permutations.push([pair[0], pair[1]])
+            permutations.push([pair[1], pair[0]])
+        }
+
+        permutations = _sampleSize(permutations, Math.floor(permutations.length / 5))
+
+        await Promise.all(permutations.map((pair) => {
+            return async () => {
+                const followingUserId = pair[0]._id.toString()
+                const followedUserId = pair[1]._id.toString()
+                const createdAt = moment().subtract(_random(0, 86400), 'minutes').toDate()
+
+                const follow = new FollowModel({
+                    followingUserId,
+                    followedUserId,
+                    createdAt,
+                })
+                await follow.save()
+                const notification = new FollowNotification({
+                    type: 'follow',
+                    userId: followedUserId,
+                    user: SeederService.getShortUser(pair[0]),
+                    createdAt,
+                })
+                await notification.save()
+            }
+        }))
     }
 
     private async generateRandomChats(users: Omit<IUser, 'password' | 'refreshToken'>[]): Promise<IChat[]> {
