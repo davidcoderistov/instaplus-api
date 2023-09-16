@@ -3,8 +3,8 @@ import { ISeederService } from './ISeeder.service'
 import UserModel, { IUser } from '../user/db.models/user.model'
 import ChatModel, { IChat } from '../chat/db.models/chat.model'
 import MessageModel, { IMessage } from '../chat/db.models/message.model'
-import FollowModel from '../user/db.models/follow.model'
-import { FollowNotification } from '../notification/db.models/notification.model'
+import FollowModel, { IFollow } from '../user/db.models/follow.model'
+import { FollowNotification, IFollowNotification } from '../notification/db.models/notification.model'
 import { faker } from '@faker-js/faker'
 import _range from 'lodash/range'
 import _random from 'lodash/random'
@@ -187,27 +187,30 @@ export class SeederService implements ISeederService {
 
         permutations = _sampleSize(permutations, Math.floor(permutations.length / 5))
 
-        await Promise.all(permutations.map((pair) => {
-            return async () => {
-                const followingUserId = pair[0]._id.toString()
-                const followedUserId = pair[1]._id.toString()
-                const createdAt = moment().subtract(_random(0, 256000), 'minutes').toDate()
+        const follows: (Pick<IFollow, 'followingUserId' | 'followedUserId'> & { createdAt: Date })[] = []
+        const followNotifications: (Pick<IFollowNotification, 'type' | 'userId' | 'user'> & { createdAt: Date })[] = []
 
-                const follow = new FollowModel({
-                    followingUserId,
-                    followedUserId,
-                    createdAt,
-                })
-                await follow.save()
-                const notification = new FollowNotification({
-                    type: 'follow',
-                    userId: followedUserId,
-                    user: SeederService.getShortUser(pair[0]),
-                    createdAt,
-                })
-                await notification.save()
-            }
-        }))
+        permutations.forEach(pair => {
+            const followingUserId = pair[0]._id.toString()
+            const followedUserId = pair[1]._id.toString()
+            const createdAt = moment().subtract(_random(0, 256000), 'minutes').toDate()
+
+            follows.push({
+                followingUserId,
+                followedUserId,
+                createdAt,
+            })
+
+            followNotifications.push({
+                type: 'follow',
+                userId: followedUserId,
+                user: SeederService.getShortUser(pair[0]),
+                createdAt,
+            })
+        })
+
+        await FollowModel.insertMany(follows.map(follow => new FollowModel(follow)))
+        await FollowNotification.insertMany(followNotifications.map(followNotification => new FollowNotification(followNotification)))
     }
 
     private async generateRandomChats(users: Omit<IUser, 'password' | 'refreshToken'>[]): Promise<IChat[]> {
