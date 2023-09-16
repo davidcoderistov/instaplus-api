@@ -5,7 +5,6 @@ import ChatModel, { IChat } from '../chat/db.models/chat.model'
 import MessageModel, { IMessage } from '../chat/db.models/message.model'
 import FollowModel from '../user/db.models/follow.model'
 import { FollowNotification } from '../notification/db.models/notification.model'
-import bcrypt from 'bcrypt'
 import { faker } from '@faker-js/faker'
 import _range from 'lodash/range'
 import _random from 'lodash/random'
@@ -112,11 +111,11 @@ export class SeederService implements ISeederService {
         'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694855599/instaplus/storage/chat/65034f2698179f633a7870b1/sjlccodh9v99g2aigaza.jpg',
     ]
 
-    private static async generateRandomUser(sex: 'male' | 'female'): Promise<Pick<IUser, 'firstName' | 'lastName' | 'username' | 'password'>> {
+    private static generateRandomUser(sex: 'male' | 'female'): Pick<IUser, 'firstName' | 'lastName' | 'username' | 'password'> {
         const firstName = faker.person.firstName(sex)
         const lastName = faker.person.lastName(sex)
         const username = `${firstName.toLowerCase()}${lastName.toLowerCase()}`
-        const password = await bcrypt.hash(faker.word.noun({ length: { min: 8, max: 12 } }), 10)
+        const password = faker.word.noun({ length: { min: 8, max: 12 } })
         return {
             firstName,
             lastName,
@@ -130,10 +129,10 @@ export class SeederService implements ISeederService {
 
         const uniqueUsernames = new Map<string, boolean>()
 
-        const genRandomUsers = async (sex: 'male' | 'female', photoUrls: string[], length: number) => {
+        const genRandomUsers = (sex: 'male' | 'female', photoUrls: string[], length: number) => {
             let index = 0
             while (users.length < length) {
-                const user = await SeederService.generateRandomUser(sex)
+                const user = SeederService.generateRandomUser(sex)
                 if (!uniqueUsernames.has(user.username)) {
                     uniqueUsernames.set(user.username, true)
                     users.push({
@@ -145,18 +144,15 @@ export class SeederService implements ISeederService {
             }
         }
 
-        await genRandomUsers('male', SeederService.maleAvatars, SeederService.maleAvatars.length)
+        genRandomUsers('male', SeederService.maleAvatars, SeederService.maleAvatars.length)
 
-        await genRandomUsers('female', SeederService.femaleAvatars, SeederService.maleAvatars.length + SeederService.femaleAvatars.length)
+        genRandomUsers('female', SeederService.femaleAvatars, SeederService.maleAvatars.length + SeederService.femaleAvatars.length)
 
-        await genRandomUsers('male', [], SeederService.maleAvatars.length + SeederService.femaleAvatars.length + 8)
+        genRandomUsers('male', [], SeederService.maleAvatars.length + SeederService.femaleAvatars.length + 8)
 
-        await genRandomUsers('female', [], SeederService.maleAvatars.length + SeederService.femaleAvatars.length + 16)
+        genRandomUsers('female', [], SeederService.maleAvatars.length + SeederService.femaleAvatars.length + 16)
 
-        const dbUsers = await Promise.all(users.map(user => {
-            const userModel = new UserModel(user)
-            return userModel.save()
-        }))
+        const dbUsers = await UserModel.insertMany(users.map(user => new UserModel(user)))
 
         return dbUsers.map(user => user.toObject())
     }
