@@ -8,6 +8,7 @@ import { FollowNotification, IFollowNotification } from '../notification/db.mode
 import { faker } from '@faker-js/faker'
 import _range from 'lodash/range'
 import _random from 'lodash/random'
+import _sample from 'lodash/sample'
 import _sampleSize from 'lodash/sampleSize'
 import moment from 'moment'
 
@@ -295,115 +296,107 @@ export class SeederService implements ISeederService {
         return dbChats.map(chat => chat.toObject())
     }
 
-    private async createMessage({
-                                    chatId,
-                                    creator,
-                                    text = null,
-                                    photoUrl = null,
-                                    photoOrientation = null,
-                                    previewPhotoUrl = null,
-                                    reply = null,
-                                    createdAt,
-                                }: {
-        chatId: string,
-        creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>,
-        text?: string | null,
-        photoUrl?: string | null,
-        photoOrientation?: 'landscape' | 'portrait' | null,
-        previewPhotoUrl?: string | null,
-        reply?: Pick<IMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation' | 'previewPhotoUrl'> | null,
-        createdAt: Date,
-    }): Promise<IMessage> {
-        const message = new MessageModel({
-            chatId,
-            creator,
-            text,
-            photoUrl,
-            photoOrientation,
-            previewPhotoUrl,
-            reply,
-            createdAt,
-            seenByUserIds: [creator._id.toString()],
-        })
-
-        await message.save()
-
-        return message.toObject()
-    }
-
     private async generateRandomMessages(chats: IChat[], min: number, max: number): Promise<void> {
-        const messages: Promise<IMessage>[] = []
+
+        type IMessageModel = Omit<IMessage, '_id' | 'createdAt'> & { createdAt: Date }
+
+        const messages: IMessageModel[] = []
+
+        const getMessage = ({
+                                text = null,
+                                photoUrl = null,
+                                photoOrientation = null,
+                                previewPhotoUrl = null,
+                                reply = null,
+                                ...rest
+                            }: Omit<IMessageModel, 'seenByUserIds' | 'reactions'>): IMessageModel => {
+            return {
+                text,
+                photoUrl,
+                photoOrientation,
+                previewPhotoUrl,
+                reply,
+                ...rest,
+                seenByUserIds: [rest.creator._id.toString()],
+                reactions: [],
+            }
+        }
 
         const getRandomCreator = (chat: IChat): Pick<IUser, '_id' | 'username' | 'photoUrl'> => {
             const creator = chat.chatMembers[_random(0, chat.chatMembers.length - 1) as number]
             return { _id: creator._id, username: creator.username, photoUrl: creator.photoUrl }
         }
 
-        const generateReplyMessage = async (chat: IChat, index: number, total: number): Promise<IMessage> => {
-            const createdAt = moment().subtract(_random(0, 86400), 'minutes')
-            const creator = getRandomCreator(chat)
-            const message = await this.createMessage({
-                chatId: chat._id.toString(),
-                text: faker.lorem.sentences({ min: 1, max: 4 }),
-                creator,
-                createdAt: createdAt.toDate(),
-            })
-            if (index > total - 3) {
-                messages.push(this.createMessage({
-                    chatId: chat._id.toString(),
-                    text: faker.lorem.words({ min: 2, max: 5 }),
-                    creator: chat.chatMembers[0]._id.toString() === creator._id.toString() ? {
-                        _id: chat.chatMembers[1]._id,
-                        username: chat.chatMembers[1].username,
-                        photoUrl: chat.chatMembers[1].photoUrl,
-                    } : {
-                        _id: chat.chatMembers[0]._id,
-                        username: chat.chatMembers[0].username,
-                        photoUrl: chat.chatMembers[0].photoUrl,
-                    },
-                    reply: {
-                        _id: message._id,
-                        creator: message.creator,
-                        text: message.text,
-                        photoUrl: message.photoUrl,
-                        photoOrientation: message.photoOrientation,
-                        previewPhotoUrl: message.previewPhotoUrl,
-                    },
-                    createdAt: createdAt.clone().add(_random(20, 40), 'seconds').toDate(),
-                }))
-            }
-            return message
-        }
-
         chats.forEach(chat => {
-            const total = _random(min, max)
-            _range(total).forEach((index) => {
-                messages.push(generateReplyMessage(chat, index, total))
+            _range(_random(min, max)).forEach(() => {
+                messages.push(getMessage({
+                    chatId: chat._id.toString(),
+                    text: faker.lorem.sentences({ min: 1, max: 4 }),
+                    creator: getRandomCreator(chat),
+                    createdAt: moment().subtract(_random(0, 86400), 'minutes').toDate(),
+                }))
             })
-            if (_random(0, 1) > 0) {
-                const photoIndices = _sampleSize(_range(SeederService.messagePhotoUrls.length), 2)
-                messages.push(this.createMessage({
+            const photoTotal = _random(1, 3)
+            const photoIndices = _sampleSize(_range(SeederService.messagePhotoUrls.length), photoTotal)
+            _range(photoTotal).forEach((index) => {
+                messages.push(getMessage({
                     chatId: chat._id.toString(),
                     creator: getRandomCreator(chat),
-                    photoUrl: SeederService.messagePhotoUrls[photoIndices[0]],
-                    previewPhotoUrl: SeederService.messagePreviewPhotoUrls[photoIndices[0]],
+                    photoUrl: SeederService.messagePhotoUrls[photoIndices[index]],
+                    previewPhotoUrl: SeederService.messagePreviewPhotoUrls[photoIndices[index]],
                     photoOrientation: 'portrait',
                     createdAt: moment().subtract(_random(0, 86400), 'minutes').toDate(),
                 }))
-                if (_random(0, 1) > 0) {
-                    messages.push(this.createMessage({
-                        chatId: chat._id.toString(),
-                        creator: getRandomCreator(chat),
-                        photoUrl: SeederService.messagePhotoUrls[photoIndices[1]],
-                        previewPhotoUrl: SeederService.messagePreviewPhotoUrls[photoIndices[1]],
-                        photoOrientation: 'portrait',
-                        createdAt: moment().subtract(_random(0, 86400), 'minutes').toDate(),
-                    }))
-                }
-            }
+            })
         })
 
-        await Promise.all(messages)
+        const dbMessages = await MessageModel.insertMany(messages.map(message => new MessageModel(message))) as unknown as IMessage[]
+        const dbMessagesByChat = new Map<string, IMessage[]>()
+
+        dbMessages.forEach(message => {
+            const prevMessages = dbMessagesByChat.get(message.chatId) || []
+            dbMessagesByChat.set(message.chatId, [...prevMessages, message])
+        })
+
+        let randomMessages: IMessage[] = []
+        const replyMessages: IMessageModel[] = []
+
+        for (const chatId of dbMessagesByChat.keys()) {
+            const messages = dbMessagesByChat.get(chatId)
+            if (Array.isArray(messages)) {
+                randomMessages = [...randomMessages, ..._sampleSize(messages, _random(3, 5))]
+            }
+        }
+
+        const chatsMap = new Map<string, IChat>()
+
+        chats.forEach(chat => chatsMap.set(chat._id.toString(), chat))
+
+        randomMessages.forEach(message => {
+            const chat = chatsMap.get(message.chatId) as IChat
+            const chatMembers = chat.chatMembers.filter(chatMember => chatMember._id.toString() !== message.creator._id.toString())
+            const chatMember = _sample(chatMembers) as unknown as Pick<IUser, '_id' | 'username' | 'firstName' | 'lastName' | 'photoUrl'>
+            replyMessages.push(getMessage({
+                chatId: message.chatId,
+                text: faker.lorem.words({ min: 3, max: 6 }),
+                creator: {
+                    _id: chatMember._id,
+                    username: chatMember.username,
+                    photoUrl: chatMember.photoUrl,
+                },
+                reply: {
+                    _id: message._id,
+                    creator: message.creator,
+                    text: message.text,
+                    photoUrl: message.photoUrl,
+                    photoOrientation: message.photoOrientation,
+                    previewPhotoUrl: message.previewPhotoUrl,
+                },
+                createdAt: moment(message.createdAt as unknown as Date).add(_random(20, 40), 'seconds').toDate(),
+            }))
+        })
+
+        await MessageModel.insertMany(replyMessages.map(message => new MessageModel(message)))
     }
 
     private* combinationN<T>(array: T[], n: number): Generator<T[]> {
