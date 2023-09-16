@@ -105,16 +105,16 @@ interface IBaseMessage {
     _id: Types.ObjectId
     chatId: string
     creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>
-    text?: string
-    photoUrl?: string
-    photoOrientation?: string
-    previewPhotoUrl?: string
+    text?: string | null
+    photoUrl?: string | null
+    photoOrientation?: string | null
+    previewPhotoUrl?: string | null
     seenByUserIds: string[]
     reactions: IReaction[]
 }
 
 export interface IMessage extends IBaseMessage, SchemaTimestampsConfig {
-    reply?: Pick<IBaseMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation' | 'previewPhotoUrl'>
+    reply?: Pick<IBaseMessage, '_id' | 'creator' | 'text' | 'photoUrl' | 'photoOrientation' | 'previewPhotoUrl'> | null
 }
 
 export default model('Message', MessageSchema)
