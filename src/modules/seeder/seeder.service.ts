@@ -290,10 +290,7 @@ export class SeederService implements ISeederService {
 
         generateGroupChats()
 
-        const dbChats = await Promise.all(chats.map(chat => {
-            const chatModel = new ChatModel(chat)
-            return chatModel.save()
-        }))
+        const dbChats = await ChatModel.insertMany(chats.map(chat => new ChatModel(chat)))
 
         return dbChats.map(chat => chat.toObject())
     }
