@@ -98,12 +98,18 @@ export class SeederService implements ISeederService {
         'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694707669/instaplus/storage/chat/64b3e50caf9cefccb764e6c7/sqhmwofzz1nnbgzoi3no.jpg',
         'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694707649/instaplus/storage/chat/64b3e50caf9cefccb764e6c7/xvvzhcqd48radyslse3i.jpg',
         'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694707582/instaplus/storage/chat/64b3e50caf9cefccb764e6c7/ooqmhmx6pjnvtuuhhmxn.jpg',
+        'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694855693/instaplus/storage/chat/65034f2698179f633a7870b1/ntrj0zsfxs5fm5ietgoq.jpg',
+        'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694855654/instaplus/storage/chat/65034f2698179f633a7870b1/ilpy9szx3bcbp7ogqdje.jpg',
+        'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694855597/instaplus/storage/chat/65034f2698179f633a7870b1/hsgeznw4idfyczv5ozh9.jpg',
     ]
 
     private static readonly messagePreviewPhotoUrls = [
         'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694707671/instaplus/storage/chat/64b3e50caf9cefccb764e6c7/q2vpddmm3j2uwj9pahni.jpg',
         'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694707650/instaplus/storage/chat/64b3e50caf9cefccb764e6c7/sxp4xii6iys84e032yai.jpg',
         'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694707585/instaplus/storage/chat/64b3e50caf9cefccb764e6c7/kl9cjq1jcyw6nzeleznv.jpg',
+        'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694855694/instaplus/storage/chat/65034f2698179f633a7870b1/yzpu01ujs2fdyg5yyoc1.jpg',
+        'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694855655/instaplus/storage/chat/65034f2698179f633a7870b1/tr1c5v3pux63z178a2cg.jpg',
+        'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694855599/instaplus/storage/chat/65034f2698179f633a7870b1/sjlccodh9v99g2aigaza.jpg',
     ]
 
     private static async generateRandomUser(sex: 'male' | 'female'): Promise<Pick<IUser, 'firstName' | 'lastName' | 'username' | 'password'>> {
