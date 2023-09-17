@@ -429,7 +429,7 @@ export class SeederService implements ISeederService {
         if (doubleTotal > 0) {
             const randomPhotoUrls: string[] = _sampleSize(photoUrls, doubleTotal)
             photoUrls = _difference(photoUrls, randomPhotoUrls)
-            for (let i = 0; i < randomPhotoUrls.length; ++i) {
+            for (let i = 0; i < randomPhotoUrls.length / 2; ++i) {
                 postsPhotoUrls.push([
                     randomPhotoUrls[i],
                     randomPhotoUrls[randomPhotoUrls.length - i - 1],
@@ -456,7 +456,7 @@ export class SeederService implements ISeederService {
 
             if (_random(1, 4) > 1) {
                 if (_random(1, 4) > 3) {
-                    caption = faker.lorem.sentence({ min: 4, max: 14 })
+                    caption = faker.lorem.sentences({ min: 1, max: 4 })
                 }
 
                 hashtags = _sampleSize(SeederService.hashtags, _random(3, 6))
@@ -471,7 +471,7 @@ export class SeederService implements ISeederService {
 
             const post = new PostModel({
                 caption,
-                location: _random(1, 4) > 3 ? faker.location.city() : null,
+                location: _random(1, 2) > 1 ? faker.location.city() : null,
                 photoUrls,
                 creator: SeederService.getFullUser(user),
             })
