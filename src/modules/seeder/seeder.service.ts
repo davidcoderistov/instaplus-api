@@ -4,12 +4,17 @@ import UserModel, { IUser } from '../user/db.models/user.model'
 import ChatModel, { IChat } from '../chat/db.models/chat.model'
 import MessageModel, { IMessage } from '../chat/db.models/message.model'
 import FollowModel, { IFollow } from '../user/db.models/follow.model'
+import HashtagModel, { IHashtag } from '../post/db.models/hashtag.model'
+import PostModel, { IPost } from '../post/db.models/post.model'
+import HashtagPostModel, { IHashtagPost } from '../post/db.models/hashtag-post.model'
 import { FollowNotification, IFollowNotification } from '../notification/db.models/notification.model'
+import { v2 as cloudinary } from 'cloudinary'
 import { faker } from '@faker-js/faker'
 import _range from 'lodash/range'
 import _random from 'lodash/random'
 import _sample from 'lodash/sample'
 import _sampleSize from 'lodash/sampleSize'
+import _difference from 'lodash/difference'
 import moment from 'moment'
 
 
@@ -110,6 +115,12 @@ export class SeederService implements ISeederService {
         'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694855694/instaplus/storage/chat/65034f2698179f633a7870b1/yzpu01ujs2fdyg5yyoc1.jpg',
         'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694855655/instaplus/storage/chat/65034f2698179f633a7870b1/tr1c5v3pux63z178a2cg.jpg',
         'https://res.cloudinary.com/dd3isrbpv/image/upload/v1694855599/instaplus/storage/chat/65034f2698179f633a7870b1/sjlccodh9v99g2aigaza.jpg',
+    ]
+
+    private static readonly hashtags = [
+        'life', 'joy', 'happiness', 'fun', 'goals', 'dreams', 'chill',
+        'WonderfulWorld', 'MakeMemories', 'StayPositive', 'DailyInspiration', 'ExploreTheWorld', 'LiveLaughLove', 'EverydayMoments',
+        'AdventureTime', 'EnjoyLife', 'GoodTimes', 'Create',
     ]
 
     private static generateRandomUser(sex: 'male' | 'female'): Pick<IUser, 'firstName' | 'lastName' | 'username' | 'password'> {
@@ -397,6 +408,138 @@ export class SeederService implements ISeederService {
         })
 
         await MessageModel.insertMany(replyMessages.map(message => new MessageModel(message)))
+    }
+
+    private async generateRandomPostsAndHashtags(users: Omit<IUser, 'password' | 'refreshToken'>[]): Promise<IPost[]> {
+
+        const hashtagDocs = await HashtagModel.insertMany(SeederService.hashtags.map(name => new HashtagModel({ name })))
+        const hashtags: IHashtag[] = hashtagDocs.map(hashtag => hashtag.toObject())
+        const hashtagsByName = new Map<string, IHashtag>()
+
+        hashtags.forEach(hashtag => hashtagsByName.set(hashtag.name, hashtag))
+
+        let photoUrls = await this.fetchPostsPhotoUrls()
+        let postsPhotoUrls: string[][] = []
+
+        let doubleTotal = Math.floor(photoUrls.length * 0.2)
+        if (doubleTotal % 2 !== 0) {
+            doubleTotal -= 1
+        }
+
+        if (doubleTotal > 0) {
+            const randomPhotoUrls: string[] = _sampleSize(photoUrls, doubleTotal)
+            photoUrls = _difference(photoUrls, randomPhotoUrls)
+            for (let i = 0; i < randomPhotoUrls.length; ++i) {
+                postsPhotoUrls.push([
+                    randomPhotoUrls[i],
+                    randomPhotoUrls[randomPhotoUrls.length - i - 1],
+                ])
+            }
+        }
+
+        postsPhotoUrls = [
+            ...postsPhotoUrls,
+            ...photoUrls.map(photoUrl => [photoUrl]),
+        ]
+
+        const avg = Math.floor(postsPhotoUrls.length / users.length)
+        const stdDeviation = Math.floor(avg * 0.6)
+        const min = avg - stdDeviation
+
+        const postsPromises: Promise<IPost>[] = []
+        const hashtagPosts: Pick<IHashtagPost, 'hashtagId' | 'postId'>[] = []
+
+        const generateRandomPost = async (user: Omit<IUser, 'password' | 'refreshToken'>, photoUrls: string[]): Promise<IPost> => {
+
+            let hashtags: string[] = []
+            let caption: string | null = null
+
+            if (_random(1, 4) > 1) {
+                if (_random(1, 4) > 3) {
+                    caption = faker.lorem.sentence({ min: 4, max: 14 })
+                }
+
+                hashtags = _sampleSize(SeederService.hashtags, _random(3, 6))
+                let hashtagsDesc = hashtags.map(hashtag => `#${hashtag}`).join(' ')
+
+                if (caption) {
+                    caption = `${caption} ${hashtagsDesc}`
+                } else {
+                    caption = hashtagsDesc
+                }
+            }
+
+            const post = new PostModel({
+                caption,
+                location: _random(1, 4) > 3 ? faker.location.city() : null,
+                photoUrls,
+                creator: SeederService.getFullUser(user),
+            })
+
+            await post.save()
+
+            const p: IPost = post.toObject()
+
+            hashtags.forEach(name => {
+                const hashtag = hashtagsByName.get(name)
+                if (hashtag) {
+                    hashtagPosts.push({
+                        hashtagId: hashtag._id.toString(),
+                        postId: p._id.toString(),
+                    })
+                }
+            })
+
+            return p
+        }
+
+        users.forEach(user => {
+            _range(min).forEach(() => {
+                postsPromises.push(generateRandomPost(user, postsPhotoUrls[0]))
+                postsPhotoUrls.shift()
+            })
+        })
+
+        postsPhotoUrls.forEach(photoUrls => postsPromises.push(generateRandomPost(_sample(users) as Omit<IUser, 'password' | 'refreshToken'>, photoUrls)))
+
+        const posts = await Promise.all(postsPromises)
+
+        if (hashtagPosts.length > 0) {
+            await HashtagPostModel.insertMany(hashtagPosts.map(hashtagPost => new HashtagPostModel(hashtagPost)))
+        }
+
+        return posts
+    }
+
+    private async fetchPostsPhotoUrls(): Promise<string[]> {
+
+        interface SearchResponse {
+            next_cursor: string | null
+            resources: { secure_url: string }[]
+        }
+
+        const photoUrls: string[] = []
+        let next_cursor: string | null = null
+
+        do {
+            let result: SearchResponse
+            if (next_cursor) {
+                result = await cloudinary.search
+                    .expression('folder=posts')
+                    .max_results(500)
+                    .next_cursor(next_cursor)
+                    .execute()
+            } else {
+                result = await cloudinary.search
+                    .expression('folder=posts')
+                    .max_results(500)
+                    .execute()
+            }
+            next_cursor = result.next_cursor
+            result.resources.forEach(({ secure_url }) => photoUrls.push(secure_url))
+        } while (Boolean(next_cursor))
+
+        return photoUrls
     }
 
     private* combinationN<T>(array: T[], n: number): Generator<T[]> {
