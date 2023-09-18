@@ -40,7 +40,7 @@ export class SeederService implements ISeederService {
     ]
 
     private static readonly hashtags = [
-        'life', 'joy', 'happiness', 'fun', 'goals', 'dreams', 'chill',
+        'Life', 'Joy', 'Happiness', 'Fun', 'Goals', 'Dreams', 'Chill',
         'WonderfulWorld', 'MakeMemories', 'StayPositive', 'DailyInspiration', 'ExploreTheWorld', 'LiveLaughLove', 'EverydayMoments',
         'AdventureTime', 'EnjoyLife', 'GoodTimes', 'Create',
     ]
