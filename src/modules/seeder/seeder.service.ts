@@ -517,7 +517,7 @@ export class SeederService implements ISeederService {
         let next_cursor: string | null = null
 
         do {
-            const result = await SeederService.searchCloudinaryByFolder('folder=posts', next_cursor)
+            const result = await SeederService.searchCloudinaryByFolder('posts', next_cursor)
             next_cursor = result.next_cursor
             result.resources.forEach(({ secure_url }) => photoUrls.push(secure_url))
         } while (Boolean(next_cursor))
@@ -529,15 +529,17 @@ export class SeederService implements ISeederService {
         next_cursor: string | null
         resources: { secure_url: string }[]
     }> {
+        const expression = `folder=${folder}`
+
         if (nextCursor) {
             return cloudinary.search
-                .expression(folder)
+                .expression(expression)
                 .max_results(500)
                 .next_cursor(nextCursor)
                 .execute()
         }
         return cloudinary.search
-            .expression(folder)
+            .expression(expression)
             .max_results(500)
             .execute()
     }
