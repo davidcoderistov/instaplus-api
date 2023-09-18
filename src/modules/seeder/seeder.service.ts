@@ -384,12 +384,12 @@ export class SeederService implements ISeederService {
             let hashtags: string[] = []
             let caption: string | null = null
 
-            if (_random(1, 4) > 1) {
+            if (_random(1, 5) > 1) {
                 if (_random(1, 4) > 3) {
                     caption = faker.lorem.sentences({ min: 1, max: 4 })
                 }
 
-                hashtags = _sampleSize(SeederService.hashtags, _random(3, 6))
+                hashtags = _sampleSize(SeederService.hashtags, _random(3, 8))
                 let hashtagsDesc = hashtags.map(hashtag => `#${hashtag}`).join(' ')
 
                 if (caption) {
@@ -404,6 +404,7 @@ export class SeederService implements ISeederService {
                 location: _random(1, 2) > 1 ? faker.location.city() : null,
                 photoUrls,
                 creator: SeederService.getFullUser(user),
+                createdAt: moment().subtract(_random(0, 604800), 'minutes').toDate(),
             })
 
             await post.save()
