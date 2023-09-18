@@ -513,33 +513,33 @@ export class SeederService implements ISeederService {
 
     private async fetchPostsPhotoUrls(): Promise<string[]> {
 
-        interface SearchResponse {
-            next_cursor: string | null
-            resources: { secure_url: string }[]
-        }
-
         const photoUrls: string[] = []
         let next_cursor: string | null = null
 
         do {
-            let result: SearchResponse
-            if (next_cursor) {
-                result = await cloudinary.search
-                    .expression('folder=posts')
-                    .max_results(500)
-                    .next_cursor(next_cursor)
-                    .execute()
-            } else {
-                result = await cloudinary.search
-                    .expression('folder=posts')
-                    .max_results(500)
-                    .execute()
-            }
+            const result = await SeederService.searchCloudinaryByFolder('folder=posts', next_cursor)
             next_cursor = result.next_cursor
             result.resources.forEach(({ secure_url }) => photoUrls.push(secure_url))
         } while (Boolean(next_cursor))
 
         return photoUrls
+    }
+
+    private static async searchCloudinaryByFolder(folder: string, nextCursor: string | null = null): Promise<{
+        next_cursor: string | null
+        resources: { secure_url: string }[]
+    }> {
+        if (nextCursor) {
+            return cloudinary.search
+                .expression(folder)
+                .max_results(500)
+                .next_cursor(nextCursor)
+                .execute()
+        }
+        return cloudinary.search
+            .expression(folder)
+            .max_results(500)
+            .execute()
     }
 
     private* combinationN<T>(array: T[], n: number): Generator<T[]> {
