@@ -14,6 +14,7 @@ import {
     IPostLikeNotification,
 } from '../notification/db.models/notification.model'
 import PostLikeModel, { IPostLike } from '../post/db.models/post-like.model'
+import PostSaveModel, { IPostSave } from '../post/db.models/post-save.model'
 import { v2 as cloudinary } from 'cloudinary'
 import { faker } from '@faker-js/faker'
 import _range from 'lodash/range'
@@ -489,6 +490,37 @@ export class SeederService implements ISeederService {
 
         await PostLikeModel.insertMany(likes.map(like => new PostLikeModel(like)))
         await PostLikeNotification.insertMany(notifications.map(notification => new PostLikeNotification(notification)))
+    }
+
+    private async savePosts(top5Users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[], percentageSaved: number): Promise<void> {
+
+        const saves: (Pick<IPostSave, 'userId' | 'postId'> & { createdAt: Date })[] = []
+
+        const savePost = (user: Omit<IUser, 'password' | 'refreshToken'>, post: IPost) => {
+            const now = moment()
+            const postCreatedAt = moment(post.createdAt as unknown as Date)
+            const randomDate = now.clone().subtract(_random(0, postCreatedAt.clone().add(4, 'hours').minutes()), 'minutes')
+            const createdAt = randomDate.isAfter(now) ? now.toDate() : randomDate.toDate()
+
+            saves.push({
+                postId: post._id.toString(),
+                userId: user._id.toString(),
+                createdAt,
+            })
+        }
+
+        top5Users.forEach(user => {
+            const p = posts.filter(post => post.creator._id.toString() !== user._id.toString())
+            const postsToBeSaved: IPost[] = _sampleSize(
+                p,
+                Math.floor(p.length * percentageSaved / 100),
+            )
+            postsToBeSaved.forEach(post => {
+                savePost(user, post)
+            })
+        })
+
+        await PostSaveModel.insertMany(saves.map(save => new PostSaveModel(save)))
     }
 
     private async fetchPostsPhotoUrls(): Promise<string[]> {
