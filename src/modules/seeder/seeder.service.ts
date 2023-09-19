@@ -456,8 +456,8 @@ export class SeederService implements ISeederService {
         const likePost = (user: Omit<IUser, 'password' | 'refreshToken'>, post: IPost) => {
             const now = moment()
             const postCreatedAt = moment(post.createdAt as unknown as Date)
-            let createdAt = now.clone().subtract(_random(0, postCreatedAt.clone().add(2, 'hours').minutes()), 'minutes')
-            createdAt = createdAt.isAfter(now) ? now.toDate() : createdAt.toDate()
+            const randomDate = now.clone().subtract(_random(0, postCreatedAt.clone().add(2, 'hours').minutes()), 'minutes')
+            const createdAt = randomDate.isAfter(now) ? now.toDate() : randomDate.toDate()
 
             likes.push({
                 postId: post._id.toString(),
@@ -473,13 +473,15 @@ export class SeederService implements ISeederService {
                 },
                 userId: post.creator._id.toString(),
                 user: SeederService.getShortUser(user),
+                createdAt,
             })
         }
 
-        const postsToBeLiked: IPost[] = _sampleSize(posts, Math.floor(posts.length * (100 - percentageNotLiked) / 100))
+        const postsToBeLiked: IPost[] = _sampleSize(posts, Math.ceil(posts.length * (100 - percentageNotLiked) / 100))
 
         postsToBeLiked.forEach(post => {
-            const likingUsers: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(users, _random(Math.floor(users.length * 0.25), Math.floor(users.length * 0.75)))
+            const u = users.filter(user => user._id.toString() !== post.creator._id.toString())
+            const likingUsers: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(u, _random(Math.floor(u.length * 0.25), Math.floor(u.length * 0.75)))
             likingUsers.forEach(user => {
                 likePost(user, post)
             })
