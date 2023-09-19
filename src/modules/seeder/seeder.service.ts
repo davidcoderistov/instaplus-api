@@ -7,7 +7,13 @@ import FollowModel, { IFollow } from '../user/db.models/follow.model'
 import HashtagModel, { IHashtag } from '../post/db.models/hashtag.model'
 import PostModel, { IPost } from '../post/db.models/post.model'
 import HashtagPostModel, { IHashtagPost } from '../post/db.models/hashtag-post.model'
-import { FollowNotification, IFollowNotification } from '../notification/db.models/notification.model'
+import {
+    FollowNotification,
+    IFollowNotification,
+    PostLikeNotification,
+    IPostLikeNotification,
+} from '../notification/db.models/notification.model'
+import PostLikeModel, { IPostLike } from '../post/db.models/post-like.model'
 import { v2 as cloudinary } from 'cloudinary'
 import { faker } from '@faker-js/faker'
 import _range from 'lodash/range'
@@ -78,11 +84,11 @@ export class SeederService implements ISeederService {
             }
         }
 
-        const maleAvatars = []
+        const maleAvatars: string[] = []
         const { resources: malePhotoUrls } = await SeederService.searchCloudinaryByFolder('male_avatars')
         malePhotoUrls.forEach(({ secure_url }) => maleAvatars.push(secure_url))
 
-        const femaleAvatars = []
+        const femaleAvatars: string[] = []
         const { resources: femalePhotoUrls } = await SeederService.searchCloudinaryByFolder('female_avatars')
         femalePhotoUrls.forEach(({ secure_url }) => femaleAvatars.push(secure_url))
 
@@ -440,6 +446,47 @@ export class SeederService implements ISeederService {
         }
 
         return posts
+    }
+
+    private async likePosts(users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[], percentageNotLiked: number): Promise<void> {
+
+        const likes: (Pick<IPostLike, 'userId' | 'postId'> & { createdAt: Date })[] = []
+        const notifications: (Pick<IPostLikeNotification, 'userId' | 'post' | 'type' | 'user'> & { createdAt: Date })[] = []
+
+        const likePost = (user: Omit<IUser, 'password' | 'refreshToken'>, post: IPost) => {
+            const now = moment()
+            const postCreatedAt = moment(post.createdAt as unknown as Date)
+            let createdAt = now.clone().subtract(_random(0, postCreatedAt.clone().add(2, 'hours').minutes()), 'minutes')
+            createdAt = createdAt.isAfter(now) ? now.toDate() : createdAt.toDate()
+
+            likes.push({
+                postId: post._id.toString(),
+                userId: user._id.toString(),
+                createdAt,
+            })
+
+            notifications.push({
+                type: 'like',
+                post: {
+                    _id: post._id,
+                    photoUrls: post.photoUrls,
+                },
+                userId: post.creator._id.toString(),
+                user: SeederService.getShortUser(user),
+            })
+        }
+
+        const postsToBeLiked: IPost[] = _sampleSize(posts, Math.floor(posts.length * (100 - percentageNotLiked) / 100))
+
+        postsToBeLiked.forEach(post => {
+            const likingUsers: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(users, _random(Math.floor(users.length * 0.25), Math.floor(users.length * 0.75)))
+            likingUsers.forEach(user => {
+                likePost(user, post)
+            })
+        })
+
+        await PostLikeModel.insertMany(likes.map(like => new PostLikeModel(like)))
+        await PostLikeNotification.insertMany(notifications.map(notification => new PostLikeNotification(notification)))
     }
 
     private async fetchPostsPhotoUrls(): Promise<string[]> {
