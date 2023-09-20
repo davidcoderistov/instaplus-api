@@ -564,6 +564,21 @@ export class SeederService implements ISeederService {
         ]
     }
 
+    private async batchGenerateRandomComments(users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[], batchSize: number = 1000): Promise<IComment[]> {
+
+        const comments: IComment[] = []
+
+        let startIndex = 0
+        while (startIndex < posts.length) {
+            const batch = posts.slice(startIndex, startIndex + batchSize)
+            const generatedComments = await this.generateRandomComments(users, batch)
+            comments.push(...generatedComments)
+            startIndex += batchSize
+        }
+
+        return comments
+    }
+
     private async likeComments(users: Omit<IUser, 'password' | 'refreshToken'>[], comments: IComment[]): Promise<void> {
 
         const likes: (Pick<ICommentLike, 'userId' | 'commentId'> & { createdAt: Date })[] = []
@@ -827,7 +842,7 @@ export class SeederService implements ISeederService {
         console.log(`GENERATING RANDOM POST SAVES...DONE in ${SeederService.getTimeElapsed(endLikePosts, endSavePosts)}`)
 
         console.log('GENERATING RANDOM COMMENTS...')
-        const comments = await this.generateRandomComments(users, posts)
+        const comments = await this.batchGenerateRandomComments(users, posts)
         const endComments = moment()
         console.log(`GENERATING RANDOM COMMENTS...DONE in ${SeederService.getTimeElapsed(endSavePosts, endComments)}`)
 
