@@ -147,20 +147,24 @@ export class SeederService implements ISeederService {
         permutations.forEach(pair => {
             const followingUserId = pair[0]._id.toString()
             const followedUserId = pair[1]._id.toString()
-            const createdAt = moment().subtract(_random(0, 256000), 'minutes').toDate()
+            const now = moment()
+            const createdAt = now.clone().subtract(_random(0, 256000), 'minutes')
+            const fourMonthsAgo = now.clone().subtract(4, 'months')
 
             follows.push({
                 followingUserId,
                 followedUserId,
-                createdAt,
+                createdAt: createdAt.toDate(),
             })
 
-            followNotifications.push({
-                type: 'follow',
-                userId: followedUserId,
-                user: SeederService.getShortUser(pair[0]),
-                createdAt,
-            })
+            if (createdAt.isAfter(fourMonthsAgo)) {
+                followNotifications.push({
+                    type: 'follow',
+                    userId: followedUserId,
+                    user: SeederService.getShortUser(pair[0]),
+                    createdAt: createdAt.toDate(),
+                })
+            }
         })
 
         await FollowModel.insertMany(follows.map(follow => new FollowModel(follow)))
@@ -478,6 +482,7 @@ export class SeederService implements ISeederService {
                 posts.forEach(post => {
                     const creators: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(index > 3 ? allUsers : users, _random(min, max))
                     creators.forEach(creator => {
+                        const fourMonthsAgo = moment().subtract(4, 'months')
                         const createdAt = SeederService.getRandomDateStartingFrom(post.createdAt as unknown as Date)
 
                         comments.push({
@@ -487,16 +492,18 @@ export class SeederService implements ISeederService {
                             createdAt,
                         })
 
-                        notifications.push({
-                            type: 'comment',
-                            post: {
-                                _id: post._id,
-                                photoUrls: post.photoUrls,
-                            },
-                            userId: post.creator._id.toString(),
-                            user: SeederService.getShortUser(creator),
-                            createdAt,
-                        })
+                        if (moment(createdAt).isAfter(fourMonthsAgo)) {
+                            notifications.push({
+                                type: 'comment',
+                                post: {
+                                    _id: post._id,
+                                    photoUrls: post.photoUrls,
+                                },
+                                userId: post.creator._id.toString(),
+                                user: SeederService.getShortUser(creator),
+                                createdAt,
+                            })
+                        }
                     })
                 })
             }
@@ -646,6 +653,7 @@ export class SeederService implements ISeederService {
         const notifications: (Pick<IPostLikeNotification, 'userId' | 'post' | 'type' | 'user'> & { createdAt: Date })[] = []
 
         const likePost = (user: Omit<IUser, 'password' | 'refreshToken'>, post: IPost) => {
+            const fourMonthsAgo = moment().subtract(4, 'months')
             const createdAt = SeederService.getRandomDateStartingFrom(post.createdAt as unknown as Date)
 
             likes.push({
@@ -654,16 +662,18 @@ export class SeederService implements ISeederService {
                 createdAt,
             })
 
-            notifications.push({
-                type: 'like',
-                post: {
-                    _id: post._id,
-                    photoUrls: post.photoUrls,
-                },
-                userId: post.creator._id.toString(),
-                user: SeederService.getShortUser(user),
-                createdAt,
-            })
+            if (moment(createdAt).isAfter(fourMonthsAgo)) {
+                notifications.push({
+                    type: 'like',
+                    post: {
+                        _id: post._id,
+                        photoUrls: post.photoUrls,
+                    },
+                    userId: post.creator._id.toString(),
+                    user: SeederService.getShortUser(user),
+                    createdAt,
+                })
+            }
         }
 
         const percentages = [0.1, 0.25, 0.4, 0.2, 0.05]
