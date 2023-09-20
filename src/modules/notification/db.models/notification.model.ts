@@ -75,8 +75,8 @@ export interface IPostLikeNotification extends IPostNotification {
     type: 'like'
 }
 
-export interface ICommentLikeNotification extends IPostNotification {
+export interface IPostCommentNotification extends IPostNotification {
     type: 'comment'
 }
 
-export type INotification = IFollowNotification | IPostLikeNotification | ICommentLikeNotification
+export type INotification = IFollowNotification | IPostLikeNotification | IPostCommentNotification
