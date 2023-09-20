@@ -502,7 +502,7 @@ export class SeederService implements ISeederService {
         const postsMap = new Map<string, IPost>()
         posts.forEach(post => postsMap.set(post._id.toString(), post))
 
-        const replyComments: (Pick<IComment, 'text' | 'postId' | 'creator' | 'replyCommentId'> & { createdAt: Date })[] = []
+        const replyComments: (Pick<IComment, 'text' | 'postId' | 'creator' | 'commentId'> & { createdAt: Date })[] = []
         const replyNotifications: (Pick<IPostCommentNotification, 'userId' | 'post' | 'type' | 'user'> & { createdAt: Date })[] = []
 
         for (const postId of dbCommentsByPost.keys()) {
@@ -521,7 +521,7 @@ export class SeederService implements ISeederService {
                         text: faker.lorem.sentences({ min: 1, max: 3 }),
                         postId: post._id.toString(),
                         creator: SeederService.getShortUser(creator),
-                        replyCommentId: comment._id.toString(),
+                        commentId: comment._id.toString(),
                         createdAt,
                     })
 
@@ -756,5 +756,7 @@ export class SeederService implements ISeederService {
         console.log(`GENERATING RANDOM COMMENT LIKES...DONE in ${SeederService.getTimeElapsed(endComments, endLikeComments)}`)
 
         console.log(`Seeding done in ${SeederService.getTimeElapsed(start, endLikeComments)}`)
+
+        console.log(`Top 5 users are: ${top5Users.map(user => user.username).join(', ')}`)
     }
 }
