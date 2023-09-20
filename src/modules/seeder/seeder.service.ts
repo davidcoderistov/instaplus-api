@@ -457,36 +457,49 @@ export class SeederService implements ISeederService {
         return posts
     }
 
-    private async generateRandomComments(users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[], percentageWithoutComments: number): Promise<IComment[]> {
+    private async generateRandomComments(users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[]): Promise<IComment[]> {
 
         const comments: (Pick<IComment, 'text' | 'postId' | 'creator'> & { createdAt: Date })[] = []
         const notifications: (Pick<IPostCommentNotification, 'userId' | 'post' | 'type' | 'user'> & { createdAt: Date })[] = []
 
-        const postsToBeCommentedOn: IPost[] = _sampleSize(posts, Math.ceil(posts.length * (100 - percentageWithoutComments) / 100))
+        const allUsers = [...users, ...users, ...users, ...users, ...users]
+        const percentages = [0.05, 0.25, 0.4, 0.25, 0.05]
+        const weight = [
+            { min: 0, max: 0 },
+            { min: 10, max: 20 },
+            { min: 40, max: 80 },
+            { min: 85, max: 105 },
+            { min: 400, max: 500 },
+        ]
 
-        postsToBeCommentedOn.forEach(post => {
-            const creators: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(users, _random(4, 28))
-            creators.forEach(creator => {
-                const createdAt = SeederService.getRandomDateStartingFrom(post.createdAt as unknown as Date)
+        SeederService.splitArrayByPercentages(posts, percentages, '_id').forEach((posts: IPost[], index) => {
+            if (index > 0) {
+                const { min, max } = weight[index]
+                posts.forEach(post => {
+                    const creators: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(index > 3 ? allUsers : users, _random(min, max))
+                    creators.forEach(creator => {
+                        const createdAt = SeederService.getRandomDateStartingFrom(post.createdAt as unknown as Date)
 
-                comments.push({
-                    text: faker.lorem.sentences({ min: 1, max: 4 }),
-                    postId: post._id.toString(),
-                    creator: SeederService.getShortUser(creator),
-                    createdAt,
+                        comments.push({
+                            text: faker.lorem.sentences({ min: 1, max: 4 }),
+                            postId: post._id.toString(),
+                            creator: SeederService.getShortUser(creator),
+                            createdAt,
+                        })
+
+                        notifications.push({
+                            type: 'comment',
+                            post: {
+                                _id: post._id,
+                                photoUrls: post.photoUrls,
+                            },
+                            userId: post.creator._id.toString(),
+                            user: SeederService.getShortUser(creator),
+                            createdAt,
+                        })
+                    })
                 })
-
-                notifications.push({
-                    type: 'comment',
-                    post: {
-                        _id: post._id,
-                        photoUrls: post.photoUrls,
-                    },
-                    userId: post.creator._id.toString(),
-                    user: SeederService.getShortUser(creator),
-                    createdAt,
-                })
-            })
+            }
         })
 
         const dbCommentsDocs = await CommentModel.insertMany(comments.map(comment => new CommentModel(comment)))
