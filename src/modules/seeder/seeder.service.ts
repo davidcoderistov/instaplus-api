@@ -455,10 +455,7 @@ export class SeederService implements ISeederService {
         const notifications: (Pick<IPostLikeNotification, 'userId' | 'post' | 'type' | 'user'> & { createdAt: Date })[] = []
 
         const likePost = (user: Omit<IUser, 'password' | 'refreshToken'>, post: IPost) => {
-            const now = moment()
-            const postCreatedAt = moment(post.createdAt as unknown as Date)
-            const randomDate = now.clone().subtract(_random(0, postCreatedAt.clone().add(2, 'hours').minutes()), 'minutes')
-            const createdAt = randomDate.isAfter(now) ? now.toDate() : randomDate.toDate()
+            const createdAt = SeederService.getRandomDateStartingFrom(post.createdAt as unknown as Date)
 
             likes.push({
                 postId: post._id.toString(),
@@ -497,15 +494,10 @@ export class SeederService implements ISeederService {
         const saves: (Pick<IPostSave, 'userId' | 'postId'> & { createdAt: Date })[] = []
 
         const savePost = (user: Omit<IUser, 'password' | 'refreshToken'>, post: IPost) => {
-            const now = moment()
-            const postCreatedAt = moment(post.createdAt as unknown as Date)
-            const randomDate = now.clone().subtract(_random(0, postCreatedAt.clone().add(4, 'hours').minutes()), 'minutes')
-            const createdAt = randomDate.isAfter(now) ? now.toDate() : randomDate.toDate()
-
             saves.push({
                 postId: post._id.toString(),
                 userId: user._id.toString(),
-                createdAt,
+                createdAt: SeederService.getRandomDateStartingFrom(post.createdAt as unknown as Date),
             })
         }
 
@@ -521,6 +513,14 @@ export class SeederService implements ISeederService {
         })
 
         await PostSaveModel.insertMany(saves.map(save => new PostSaveModel(save)))
+    }
+
+    private static getRandomDateStartingFrom(startDate: Date): Date {
+        const start = moment(startDate)
+        const end = moment()
+
+        const diffInMs = end.diff(start)
+        return start.clone().add(_random(0, diffInMs), 'milliseconds').toDate()
     }
 
     private async fetchPostsPhotoUrls(): Promise<string[]> {
