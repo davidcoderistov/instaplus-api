@@ -26,6 +26,7 @@ import _random from 'lodash/random'
 import _sample from 'lodash/sample'
 import _sampleSize from 'lodash/sampleSize'
 import _difference from 'lodash/difference'
+import _differenceBy from 'lodash/differenceBy'
 import moment from 'moment'
 
 
@@ -138,7 +139,7 @@ export class SeederService implements ISeederService {
             permutations.push([pair[1], pair[0]])
         }
 
-        permutations = _sampleSize(permutations, Math.floor(permutations.length / 5))
+        permutations = _sampleSize(permutations, Math.floor(permutations.length * 0.7))
 
         const follows: (Pick<IFollow, 'followingUserId' | 'followedUserId'> & { createdAt: Date })[] = []
         const followNotifications: (Pick<IFollowNotification, 'type' | 'userId' | 'user'> & { createdAt: Date })[] = []
@@ -647,6 +648,25 @@ export class SeederService implements ISeederService {
 
         const diffInMs = end.diff(start)
         return start.clone().add(_random(0, diffInMs), 'milliseconds').toDate()
+    }
+
+    private static splitArrayByPercentages(arr: any[], percentages: number[], compareBy: string | null = null): any[][] {
+
+        const result: any[][] = []
+        let remaining: any[] = Array.from(arr)
+
+        for (const percentage of percentages) {
+            const size = Math.floor(arr.length * percentage)
+            const sample: any[] = _sampleSize(remaining, size)
+            result.push(sample)
+            if (compareBy) {
+                remaining = _differenceBy(remaining, sample, compareBy)
+            } else {
+                remaining = _difference(remaining, sample)
+            }
+        }
+
+        return result
     }
 
     private async fetchPostsPhotoUrls(): Promise<string[]> {
