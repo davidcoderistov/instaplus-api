@@ -805,12 +805,12 @@ export class SeederService implements ISeederService {
         console.log(`GENERATING RANDOM POST SAVES...DONE in ${SeederService.getTimeElapsed(endLikePosts, endSavePosts)}`)
 
         console.log('GENERATING RANDOM COMMENTS...')
-        const comments = await this.generateRandomComments(users, posts, 7)
+        const comments = await this.generateRandomComments(users, posts)
         const endComments = moment()
         console.log(`GENERATING RANDOM COMMENTS...DONE in ${SeederService.getTimeElapsed(endSavePosts, endComments)}`)
 
         console.log('GENERATING RANDOM COMMENT LIKES...')
-        await this.likeComments(users, comments, 75)
+        await this.likeComments(users, comments)
         const endLikeComments = moment()
         console.log(`GENERATING RANDOM COMMENT LIKES...DONE in ${SeederService.getTimeElapsed(endComments, endLikeComments)}`)
 
