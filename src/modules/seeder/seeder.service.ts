@@ -692,6 +692,16 @@ export class SeederService implements ISeederService {
         await PostLikeNotification.insertMany(notifications.map(notification => new PostLikeNotification(notification)))
     }
 
+    private async batchLikePosts(users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[], batchSize: number = 1000): Promise<void> {
+
+        let startIndex = 0
+        while (startIndex < posts.length) {
+            const batch = posts.slice(startIndex, startIndex + batchSize)
+            await this.likePosts(users, batch)
+            startIndex += batchSize
+        }
+    }
+
     private async savePosts(top5Users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[], percentageSaved: number): Promise<void> {
 
         const saves: (Pick<IPostSave, 'userId' | 'postId'> & { createdAt: Date })[] = []
@@ -832,7 +842,7 @@ export class SeederService implements ISeederService {
         console.log(`GENERATING RANDOM POSTS...DONE in ${SeederService.getTimeElapsed(endMessages, endPosts)}`)
 
         console.log('GENERATING RANDOM POST LIKES...')
-        await this.likePosts(users, posts)
+        await this.batchLikePosts(users, posts)
         const endLikePosts = moment()
         console.log(`GENERATING RANDOM POST LIKES...DONE in ${SeederService.getTimeElapsed(endPosts, endLikePosts)}`)
 
