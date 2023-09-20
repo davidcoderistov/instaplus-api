@@ -166,7 +166,7 @@ export class SeederService implements ISeederService {
         await FollowNotification.insertMany(followNotifications.map(followNotification => new FollowNotification(followNotification)))
     }
 
-    private async generateRandomChats(users: Omit<IUser, 'password' | 'refreshToken'>[]): Promise<IChat[]> {
+    private async generateRandomChats(users: Omit<IUser, 'password' | 'refreshToken'>[]): Promise<{ chats: IChat[], top5Users: Omit<IUser, 'password' | 'refreshToken'>[] }> {
         const chats: {
             creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>,
             chatMembers: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>[]
@@ -245,7 +245,10 @@ export class SeederService implements ISeederService {
 
         const dbChats = await ChatModel.insertMany(chats.map(chat => new ChatModel(chat)))
 
-        return dbChats.map(chat => chat.toObject())
+        return {
+            chats: dbChats.map(chat => chat.toObject()),
+            top5Users,
+        }
     }
 
     private async generateRandomMessages(chats: IChat[], min: number, max: number): Promise<void> {
