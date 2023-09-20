@@ -551,27 +551,53 @@ export class SeederService implements ISeederService {
         ]
     }
 
-    private async likeComments(users: Omit<IUser, 'password' | 'refreshToken'>[], comments: IComment[], percentageNotLiked: number): Promise<void> {
+    private async likeComments(users: Omit<IUser, 'password' | 'refreshToken'>[], comments: IComment[]): Promise<void> {
 
         const likes: (Pick<ICommentLike, 'userId' | 'commentId'> & { createdAt: Date })[] = []
 
-        const likeComment = (user: Omit<IUser, 'password' | 'refreshToken'>, comment: IComment) => {
-            likes.push({
-                commentId: comment._id.toString(),
-                userId: user._id.toString(),
-                createdAt: SeederService.getRandomDateStartingFrom(comment.createdAt as unknown as Date),
+        const createCommentLikes = (comments: IComment[], min: number, max: number) => {
+            comments.forEach(comment => {
+                const u = users.filter(user => user._id.toString() !== comment.creator._id.toString())
+                const likingUsers: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(u, _random(min, max))
+                likingUsers.forEach(user => {
+                    likes.push({
+                        commentId: comment._id.toString(),
+                        userId: user._id.toString(),
+                        createdAt: SeederService.getRandomDateStartingFrom(comment.createdAt as unknown as Date),
+                    })
+                })
             })
         }
 
-        const commentsToBeLiked: IComment[] = _sampleSize(comments, Math.ceil(comments.length * (100 - percentageNotLiked) / 100))
-
-        commentsToBeLiked.forEach(comment => {
-            const u = users.filter(user => user._id.toString() !== comment.creator._id.toString())
-            const likingUsers: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(u, _random(3, 24))
-            likingUsers.forEach(user => {
-                likeComment(user, comment)
-            })
+        const commentsByPost = new Map<string, IComment[]>()
+        comments.forEach(comment => {
+            const comments = commentsByPost.get(comment.postId)
+            commentsByPost.set(comment.postId, Array.isArray(comments) ? [...comments, comment] : [comment])
         })
+
+        for (const postId of commentsByPost.keys()) {
+            const comments = commentsByPost.get(postId) as IComment[]
+
+            const normalComments = comments.filter(comment => Boolean(!comment.commentId))
+            const replyComments = comments.filter(comment => Boolean(comment.commentId))
+
+            const percentages = [0.15, 0.4, 0.3, 0.15]
+            const weight = [{ min: 0, max: 0 }, { min: 2, max: 4 }, { min: 5, max: 8 }, { min: 15, max: 25 }]
+
+            SeederService.splitArrayByPercentages(normalComments, percentages, '_id').forEach((comments: IComment[], index) => {
+                if (index > 0) {
+                    const { min, max } = weight[index]
+                    createCommentLikes(comments, min, max)
+                }
+            })
+
+            SeederService.splitArrayByPercentages(replyComments, percentages, '_id').forEach((comments: IComment[], index) => {
+                if (index > 0) {
+                    const { min, max } = weight[index]
+                    createCommentLikes(comments, min, max)
+                }
+            })
+        }
 
         await CommentLikeModel.insertMany(likes.map(like => new CommentLikeModel(like)))
     }
