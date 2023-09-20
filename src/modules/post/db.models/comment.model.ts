@@ -38,7 +38,7 @@ export interface IComment extends SchemaTimestampsConfig {
     text: string
     creator: Pick<IUser, '_id' | 'username' | 'photoUrl'>
     postId: string
-    commentId: string
+    commentId: string | null
 }
 
 export default model('Comment', CommentSchema)
