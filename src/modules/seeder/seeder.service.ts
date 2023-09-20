@@ -6,12 +6,15 @@ import MessageModel, { IMessage } from '../chat/db.models/message.model'
 import FollowModel, { IFollow } from '../user/db.models/follow.model'
 import HashtagModel, { IHashtag } from '../post/db.models/hashtag.model'
 import PostModel, { IPost } from '../post/db.models/post.model'
+import CommentModel, { IComment } from '../post/db.models/comment.model'
 import HashtagPostModel, { IHashtagPost } from '../post/db.models/hashtag-post.model'
 import {
     FollowNotification,
     IFollowNotification,
     PostLikeNotification,
     IPostLikeNotification,
+    PostCommentNotification,
+    IPostCommentNotification,
 } from '../notification/db.models/notification.model'
 import PostLikeModel, { IPostLike } from '../post/db.models/post-like.model'
 import PostSaveModel, { IPostSave } from '../post/db.models/post-save.model'
@@ -447,6 +450,100 @@ export class SeederService implements ISeederService {
         }
 
         return posts
+    }
+
+    private async generateRandomComments(users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[], percentageWithoutComments: number): Promise<IComment[]> {
+
+        const comments: (Pick<IComment, 'text' | 'postId' | 'creator'> & { createdAt: Date })[] = []
+        const notifications: (Pick<IPostCommentNotification, 'userId' | 'post' | 'type' | 'user'> & { createdAt: Date })[] = []
+
+        const postsToBeCommentedOn: IPost[] = _sampleSize(posts, Math.ceil(posts.length * (100 - percentageWithoutComments) / 100))
+
+        postsToBeCommentedOn.forEach(post => {
+            const creators: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(users, _random(4, 28))
+            creators.forEach(creator => {
+                const createdAt = SeederService.getRandomDateStartingFrom(post.createdAt as unknown as Date)
+
+                comments.push({
+                    text: faker.lorem.sentences({ min: 1, max: 4 }),
+                    postId: post._id.toString(),
+                    creator: SeederService.getShortUser(creator),
+                    createdAt,
+                })
+
+                notifications.push({
+                    type: 'comment',
+                    post: {
+                        _id: post._id,
+                        photoUrls: post.photoUrls,
+                    },
+                    userId: post.creator._id.toString(),
+                    user: SeederService.getShortUser(creator),
+                    createdAt,
+                })
+            })
+        })
+
+        const dbCommentsDocs = await CommentModel.insertMany(comments.map(comment => new CommentModel(comment)))
+        const dbComments: IComment[] = dbCommentsDocs.map(comment => comment.toObject())
+
+        await PostCommentNotification.insertMany(notifications.map(notification => new PostCommentNotification(notification)))
+
+        const dbCommentsByPost = new Map<string, IComment[]>()
+        dbComments.forEach(comment => {
+            const comments = dbCommentsByPost.get(comment.postId)
+            dbCommentsByPost.set(comment.postId, Array.isArray(comments) ? [...comments, comment] : [comment])
+        })
+
+        const postsMap = new Map<string, IPost>()
+        posts.forEach(post => postsMap.set(post._id.toString(), post))
+
+        const replyComments: (Pick<IComment, 'text' | 'postId' | 'creator' | 'replyCommentId'> & { createdAt: Date })[] = []
+        const replyNotifications: (Pick<IPostCommentNotification, 'userId' | 'post' | 'type' | 'user'> & { createdAt: Date })[] = []
+
+        for (const postId of dbCommentsByPost.keys()) {
+            const comments = dbCommentsByPost.get(postId) as IComment[]
+            const randomComments: IComment[] = _sampleSize(comments, _random(1, 3))
+
+            randomComments.forEach(comment => {
+
+                const post = postsMap.get(postId) as IPost
+                const creators: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(users, _random(3, 12))
+
+                creators.forEach(creator => {
+                    const createdAt = SeederService.getRandomDateStartingFrom(comment.createdAt as unknown as Date)
+
+                    replyComments.push({
+                        text: faker.lorem.sentences({ min: 1, max: 3 }),
+                        postId: post._id.toString(),
+                        creator: SeederService.getShortUser(creator),
+                        replyCommentId: comment._id.toString(),
+                        createdAt,
+                    })
+
+                    replyNotifications.push({
+                        type: 'comment',
+                        post: {
+                            _id: post._id,
+                            photoUrls: post.photoUrls,
+                        },
+                        userId: post.creator._id.toString(),
+                        user: SeederService.getShortUser(creator),
+                        createdAt,
+                    })
+                })
+            })
+        }
+
+        const dbReplyCommentsDocs = await CommentModel.insertMany(replyComments.map(comment => new CommentModel(comment)))
+        const dbReplyComments: IComment[] = dbReplyCommentsDocs.map(comment => comment.toObject())
+
+        await PostCommentNotification.insertMany(replyNotifications.map(notification => new PostCommentNotification(notification)))
+
+        return [
+            ...dbComments,
+            ...dbReplyComments,
+        ]
     }
 
     private async likePosts(users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[], percentageNotLiked: number): Promise<void> {
