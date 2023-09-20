@@ -615,7 +615,7 @@ export class SeederService implements ISeederService {
         await CommentLikeModel.insertMany(likes.map(like => new CommentLikeModel(like)))
     }
 
-    private async likePosts(users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[], percentageNotLiked: number): Promise<void> {
+    private async likePosts(users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[]): Promise<void> {
 
         const likes: (Pick<IPostLike, 'userId' | 'postId'> & { createdAt: Date })[] = []
         const notifications: (Pick<IPostLikeNotification, 'userId' | 'post' | 'type' | 'user'> & { createdAt: Date })[] = []
@@ -641,14 +641,26 @@ export class SeederService implements ISeederService {
             })
         }
 
-        const postsToBeLiked: IPost[] = _sampleSize(posts, Math.ceil(posts.length * (100 - percentageNotLiked) / 100))
+        const percentages = [0.1, 0.25, 0.4, 0.2, 0.05]
+        const weight = [
+            { min: 0, max: 0 },
+            { min: 15, max: 25 },
+            { min: 30, max: 40 },
+            { min: 50, max: 60 },
+            { min: 80, max: 100 },
+        ]
 
-        postsToBeLiked.forEach(post => {
-            const u = users.filter(user => user._id.toString() !== post.creator._id.toString())
-            const likingUsers: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(u, _random(Math.floor(u.length * 0.25), Math.floor(u.length * 0.75)))
-            likingUsers.forEach(user => {
-                likePost(user, post)
-            })
+        SeederService.splitArrayByPercentages(posts, percentages, '_id').forEach((posts: IPost[], index) => {
+            if (index > 0) {
+                const { min, max } = weight[index]
+                posts.forEach(post => {
+                    const u = users.filter(user => user._id.toString() !== post.creator._id.toString())
+                    const likingUsers: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(u, _random(min, max))
+                    likingUsers.forEach(user => {
+                        likePost(user, post)
+                    })
+                })
+            }
         })
 
         await PostLikeModel.insertMany(likes.map(like => new PostLikeModel(like)))
@@ -795,7 +807,7 @@ export class SeederService implements ISeederService {
         console.log(`GENERATING RANDOM POSTS...DONE in ${SeederService.getTimeElapsed(endMessages, endPosts)}`)
 
         console.log('GENERATING RANDOM POST LIKES...')
-        await this.likePosts(users, posts, 7)
+        await this.likePosts(users, posts)
         const endLikePosts = moment()
         console.log(`GENERATING RANDOM POST LIKES...DONE in ${SeederService.getTimeElapsed(endPosts, endLikePosts)}`)
 
