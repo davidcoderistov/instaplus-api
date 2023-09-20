@@ -697,13 +697,64 @@ export class SeederService implements ISeederService {
         }
     }
 
+    private static getTimeElapsed(start: moment.Moment, end: moment.Moment) {
+        const diffInSeconds = end.diff(start, 'seconds')
+
+        const minutes = Math.floor(diffInSeconds / 60)
+        const seconds = diffInSeconds % 60
+
+        return minutes > 0 ? seconds > 0 ? `${minutes} minutes and ${seconds} seconds.` : `${minutes} minutes.` : `${seconds} seconds.`
+    }
+
     async seed(): Promise<void> {
+
+        const start = moment()
+
         console.log('GENERATING RANDOM USERS...')
-
         const users = await this.generateRandomUsers()
+        const endUsers = moment()
+        console.log(`GENERATING RANDOM USERS...DONE in ${SeederService.getTimeElapsed(start, endUsers)}`)
 
-        const chats = await this.generateRandomChats(users)
+        console.log('GENERATING RANDOM FOLLOWERS...')
+        await this.generateRandomFollowers(users)
+        const endFollowers = moment()
+        console.log(`GENERATING RANDOM FOLLOWERS...DONE in ${SeederService.getTimeElapsed(endUsers, endFollowers)}`)
 
-        console.log('GENERATING RANDOM USERS...DONE')
+        console.log('GENERATING RANDOM CHATS...')
+        const { chats, top5Users } = await this.generateRandomChats(users)
+        const endChats = moment()
+        console.log(`GENERATING RANDOM CHATS...DONE in ${SeederService.getTimeElapsed(endFollowers, endChats)}`)
+
+        console.log('GENERATING RANDOM MESSAGES...')
+        await this.generateRandomMessages(chats, 3, 33)
+        const endMessages = moment()
+        console.log(`GENERATING RANDOM MESSAGES...DONE in ${SeederService.getTimeElapsed(endChats, endMessages)}`)
+
+        console.log('GENERATING RANDOM POSTS...')
+        const posts = await this.generateRandomPostsAndHashtags(users)
+        const endPosts = moment()
+        console.log(`GENERATING RANDOM POSTS...DONE in ${SeederService.getTimeElapsed(endMessages, endPosts)}`)
+
+        console.log('GENERATING RANDOM POST LIKES...')
+        await this.likePosts(users, posts, 7)
+        const endLikePosts = moment()
+        console.log(`GENERATING RANDOM POST LIKES...DONE in ${SeederService.getTimeElapsed(endPosts, endLikePosts)}`)
+
+        console.log('GENERATING RANDOM POST SAVES...')
+        await this.savePosts(top5Users, posts, 1)
+        const endSavePosts = moment()
+        console.log(`GENERATING RANDOM POST SAVES...DONE in ${SeederService.getTimeElapsed(endLikePosts, endSavePosts)}`)
+
+        console.log('GENERATING RANDOM COMMENTS...')
+        const comments = await this.generateRandomComments(users, posts, 7)
+        const endComments = moment()
+        console.log(`GENERATING RANDOM COMMENTS...DONE in ${SeederService.getTimeElapsed(endSavePosts, endComments)}`)
+
+        console.log('GENERATING RANDOM COMMENT LIKES...')
+        await this.likeComments(users, comments, 75)
+        const endLikeComments = moment()
+        console.log(`GENERATING RANDOM COMMENT LIKES...DONE in ${SeederService.getTimeElapsed(endComments, endLikeComments)}`)
+
+        console.log(`Seeding done in ${SeederService.getTimeElapsed(start, endLikeComments)}`)
     }
 }
