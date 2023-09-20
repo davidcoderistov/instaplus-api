@@ -18,6 +18,7 @@ import {
 } from '../notification/db.models/notification.model'
 import PostLikeModel, { IPostLike } from '../post/db.models/post-like.model'
 import PostSaveModel, { IPostSave } from '../post/db.models/post-save.model'
+import CommentLikeModel, { ICommentLike } from '../post/db.models/comment-like.model'
 import { v2 as cloudinary } from 'cloudinary'
 import { faker } from '@faker-js/faker'
 import _range from 'lodash/range'
@@ -544,6 +545,31 @@ export class SeederService implements ISeederService {
             ...dbComments,
             ...dbReplyComments,
         ]
+    }
+
+    private async likeComments(users: Omit<IUser, 'password' | 'refreshToken'>[], comments: IComment[], percentageNotLiked: number): Promise<void> {
+
+        const likes: (Pick<ICommentLike, 'userId' | 'commentId'> & { createdAt: Date })[] = []
+
+        const likeComment = (user: Omit<IUser, 'password' | 'refreshToken'>, comment: IComment) => {
+            likes.push({
+                commentId: comment._id.toString(),
+                userId: user._id.toString(),
+                createdAt: SeederService.getRandomDateStartingFrom(comment.createdAt as unknown as Date),
+            })
+        }
+
+        const commentsToBeLiked: IComment[] = _sampleSize(comments, Math.ceil(comments.length * (100 - percentageNotLiked) / 100))
+
+        commentsToBeLiked.forEach(comment => {
+            const u = users.filter(user => user._id.toString() !== comment.creator._id.toString())
+            const likingUsers: Omit<IUser, 'password' | 'refreshToken'>[] = _sampleSize(u, _random(3, 24))
+            likingUsers.forEach(user => {
+                likeComment(user, comment)
+            })
+        })
+
+        await CommentLikeModel.insertMany(likes.map(like => new CommentLikeModel(like)))
     }
 
     private async likePosts(users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[], percentageNotLiked: number): Promise<void> {
