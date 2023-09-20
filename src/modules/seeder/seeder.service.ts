@@ -615,6 +615,16 @@ export class SeederService implements ISeederService {
         await CommentLikeModel.insertMany(likes.map(like => new CommentLikeModel(like)))
     }
 
+    private async batchLikeComments(users: Omit<IUser, 'password' | 'refreshToken'>[], comments: IComment[], batchSize: number = 1000): Promise<void> {
+
+        let startIndex = 0
+        while (startIndex < comments.length) {
+            const batch = comments.slice(startIndex, startIndex + batchSize)
+            await this.likeComments(users, batch)
+            startIndex += batchSize
+        }
+    }
+
     private async likePosts(users: Omit<IUser, 'password' | 'refreshToken'>[], posts: IPost[]): Promise<void> {
 
         const likes: (Pick<IPostLike, 'userId' | 'postId'> & { createdAt: Date })[] = []
@@ -822,7 +832,7 @@ export class SeederService implements ISeederService {
         console.log(`GENERATING RANDOM COMMENTS...DONE in ${SeederService.getTimeElapsed(endSavePosts, endComments)}`)
 
         console.log('GENERATING RANDOM COMMENT LIKES...')
-        await this.likeComments(users, comments)
+        await this.batchLikeComments(users, comments)
         const endLikeComments = moment()
         console.log(`GENERATING RANDOM COMMENT LIKES...DONE in ${SeederService.getTimeElapsed(endComments, endLikeComments)}`)
 
