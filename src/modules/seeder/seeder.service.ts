@@ -931,7 +931,7 @@ export class SeederService implements ISeederService {
         console.log(`UPDATING HASHTAGS POSTS COUNTS...DONE in ${SeederService.getTimeElapsed(endLikeComments, endUpdateHashtagsPostsCounts)}`)
 
         console.log('UPDATING POSTS COMMENTS COUNTS...')
-        await this.updatePostsCommentsCounts()
+        await this.batchUpdatePostsCommentsCounts()
         const endUpdatePostsCommentsCounts = moment()
         console.log(`UPDATING POSTS COMMENTS COUNTS...DONE in ${SeederService.getTimeElapsed(endUpdateHashtagsPostsCounts, endUpdatePostsCommentsCounts)}`)
 
