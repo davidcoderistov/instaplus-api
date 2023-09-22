@@ -14,6 +14,9 @@ const PostLikeSchema = new Schema({
     },
 }, { timestamps: true })
 
+PostLikeSchema.index({ postId: 1 })
+PostLikeSchema.index({ createdAt: -1, _id: -1 })
+
 export interface IPostLike extends SchemaTimestampsConfig {
     postId: string
     userId: string
