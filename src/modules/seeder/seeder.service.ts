@@ -753,7 +753,7 @@ export class SeederService implements ISeederService {
             HashtagModel.findByIdAndUpdate(_id, { $set: { postsCount } }, { new: true, lean: true })))
     }
 
-    public async updatePostsCommentsCounts(offset: number, limit: number): Promise<void> {
+    private async updatePostsCommentsCounts(offset: number, limit: number): Promise<void> {
 
         const commentsCountsByPosts: { _id: string, commentsCount: number }[] = await CommentModel.aggregate([
             {
@@ -778,6 +778,17 @@ export class SeederService implements ISeederService {
 
         await Promise.all(commentsCountsByPosts.map(({ _id, commentsCount }) =>
             PostModel.findByIdAndUpdate(_id, { $inc: { commentsCount } }, { new: true, lean: true })))
+    }
+
+    private async batchUpdatePostsCommentsCounts(batchSize: number = 5000): Promise<void> {
+
+        const commentsCount = await CommentModel.find({ commentId: { $eq: null } }).count()
+
+        let startIndex = 0
+        while (startIndex < commentsCount) {
+            await this.updatePostsCommentsCounts(startIndex, batchSize)
+            startIndex += batchSize
+        }
     }
 
     private static getRandomDateStartingFrom(startDate: Date): Date {
