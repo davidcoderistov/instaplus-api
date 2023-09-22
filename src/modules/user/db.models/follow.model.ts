@@ -14,6 +14,10 @@ const FollowSchema = new Schema({
     },
 }, { timestamps: true })
 
+FollowSchema.index({ followingUserId: 1 })
+FollowSchema.index({ followedUserId: 1 })
+FollowSchema.index({ createdAt: -1, _id: -1 })
+
 export interface IFollow extends SchemaTimestampsConfig {
     _id: Types.ObjectId
     followingUserId: string
