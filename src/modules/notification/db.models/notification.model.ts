@@ -45,6 +45,9 @@ const PostNotificationSchema = new Schema({
     },
 })
 
+NotificationSchema.index({ userId: 1, createdAt: 1 })
+NotificationSchema.index({ createdAt: -1 })
+
 export const Notification = model('Notification', NotificationSchema)
 export const FollowNotification = Notification.discriminator('follow', FollowNotificationSchema)
 export const PostLikeNotification = Notification.discriminator('like', PostNotificationSchema)
