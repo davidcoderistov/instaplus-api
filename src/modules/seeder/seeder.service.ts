@@ -925,7 +925,17 @@ export class SeederService implements ISeederService {
         const endLikeComments = moment()
         console.log(`GENERATING RANDOM COMMENT LIKES...DONE in ${SeederService.getTimeElapsed(endComments, endLikeComments)}`)
 
-        console.log(`Seeding done in ${SeederService.getTimeElapsed(start, endLikeComments)}`)
+        console.log('UPDATING HASHTAGS POSTS COUNTS...')
+        await this.updateHashtagsPostsCounts()
+        const endUpdateHashtagsPostsCounts = moment()
+        console.log(`UPDATING HASHTAGS POSTS COUNTS...DONE in ${SeederService.getTimeElapsed(endLikeComments, endUpdateHashtagsPostsCounts)}`)
+
+        console.log('UPDATING POSTS COMMENTS COUNTS...')
+        await this.updatePostsCommentsCounts()
+        const endUpdatePostsCommentsCounts = moment()
+        console.log(`UPDATING POSTS COMMENTS COUNTS...DONE in ${SeederService.getTimeElapsed(endUpdateHashtagsPostsCounts, endUpdatePostsCommentsCounts)}`)
+
+        console.log(`Seeding done in ${SeederService.getTimeElapsed(start, endUpdatePostsCommentsCounts)}`)
 
         console.log(`Top 5 users are: ${top5Users.map(user => user.username).join(', ')}`)
     }
