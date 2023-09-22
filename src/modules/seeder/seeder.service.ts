@@ -738,7 +738,7 @@ export class SeederService implements ISeederService {
         await PostSaveModel.insertMany(saves.map(save => new PostSaveModel(save)))
     }
 
-    private async updateHashtagsPostsCounts() {
+    private async updateHashtagsPostsCounts(): Promise<void> {
 
         const postsCountsByHashtag: { _id: string, postsCount: number }[] = await HashtagPostModel.aggregate([
             {
@@ -751,6 +751,33 @@ export class SeederService implements ISeederService {
 
         await Promise.all(postsCountsByHashtag.map(({ _id, postsCount }) =>
             HashtagModel.findByIdAndUpdate(_id, { $set: { postsCount } }, { new: true, lean: true })))
+    }
+
+    public async updatePostsCommentsCounts(offset: number, limit: number): Promise<void> {
+
+        const commentsCountsByPosts: { _id: string, commentsCount: number }[] = await CommentModel.aggregate([
+            {
+                $match: { commentId: { $eq: null } },
+            },
+            {
+                $group: {
+                    _id: '$postId',
+                    commentsCount: { $sum: 1 },
+                },
+            },
+            {
+                $sort: { createdAt: -1, _id: -1 },
+            },
+            {
+                $skip: offset,
+            },
+            {
+                $limit: limit,
+            },
+        ])
+
+        await Promise.all(commentsCountsByPosts.map(({ _id, commentsCount }) =>
+            PostModel.findByIdAndUpdate(_id, { $inc: { commentsCount } }, { new: true, lean: true })))
     }
 
     private static getRandomDateStartingFrom(startDate: Date): Date {
