@@ -423,6 +423,7 @@ export class SeederService implements ISeederService {
                 location: _random(1, 2) > 1 ? faker.location.city() : null,
                 photoUrls,
                 creator: SeederService.getFullUser(user),
+                commentsCount: 0,
                 createdAt: moment().subtract(_random(0, 604800), 'minutes').toDate(),
             })
 
