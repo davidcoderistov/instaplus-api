@@ -180,25 +180,6 @@ export class PostRepository implements IPostRepository {
                         data: [
                             { $limit: limit },
                             {
-                                $lookup: {
-                                    from: CommentModel.collection.name,
-                                    let: { postId: '$postId' },
-                                    pipeline: [
-                                        {
-                                            $match: {
-                                                $expr: {
-                                                    $and: [
-                                                        { $eq: ['$postId', '$$postId'] },
-                                                        { $eq: ['$commentId', null] },
-                                                    ],
-                                                },
-                                            },
-                                        },
-                                    ],
-                                    as: 'comments',
-                                },
-                            },
-                            {
                                 $project: {
                                     _id: 1,
                                     postId: 1,
@@ -207,7 +188,7 @@ export class PostRepository implements IPostRepository {
                                     location: 1,
                                     photoUrls: 1,
                                     creator: 1,
-                                    commentsCount: { $size: '$comments' },
+                                    commentsCount: 1,
                                     createdAt: 1,
                                 },
                             },
@@ -790,25 +771,6 @@ export class PostRepository implements IPostRepository {
                     $match: { postId },
                 },
                 {
-                    $lookup: {
-                        from: CommentModel.collection.name,
-                        let: { postId: '$postId' },
-                        pipeline: [
-                            {
-                                $match: {
-                                    $expr: {
-                                        $and: [
-                                            { $eq: ['$postId', '$$postId'] },
-                                            { $eq: ['$commentId', null] },
-                                        ],
-                                    },
-                                },
-                            },
-                        ],
-                        as: 'comments',
-                    },
-                },
-                {
                     $project: {
                         _id: 1,
                         postId: 1,
@@ -817,7 +779,7 @@ export class PostRepository implements IPostRepository {
                         location: 1,
                         photoUrls: 1,
                         creator: 1,
-                        commentsCount: { $size: '$comments' },
+                        commentsCount: 1,
                         createdAt: 1,
                     },
                 },
