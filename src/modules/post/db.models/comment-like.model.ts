@@ -14,6 +14,9 @@ const CommentLikeSchema = new Schema({
     },
 }, { timestamps: true })
 
+CommentLikeSchema.index({ commentId: 1 })
+CommentLikeSchema.index({ createdAt: -1, _id: -1 })
+
 export interface ICommentLike extends SchemaTimestampsConfig {
     commentId: string
     userId: string
