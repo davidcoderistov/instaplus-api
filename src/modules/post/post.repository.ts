@@ -94,36 +94,11 @@ export class PostRepository implements IPostRepository {
     }
 
     public async findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<Hashtag[]> {
-        const regex = new RegExp(searchQuery, 'i')
-        return HashtagModel.aggregate([
-            {
-                $match: { name: { $regex: regex } },
-            },
-            {
-                $sort: { name: 1 },
-            },
-            {
-                $limit: limit,
-            },
-            {
-                $addFields: {
-                    hashtagId: { $toString: '$_id' },
-                },
-            },
-            {
-                $lookup: {
-                    from: HashtagPostModel.collection.name,
-                    localField: 'hashtagId',
-                    foreignField: 'hashtagId',
-                    as: 'posts',
-                },
-            },
-            {
-                $addFields: {
-                    postsCount: { $size: '$posts' },
-                },
-            },
-        ])
+        return HashtagModel
+            .find({ name: { $regex: new RegExp(searchQuery, 'i') } })
+            .sort('name')
+            .limit(limit)
+            .lean()
     }
 
     public async findHashtagById(id: string): Promise<IHashtag | null> {
@@ -134,32 +109,7 @@ export class PostRepository implements IPostRepository {
     public async findHashtagsByIds(ids: string[], limit: number): Promise<Hashtag[]> {
         try {
             const hashtagIds = ids.map(id => new Types.ObjectId(id))
-            return HashtagModel.aggregate([
-                {
-                    $match: { _id: { $in: hashtagIds } },
-                },
-                {
-                    $limit: limit,
-                },
-                {
-                    $addFields: {
-                        hashtagId: { $toString: '$_id' },
-                    },
-                },
-                {
-                    $lookup: {
-                        from: HashtagPostModel.collection.name,
-                        localField: 'hashtagId',
-                        foreignField: 'hashtagId',
-                        as: 'posts',
-                    },
-                },
-                {
-                    $addFields: {
-                        postsCount: { $size: '$posts' },
-                    },
-                },
-            ])
+            return HashtagModel.find({ _id: { $in: hashtagIds } }).limit(limit).lean()
         } catch (err) {
             throw err
         }
