@@ -24,6 +24,8 @@ const UserSchema = new Schema({
     refreshToken: Schema.Types.String,
 })
 
+UserSchema.index({ firstName: 1, lastName: 1, username: 1 })
+
 export interface IUser {
     _id: Types.ObjectId
     username: string
