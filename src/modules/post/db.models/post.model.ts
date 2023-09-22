@@ -37,6 +37,10 @@ const PostSchema = new Schema({
         },
         required: true,
     },
+    commentsCount: {
+        type: Schema.Types.Number,
+        required: true,
+    },
 }, { timestamps: true })
 
 PostSchema.index({ createdAt: -1 })
@@ -48,6 +52,7 @@ export interface IPost extends SchemaTimestampsConfig {
     location: string | null
     photoUrls: string[]
     creator: Pick<IUser, '_id' | 'firstName' | 'lastName' | 'username' | 'photoUrl'>
+    commentsCount: number
 }
 
 export default model('Post', PostSchema)
