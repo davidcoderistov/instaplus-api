@@ -16,6 +16,7 @@ const HashtagSchema = new Schema({
 export interface IHashtag extends SchemaTimestampsConfig {
     _id: Types.ObjectId
     name: string
+    postsCount: number
 }
 
 export default model('Hashtag', HashtagSchema)
