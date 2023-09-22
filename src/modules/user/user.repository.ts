@@ -82,6 +82,12 @@ export class UserRepository implements IUserRepository {
                     },
                 },
                 {
+                    $sort: { username: 1 },
+                },
+                {
+                    $limit: limit,
+                },
+                {
                     $addFields: {
                         userId: { $toString: '$_id' },
                     },
@@ -152,12 +158,6 @@ export class UserRepository implements IUserRepository {
                         foreignField: '_id',
                         as: 'followers',
                     },
-                },
-                {
-                    $sort: { username: 1 },
-                },
-                {
-                    $limit: limit,
                 },
             ],
         ) as unknown as AggregateResult[]
