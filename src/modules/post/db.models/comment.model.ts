@@ -33,6 +33,10 @@ const CommentSchema = new Schema({
     },
 }, { timestamps: true })
 
+CommentSchema.index({ postId: 1, commentId: 1 })
+CommentSchema.index({ commentId: 1 })
+CommentSchema.index({ createdAt: 1 })
+
 export interface IComment extends SchemaTimestampsConfig {
     _id: Types.ObjectId
     text: string
