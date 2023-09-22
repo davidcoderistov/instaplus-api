@@ -7,6 +7,10 @@ const HashtagSchema = new Schema({
         required: true,
         unique: true,
     },
+    postsCount: {
+        type: Schema.Types.Number,
+        required: true,
+    },
 }, { timestamps: true })
 
 export interface IHashtag extends SchemaTimestampsConfig {
