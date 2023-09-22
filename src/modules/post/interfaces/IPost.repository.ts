@@ -43,6 +43,8 @@ export interface IPostRepository {
 
     createHashtag(name: string): Promise<IHashtag>
 
+    findHashtagByIdAndIncrementPostsCount(id: string): Promise<IHashtag | null>
+
     createHashtagPost(hashtagId: string, postId: string): Promise<IHashtagPost>
 
     findHashtagsBySearchQuery(searchQuery: string, limit: number): Promise<Hashtag[]>

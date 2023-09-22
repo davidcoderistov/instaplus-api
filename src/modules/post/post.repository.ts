@@ -80,6 +80,10 @@ export class PostRepository implements IPostRepository {
         return hashtag.toObject()
     }
 
+    public async findHashtagByIdAndIncrementPostsCount(id: string): Promise<IHashtag | null> {
+        return HashtagModel.findByIdAndUpdate(id, { $inc: { postsCount: 1 } }, { new: true, lean: true })
+    }
+
     public async createHashtagPost(hashtagId: string, postId: string): Promise<IHashtagPost> {
         const hashtagPost = new HashtagPostModel({
             hashtagId,
