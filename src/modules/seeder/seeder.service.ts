@@ -738,6 +738,21 @@ export class SeederService implements ISeederService {
         await PostSaveModel.insertMany(saves.map(save => new PostSaveModel(save)))
     }
 
+    private async updateHashtagsPostsCounts() {
+
+        const postsCountsByHashtag: { _id: string, postsCount: number }[] = await HashtagPostModel.aggregate([
+            {
+                $group: {
+                    _id: '$hashtagId',
+                    postsCount: { $sum: 1 },
+                },
+            },
+        ])
+
+        await Promise.all(postsCountsByHashtag.map(({ _id, postsCount }) =>
+            HashtagModel.findByIdAndUpdate(_id, { $set: { postsCount } }, { new: true, lean: true })))
+    }
+
     private static getRandomDateStartingFrom(startDate: Date): Date {
         const start = moment(startDate)
         const end = moment()
