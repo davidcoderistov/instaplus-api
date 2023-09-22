@@ -39,6 +39,9 @@ const PostSchema = new Schema({
     },
 }, { timestamps: true })
 
+PostSchema.index({ createdAt: -1 })
+PostSchema.index({ createdAt: -1, _id: -1 })
+
 export interface IPost extends SchemaTimestampsConfig {
     _id: Types.ObjectId
     caption: string | null
