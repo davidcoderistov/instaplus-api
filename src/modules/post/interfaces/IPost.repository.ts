@@ -57,6 +57,8 @@ export interface IPostRepository {
 
     findPostById(postId: string): Promise<IPost | null>
 
+    findPostByIdAndIncrementCommentsCount(postId: string): Promise<IPost | null>
+
     findFollowedUsersPosts(findFollowedUsersPostsDto: FindFollowedUsersPostsDto, userId: string): Promise<FollowedUsersPosts>
 
     findPostLike(postId: string, userId: string): Promise<IPostLike | null>

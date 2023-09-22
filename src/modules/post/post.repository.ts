@@ -126,6 +126,10 @@ export class PostRepository implements IPostRepository {
         return post ? post.toObject() : null
     }
 
+    public async findPostByIdAndIncrementCommentsCount(postId: string): Promise<IPost | null> {
+        return PostModel.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } }, { new: true, lean: true })
+    }
+
     public async findFollowedUsersPosts({
                                             cursor,
                                             limit,
