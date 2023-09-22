@@ -104,6 +104,7 @@ export class PostService implements IPostService {
                     ...unsavedHashtags.map(hashtag => hashtag._id.toString()),
                 ]
                 await Promise.all(hashtagIds.map(hashtagId => this._postRepository.createHashtagPost(hashtagId, postId)))
+                await Promise.all(hashtagIds.map(this._postRepository.findHashtagByIdAndIncrementPostsCount))
             }
 
             return post
