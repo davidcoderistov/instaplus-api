@@ -139,7 +139,7 @@ export class SeederService implements ISeederService {
             permutations.push([pair[1], pair[0]])
         }
 
-        permutations = _sampleSize(permutations, Math.floor(permutations.length * 0.7))
+        permutations = _sampleSize(permutations, Math.floor(permutations.length * 0.55))
 
         const follows: (Pick<IFollow, 'followingUserId' | 'followedUserId'> & { createdAt: Date })[] = []
         const followNotifications: (Pick<IFollowNotification, 'type' | 'userId' | 'user'> & { createdAt: Date })[] = []
