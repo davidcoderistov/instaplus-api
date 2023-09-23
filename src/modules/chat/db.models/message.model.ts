@@ -96,6 +96,9 @@ MessageSchema.pre('validate', function(next) {
     next()
 })
 
+MessageSchema.index({ chatId: 1 })
+MessageSchema.index({ createdAt: -1, _id: -1 })
+
 interface IReaction {
     reaction: string
     creator: Pick<IUser, '_id' | 'username' | 'firstName' | 'lastName' | 'photoUrl'>
