@@ -7,7 +7,7 @@ export function generateAccessToken(userId: string): string {
     return jwt.sign({
         id: userId,
         access: true,
-    }, process.env.SECRET_KEY as string, { expiresIn: '15m' })
+    }, process.env.SECRET_KEY as string, { expiresIn: '2h' })
 }
 
 export function generateRefreshToken(userId: string): string {
