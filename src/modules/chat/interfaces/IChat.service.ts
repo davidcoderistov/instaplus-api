@@ -8,7 +8,7 @@ import {
 } from '../dtos'
 import { IChat } from '../db.models/chat.model'
 import { IMessage } from '../db.models/message.model'
-import { ChatsWithLatestMessage, ChatWithLatestMessage, Messages } from '../graphql.models'
+import { ChatsWithLatestMessage, ChatWithLatestMessage, Messages, UnreadMessagesCount } from '../graphql.models'
 
 
 export interface IChatService {
@@ -30,5 +30,5 @@ export interface IChatService {
 
     markMessageAsRead(messageId: string, userId: string): Promise<IMessage>
 
-    findUnreadMessagesCountForUser(userId: string): Promise<number>
+    findUnreadMessagesCountForUser(userId: string): Promise<UnreadMessagesCount>
 }

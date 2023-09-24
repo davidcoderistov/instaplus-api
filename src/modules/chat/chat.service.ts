@@ -8,7 +8,7 @@ import {
     CreateMessageDto,
     ReactToMessageDto,
 } from './dtos'
-import { ChatsWithLatestMessage, ChatWithLatestMessage, Messages } from './graphql.models'
+import { ChatsWithLatestMessage, ChatWithLatestMessage, Messages, UnreadMessagesCount } from './graphql.models'
 import { IChat } from './db.models/chat.model'
 import { IMessage } from './db.models/message.model'
 import { TYPES } from '../../container/types'
@@ -251,7 +251,7 @@ export class ChatService implements IChatService {
         }
     }
 
-    public async findUnreadMessagesCountForUser(userId: string): Promise<number> {
+    public async findUnreadMessagesCountForUser(userId: string): Promise<UnreadMessagesCount> {
         return this._chatRepository.findUnreadMessagesCountForUser(userId)
     }
 }

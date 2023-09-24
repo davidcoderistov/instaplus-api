@@ -127,7 +127,6 @@ export class ChatResolver {
 
     @Query(() => UnreadMessagesCount)
     public async findUnreadMessagesCountForUser(@Ctx() { userId }: Context): Promise<UnreadMessagesCount> {
-        const count = await this._chatService.findUnreadMessagesCountForUser(userId)
-        return { count }
+        return this._chatService.findUnreadMessagesCountForUser(userId)
     }
 }

@@ -4,7 +4,14 @@ import { FindChatsDto, FindMessagesByChatIdDto } from './dtos'
 import { IChat } from './db.models/chat.model'
 import { IUser } from '../user/db.models/user.model'
 import { IUserDeletedChat } from './db.models/user-deleted-chat.model'
-import { ChatsWithLatestMessage, ChatWithLatestMessage, Chat, Messages, Message } from './graphql.models'
+import {
+    ChatsWithLatestMessage,
+    ChatWithLatestMessage,
+    Chat,
+    Messages,
+    Message,
+    UnreadMessagesCount,
+} from './graphql.models'
 import mongoose, { Types } from 'mongoose'
 import ChatModel from './db.models/chat.model'
 import MessageModel, { IMessage } from './db.models/message.model'
@@ -449,8 +456,8 @@ export class ChatRepository implements IChatRepository {
         await MessageModel.updateMany({ 'reactions.creator._id': creator._id }, { $set: { 'reactions.$.creator': creator } })
     }
 
-    public async findUnreadMessagesCountForUser(userId: string): Promise<number> {
-        const messagesCount: { unreadMessagesCount: number }[] = await ChatModel.aggregate([
+    public async findUnreadMessagesCountForUser(userId: string): Promise<UnreadMessagesCount> {
+        const result: { unreadChatsIds: string[], unreadMessagesCount: number }[] = await ChatModel.aggregate([
             {
                 $match: {
                     'chatMembers._id': new mongoose.Types.ObjectId(userId),
@@ -542,12 +549,30 @@ export class ChatRepository implements IChatRepository {
             },
             {
                 $group: {
-                    _id: null,
+                    _id: '$_id',
                     unreadMessagesCount: { $sum: '$isMessageUnread' },
+                },
+            },
+            {
+                $match: {
+                    unreadMessagesCount: { $gt: 0 },
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    unreadChatsIds: { $push: '$_id' },
+                    unreadMessagesCount: { $sum: '$unreadMessagesCount' },
                 },
             },
         ])
 
-        return messagesCount.length > 0 ? messagesCount[0].unreadMessagesCount : 0
+        const chatsIds = result[0]?.unreadChatsIds || []
+        const count = result[0]?.unreadMessagesCount || 0
+
+        return {
+            chatsIds,
+            count,
+        }
     }
 }
