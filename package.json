@@ -6,8 +6,9 @@
   "scripts": {
     "compile": "node_modules/.bin/tsc",
     "build": "rimraf dist && npm run compile",
-    "start": "node dist/main.js",
     "build:dev": "npm run build && npm run start",
+    "build:prod": "npm run compile && npm run start",
+    "start": "node dist/main.js",
     "start:dev": "concurrently \"docker-compose -f docker-compose.dev.yml up\" \"nodemon\"",
     "stop:dev": "docker compose -f docker-compose.dev.yml down",
     "build:backend-dev": "docker compose -f docker-compose.dev.yml build backend"
