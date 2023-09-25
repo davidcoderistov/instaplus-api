@@ -7,7 +7,7 @@ import { IWsServerService } from '../ws.server/IWsServer.service'
 import { IGraphQLSchemaService } from '../graphql.schema/IGraphQLSchema.service'
 import { IApolloServerService } from './IApolloServer.service'
 import { Context } from '../../shared/types'
-import { InvalidSessionException } from '../../shared/exceptions/invalid.session.exception'
+import { InvalidSessionException } from '../../shared/exceptions'
 import { expressMiddleware } from '@apollo/server/express4'
 import { serializeRefreshToken, deserializeRefreshToken, getUserIdFromAuthHeader } from '../../shared/utils/token'
 
