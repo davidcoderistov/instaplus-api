@@ -7,7 +7,7 @@ import { IHttpServerService } from '../http.server/IHttpServer.service'
 import { IGraphQLSchemaService } from '../graphql.schema/IGraphQLSchema.service'
 import { IWsServerService } from './IWsServer.service'
 import { getUserIdFromConnectionParams } from '../../shared/utils/token'
-import { InvalidSessionException } from '../../shared/exceptions/invalid.session.exception'
+import { InvalidSessionException } from '../../shared/exceptions'
 
 
 @injectable()
