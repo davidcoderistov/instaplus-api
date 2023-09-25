@@ -44,7 +44,7 @@ export class ApolloServerService implements IApolloServerService {
                                 switch (requestContext.operationName) {
                                     case 'signUp':
                                         return
-                                    case 'login':
+                                    case 'signIn':
                                         return
                                     case 'refresh':
                                         return
