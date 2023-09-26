@@ -409,7 +409,18 @@ export class PostService implements IPostService {
                 [post._id.toString()]: post,
             }), {})
 
-            return suggestedPostsIds.map(suggestedPostId => suggestedPostsById[suggestedPostId]) as unknown as Post[]
+            return _uniq([
+                ...followingSuggestedPostsIds.sort((a, b) => {
+                    const count = followingSuggestedPostsWithCount[b] - followingSuggestedPostsWithCount[a]
+                    if (count === 0) {
+                        const createdA = suggestedPostsById[a].createdAt as unknown as Date
+                        const createdB = suggestedPostsById[b].createdAt as unknown as Date
+                        return createdB.getTime() - createdA.getTime()
+                    }
+                    return count
+                }),
+                ...popularPostsIds,
+            ]).map(suggestedPostId => suggestedPostsById[suggestedPostId]) as unknown as Post[]
         } catch (err) {
             throw err
         }
