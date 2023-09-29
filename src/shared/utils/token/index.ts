@@ -36,7 +36,7 @@ export function verifyToken(token: string): Promise<{ id: string, access?: boole
 export function serializeRefreshToken(refreshToken: string, immediate: boolean = false) {
     return cookie.serialize('refreshToken', refreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: false,
         maxAge: immediate ? 0 : 7 * 24 * 60 * 60,
         path: '/',
     })
