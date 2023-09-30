@@ -65,6 +65,7 @@ export class UserService implements IUserService {
             return {
                 user,
                 accessToken: user.accessToken,
+                createdAt: new Date(),
             }
         } catch (err) {
             if (err instanceof MongoError) {
@@ -98,6 +99,7 @@ export class UserService implements IUserService {
                     user: updatedUser,
                     accessToken: generateAccessToken(userId),
                     refreshToken: updatedUser.refreshToken,
+                    createdAt: new Date(),
                 }
             } else {
                 return Promise.reject(new MongodbServerException(`User ${signInDto.username} does not exist`))
@@ -133,6 +135,7 @@ export class UserService implements IUserService {
                     user: updatedUser,
                     accessToken: generateAccessToken(userId),
                     refreshToken: updatedUser.refreshToken,
+                    createdAt: new Date(),
                 }
             } else {
                 return Promise.reject(new InvalidSessionException())
@@ -167,6 +170,7 @@ export class UserService implements IUserService {
                     user: updatedUser,
                     accessToken: null,
                     refreshToken: null,
+                    createdAt: new Date(),
                 }
             } else {
                 return Promise.reject(new InvalidSessionException())
@@ -193,6 +197,7 @@ export class UserService implements IUserService {
                     user: updatedUser,
                     refreshToken,
                     accessToken: generateAccessToken(userId),
+                    createdAt: new Date(),
                 }
             }
 
@@ -243,6 +248,7 @@ export class UserService implements IUserService {
                     user: updatedUser,
                     refreshToken,
                     accessToken: generateAccessToken(userId),
+                    createdAt: new Date(),
                 }
             }
 
@@ -269,6 +275,7 @@ export class UserService implements IUserService {
                     user: updatedUser,
                     refreshToken: updatedUser.refreshToken,
                     accessToken: generateAccessToken(userId),
+                    createdAt: new Date(),
                 }
             }
 

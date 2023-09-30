@@ -13,4 +13,7 @@ export class AuthUser {
 
     @Field(() => String, { nullable: true })
     refreshToken?: string | null
+
+    @Field()
+    createdAt!: Date
 }
