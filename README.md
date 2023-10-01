@@ -1,3 +1,7 @@
+### [ec2-16-171-240-55.eu-north-1.compute.amazonaws.com:3000](http://ec2-16-171-240-55.eu-north-1.compute.amazonaws.com:3000/)
+
+[Instaplus Demo](https://github.com/davidcoderistov/instaplus-api/assets/85624034/3aa1505f-b2f5-4c74-a4e3-34cc71719f84)
+
 <p align="center">
   <img alt="Tech Stack" src="https://skillicons.dev/icons?i=nodejs,mongodb,express,graphql,apollo,docker,aws&perline=7" />
 </p>
@@ -58,4 +62,7 @@ Instaplus API offers a range of core features designed to provide a seamless and
 |   chat.resolver.ts
 ```
 
+## Contact
+
+If you want to contact me you can reach me at [davidcoderistov@gmail.com](mailto:davidcoderistov@gmail.com).
 
