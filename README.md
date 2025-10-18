@@ -1,4 +1,4 @@
-## InstaPlus
+## Instaplus
 
 [Instaplus Demo](https://github.com/davidcoderistov/instaplus-api/assets/85624034/3aa1505f-b2f5-4c74-a4e3-34cc71719f84)
 
